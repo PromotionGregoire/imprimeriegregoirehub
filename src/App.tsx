@@ -12,6 +12,8 @@ import Dashboard from "./pages/Dashboard";
 import ClientDetails from "./pages/ClientDetails";
 import CreateSubmission from "./pages/CreateSubmission";
 import Submissions from "./pages/Submissions";
+import SubmissionDetails from "./pages/SubmissionDetails";
+import Orders from "./pages/Orders";
 import DashboardLayout from "./components/DashboardLayout";
 
 const queryClient = new QueryClient();
@@ -35,6 +37,8 @@ const App = () => (
               <Route path="clients/:id" element={<ClientDetails />} />
               <Route path="submissions" element={<Submissions />} />
               <Route path="submissions/new" element={<CreateSubmission />} />
+              <Route path="submissions/:id" element={<SubmissionDetails />} />
+              <Route path="orders" element={<Orders />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
