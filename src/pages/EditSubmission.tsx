@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { useClients } from '@/hooks/useClients';
 import { useProducts } from '@/hooks/useProducts';
 import { useSubmissionDetails } from '@/hooks/useSubmissionDetails';
+import { useUpdateSubmission, SubmissionFormData } from '@/hooks/useSubmissions';
 import { useToast } from '@/hooks/use-toast';
 
 const submissionItemSchema = z.object({
@@ -45,6 +46,7 @@ const EditSubmission = () => {
   const { data: clients } = useClients();
   const { data: products } = useProducts();
   const { data: submission, isLoading } = useSubmissionDetails(id!);
+  const updateSubmission = useUpdateSubmission();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -166,7 +168,22 @@ const EditSubmission = () => {
     try {
       setIsSubmitting(true);
       
-      // TODO: Implement submission update logic
+      const submissionData: SubmissionFormData = {
+        client_id: data.client_id,
+        deadline: data.deadline?.toISOString(),
+        items: data.items.map(item => ({
+          product_name: item.product_name,
+          description: item.description,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+        })),
+        subtotal,
+        tax_amount: taxes.tps + taxes.tvq,
+        total_price: total,
+      };
+
+      await updateSubmission.mutateAsync({ id: id!, submissionData });
+
       toast({
         title: 'Succès',
         description: 'Soumission modifiée avec succès',
@@ -174,6 +191,7 @@ const EditSubmission = () => {
 
       navigate(`/dashboard/submissions/${id}`);
     } catch (error) {
+      console.error('Error updating submission:', error);
       toast({
         title: 'Erreur',
         description: 'Une erreur est survenue lors de la modification',

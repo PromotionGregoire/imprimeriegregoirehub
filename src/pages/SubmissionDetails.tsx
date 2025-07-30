@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useSubmissionDetails } from '@/hooks/useSubmissionDetails';
+import { useCloneSubmission, useDeleteSubmission, useUpdateSubmissionStatus } from '@/hooks/useSubmissionActions';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -14,6 +15,9 @@ const SubmissionDetails = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { data: submission, isLoading } = useSubmissionDetails(id!);
+  const cloneSubmission = useCloneSubmission();
+  const deleteSubmission = useDeleteSubmission();
+  const updateSubmissionStatus = useUpdateSubmissionStatus();
 
   if (isLoading) {
     return (
@@ -67,7 +71,7 @@ const SubmissionDetails = () => {
   const taxAmount = submission.total_price ? Number(submission.total_price) - subtotal : 0;
 
   const handleCopyLink = () => {
-    const approvalLink = `${window.location.origin}/approval/${submission.id}`;
+    const approvalLink = `${window.location.origin}/approval/${submission.approval_token}`;
     navigator.clipboard.writeText(approvalLink);
     toast({
       title: 'Lien copié',
@@ -75,11 +79,64 @@ const SubmissionDetails = () => {
     });
   };
 
-  const handleResendEmail = () => {
+  const handleResendEmail = async () => {
+    // TODO: Implement email resend functionality
     toast({
       title: 'Email envoyé',
       description: 'Le courriel d\'approbation a été renvoyé au client',
     });
+  };
+
+  const handleCloneSubmission = async () => {
+    try {
+      const newSubmission = await cloneSubmission.mutateAsync(id!);
+      toast({
+        title: 'Soumission clonée',
+        description: `Nouvelle soumission ${newSubmission.submission_number} créée`,
+      });
+      navigate(`/dashboard/submissions/edit/${newSubmission.id}`);
+    } catch (error) {
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de cloner la soumission',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDeleteSubmission = async () => {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette soumission ? Cette action est irréversible.')) {
+      try {
+        await deleteSubmission.mutateAsync(id!);
+        toast({
+          title: 'Soumission supprimée',
+          description: 'La soumission a été supprimée avec succès',
+        });
+        navigate('/dashboard/submissions');
+      } catch (error) {
+        toast({
+          title: 'Erreur',
+          description: 'Impossible de supprimer la soumission',
+          variant: 'destructive',
+        });
+      }
+    }
+  };
+
+  const handleMarkAsRejected = async () => {
+    try {
+      await updateSubmissionStatus.mutateAsync({ submissionId: id!, status: 'Refusée' });
+      toast({
+        title: 'Statut mis à jour',
+        description: 'La soumission a été marquée comme refusée',
+      });
+    } catch (error) {
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de mettre à jour le statut',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
@@ -229,11 +286,20 @@ const SubmissionDetails = () => {
                 <Edit className="w-4 h-4 mr-2" />
                 Modifier la Soumission
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={handleCloneSubmission}
+                disabled={cloneSubmission.isPending}
+              >
                 <Copy className="w-4 h-4 mr-2" />
                 Cloner la Soumission
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => window.open(`/api/submissions/${submission.id}/pdf`, '_blank')}
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Générer PDF
               </Button>
@@ -251,7 +317,7 @@ const SubmissionDetails = () => {
                   Lien d'approbation unique:
                 </div>
                 <div className="text-xs font-mono break-all">
-                  /approval/{submission.id}
+                  /approval/{submission.approval_token || submission.id}
                 </div>
               </div>
               
@@ -290,10 +356,16 @@ const SubmissionDetails = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-56">
-                  <DropdownMenuItem className="text-destructive">
+                  <DropdownMenuItem 
+                    className="text-destructive"
+                    onClick={handleMarkAsRejected}
+                  >
                     Marquer comme Refusée
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="text-destructive">
+                  <DropdownMenuItem 
+                    className="text-destructive"
+                    onClick={handleDeleteSubmission}
+                  >
                     Supprimer
                   </DropdownMenuItem>
                 </DropdownMenuContent>
