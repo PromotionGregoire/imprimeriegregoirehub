@@ -16,6 +16,10 @@ interface StatusManagerProps {
 }
 
 const StatusManager = ({ submission, currentStatus }: StatusManagerProps) => {
+  console.log('=== STATUS MANAGER LOADED ===');
+  console.log('Submission:', submission);
+  console.log('Current Status:', currentStatus);
+  
   const [showForceAcceptModal, setShowForceAcceptModal] = useState(false);
   const [approverName, setApproverName] = useState('');
   const updateStatus = useUpdateSubmissionStatus();
