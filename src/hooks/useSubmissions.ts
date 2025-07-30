@@ -86,7 +86,11 @@ export const useUpdateSubmission = () => {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async ({ id, submissionData }: { id: string; submissionData: Partial<SubmissionFormData> }) => {
+    mutationFn: async ({ id, submissionData, previousTotal }: { 
+      id: string; 
+      submissionData: Partial<SubmissionFormData>; 
+      previousTotal?: number;
+    }) => {
       console.log('=== UPDATE SUBMISSION HOOK DEBUG ===');
       console.log('Submission ID:', id);
       console.log('Data to update:', submissionData);
@@ -142,15 +146,27 @@ export const useUpdateSubmission = () => {
         }
       }
 
-      // Log the activity
+      // Enhanced activity logging
       if (user) {
+        const newTotal = submissionData.total_price || Number(submission.total_price);
+        let description = `L'employé ${user.email} a modifié la soumission ${submission.submission_number}.`;
+        
+        if (previousTotal !== undefined && previousTotal !== newTotal) {
+          description += ` Le montant total est passé de ${previousTotal.toFixed(2)}$ à ${newTotal.toFixed(2)}$.`;
+        }
+        
         await supabase
           .from('activity_logs')
           .insert([{
             client_id: submission.client_id,
             action_type: 'submission_updated',
-            description: `La soumission ${submission.submission_number} a été modifiée par ${user.email}.`,
-            created_by: user.id
+            description,
+            created_by: user.id,
+            metadata: {
+              previous_total: previousTotal,
+              new_total: newTotal,
+              items_count: submissionData.items?.length
+            }
           }]);
       }
 

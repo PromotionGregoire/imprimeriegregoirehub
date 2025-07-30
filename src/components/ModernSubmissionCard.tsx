@@ -40,8 +40,50 @@ const ModernSubmissionCard = ({ submission, onViewDetails }: ModernSubmissionCar
     return 'text-gray-500';
   };
 
+  // Dynamic card styling based on status and dates
+  const getCardStyles = () => {
+    const baseClass = "group cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white";
+    let borderClass = "border-l-4";
+    
+    switch (submission.status) {
+      case 'Acceptée':
+        borderClass += " border-l-green-500";
+        break;
+      case 'Modification Demandée':
+        borderClass += " border-l-blue-500";
+        break;
+      case 'Refusée':
+        borderClass += " border-l-red-500";
+        break;
+      case 'Envoyée':
+        // Check follow-up timing
+        if (submission.sent_at) {
+          const daysSinceLastMessage = Math.floor(
+            (new Date().getTime() - new Date(submission.sent_at).getTime()) / (1000 * 60 * 60 * 24)
+          );
+          if (daysSinceLastMessage > 10) {
+            borderClass += " border-l-red-400";
+          } else if (daysSinceLastMessage > 5) {
+            borderClass += " border-l-yellow-400";
+          } else {
+            borderClass += " border-l-blue-400";
+          }
+        } else {
+          borderClass += " border-l-blue-400";
+        }
+        break;
+      default:
+        borderClass += " border-l-gray-300";
+    }
+    
+    return `${baseClass} ${borderClass}`;
+  };
+
   return (
-    <Card className="group hover:shadow-lg transition-all duration-200 border-0 bg-white">
+    <Card 
+      className={getCardStyles()}
+      onClick={() => onViewDetails(submission.id)}
+    >
       <CardContent className="p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
@@ -61,8 +103,11 @@ const ModernSubmissionCard = ({ submission, onViewDetails }: ModernSubmissionCar
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => onViewDetails(submission.id)}
-            className="opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={(e) => {
+              e.stopPropagation();
+              onViewDetails(submission.id);
+            }}
+            className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-100"
           >
             <ArrowRight className="w-4 h-4" />
           </Button>
@@ -97,19 +142,22 @@ const ModernSubmissionCard = ({ submission, onViewDetails }: ModernSubmissionCar
           {/* Status Manager */}
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600">Statut:</span>
-            <StatusManager submission={submission} currentStatus={submission.status} />
+            <div onClick={(e) => e.stopPropagation()}>
+              <StatusManager submission={submission} currentStatus={submission.status} />
+            </div>
           </div>
 
           {/* Proof Accepted Toggle */}
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600">Épreuve acceptée:</span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
               <span className="text-sm font-medium">
                 {proofAccepted ? 'Oui' : 'Non'}
               </span>
               <Switch
                 checked={proofAccepted}
                 onCheckedChange={setProofAccepted}
+                disabled={submission.status !== 'Acceptée'}
               />
             </div>
           </div>
@@ -117,7 +165,7 @@ const ModernSubmissionCard = ({ submission, onViewDetails }: ModernSubmissionCar
           {/* Delivered Toggle */}
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600">Livraison:</span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
               <span className={`text-sm font-medium ${getDeliveryStatusColor()}`}>
                 {getDeliveryStatusText()}
               </span>
@@ -136,7 +184,10 @@ const ModernSubmissionCard = ({ submission, onViewDetails }: ModernSubmissionCar
             <Button
               variant="link"
               className="p-0 h-auto text-blue-600 hover:text-blue-800"
-              onClick={() => window.open(`/approval/${submission.approval_token}`, '_blank')}
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(`/approval/${submission.approval_token}`, '_blank');
+              }}
             >
               <ExternalLink className="w-3 h-3 mr-1" />
               Voir le lien d'épreuve

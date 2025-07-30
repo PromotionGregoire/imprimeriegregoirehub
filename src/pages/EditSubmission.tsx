@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Plus, Trash2, ArrowLeft } from 'lucide-react';
+import { CalendarIcon, Plus, Trash2, ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useClients } from '@/hooks/useClients';
@@ -19,6 +19,7 @@ import { useProducts } from '@/hooks/useProducts';
 import { useSubmissionDetails } from '@/hooks/useSubmissionDetails';
 import { useUpdateSubmission, SubmissionFormData } from '@/hooks/useSubmissions';
 import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const submissionItemSchema = z.object({
   product_type: z.string().min(1, 'Le type de produit est requis'),
@@ -49,6 +50,8 @@ const EditSubmission = () => {
   const updateSubmission = useUpdateSubmission();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [originalData, setOriginalData] = useState<any>(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(submissionSchema),
@@ -74,14 +77,17 @@ const EditSubmission = () => {
     name: 'items',
   });
 
-  const { watch, setValue, register, reset } = form;
+  const { watch, setValue, register, reset, formState: { errors, isValid } } = form;
   const watchedItems = watch('items');
   const watchedTaxRegion = watch('tax_region');
+  
+  // Watch all form values for change detection
+  const watchedValues = useWatch({ control: form.control });
 
   // Load submission data when available
   useEffect(() => {
     if (submission) {
-      reset({
+      const formData = {
         client_id: submission.client_id,
         deadline: submission.deadline ? new Date(submission.deadline) : undefined,
         items: submission.submission_items?.map((item: any) => ({
@@ -102,9 +108,21 @@ const EditSubmission = () => {
         tax_region: 'quebec',
         manual_tps: 0,
         manual_tvq: 0,
-      });
+      };
+      
+      reset(formData);
+      setOriginalData(formData);
+      setHasChanges(false);
     }
   }, [submission, reset]);
+
+  // Detect changes in form values
+  useEffect(() => {
+    if (originalData && watchedValues) {
+      const hasChanged = JSON.stringify(watchedValues) !== JSON.stringify(originalData);
+      setHasChanges(hasChanged);
+    }
+  }, [watchedValues, originalData]);
 
   // Calculate subtotal
   const subtotal = watchedItems.reduce((sum, item) => {
@@ -175,6 +193,8 @@ const EditSubmission = () => {
     try {
       setIsSubmitting(true);
       
+      const previousTotal = Number(submission?.total_price || 0);
+      
       const submissionData: SubmissionFormData = {
         client_id: data.client_id,
         deadline: data.deadline?.toISOString(),
@@ -191,26 +211,52 @@ const EditSubmission = () => {
 
       console.log('Submission data to send:', submissionData);
       
-      await updateSubmission.mutateAsync({ id: id!, submissionData });
+      await updateSubmission.mutateAsync({ 
+        id: id!, 
+        submissionData,
+        previousTotal, // Pour la journalisation détaillée
+      });
       console.log('Update completed successfully');
 
       toast({
-        title: 'Succès',
-        description: 'Soumission modifiée avec succès',
+        title: '✅ Soumission mise à jour avec succès',
+        description: `Les modifications ont été sauvegardées. Nouveau montant: ${total.toFixed(2)}$`,
       });
+
+      // Reset form state
+      setOriginalData(watchedValues);
+      setHasChanges(false);
 
       navigate(`/dashboard/submissions/${id}`);
     } catch (error) {
       console.error('Error updating submission:', error);
       toast({
-        title: 'Erreur',
-        description: 'Une erreur est survenue lors de la modification',
+        title: '❌ Erreur lors de la sauvegarde',
+        description: 'Veuillez réessayer. Si le problème persiste, contactez le support.',
         variant: 'destructive',
       });
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // Validation helpers
+  const getFieldError = (fieldPath: string): string | undefined => {
+    const keys = fieldPath.split('.');
+    let error: any = errors;
+    for (const key of keys) {
+      error = error?.[key];
+    }
+    return error?.message as string | undefined;
+  };
+
+  const isFormValid = useMemo(() => {
+    return isValid && watchedItems.every(item => 
+      item.product_name && 
+      item.quantity > 0 && 
+      item.unit_price >= 0
+    );
+  }, [isValid, watchedItems]);
 
   if (isLoading) {
     return (
@@ -262,14 +308,17 @@ const EditSubmission = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="client">Client *</Label>
-                <Input
-                  value={submission.clients?.business_name || ''}
-                  disabled
-                  className="bg-muted"
-                />
-              </div>
+                <div>
+                  <Label htmlFor="client">Client *</Label>
+                  <Input
+                    value={submission.clients?.business_name || ''}
+                    disabled
+                    className="bg-muted"
+                  />
+                  {getFieldError('client_id') && (
+                    <p className="text-sm text-destructive mt-1">{getFieldError('client_id')}</p>
+                  )}
+                </div>
               
               <div>
                 <Label>Date</Label>
@@ -359,10 +408,16 @@ const EditSubmission = () => {
                           </SelectContent>
                         </Select>
                       ) : (
-                        <Input
-                          {...register(`items.${index}.product_name`)}
-                          placeholder="Nom du produit"
-                        />
+                        <div>
+                          <Input
+                            {...register(`items.${index}.product_name`)}
+                            placeholder="Nom du produit"
+                            className={getFieldError(`items.${index}.product_name`) ? 'border-destructive' : ''}
+                          />
+                          {getFieldError(`items.${index}.product_name`) && (
+                            <p className="text-xs text-destructive mt-1">{getFieldError(`items.${index}.product_name`)}</p>
+                          )}
+                        </div>
                       )}
                     </div>
 
@@ -381,7 +436,11 @@ const EditSubmission = () => {
                         type="number"
                         min="1"
                         {...register(`items.${index}.quantity`, { valueAsNumber: true })}
+                        className={getFieldError(`items.${index}.quantity`) ? 'border-destructive' : ''}
                       />
+                      {getFieldError(`items.${index}.quantity`) && (
+                        <p className="text-xs text-destructive mt-1">{getFieldError(`items.${index}.quantity`)}</p>
+                      )}
                     </div>
                     
                     <div className="col-span-2">
@@ -391,7 +450,11 @@ const EditSubmission = () => {
                         step="0.01"
                         min="0"
                         {...register(`items.${index}.unit_price`, { valueAsNumber: true })}
+                        className={getFieldError(`items.${index}.unit_price`) ? 'border-destructive' : ''}
                       />
+                      {getFieldError(`items.${index}.unit_price`) && (
+                        <p className="text-xs text-destructive mt-1">{getFieldError(`items.${index}.unit_price`)}</p>
+                      )}
                     </div>
                     
                     <div className="col-span-1 text-right pt-6">
@@ -501,6 +564,16 @@ const EditSubmission = () => {
           </CardContent>
         </Card>
 
+        {/* Validation Alert */}
+        {!isFormValid && (
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Veuillez remplir tous les champs obligatoires avant de sauvegarder.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Actions */}
         <div className="flex gap-4 justify-end">
           <Button
@@ -513,9 +586,24 @@ const EditSubmission = () => {
           </Button>
           <Button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !hasChanges || !isFormValid}
+            className={cn(
+              "min-w-[200px] transition-all",
+              hasChanges && isFormValid ? "bg-primary hover:bg-primary/90" : "bg-muted text-muted-foreground"
+            )}
           >
-            Sauvegarder les modifications
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Sauvegarde en cours...
+              </>
+            ) : !hasChanges ? (
+              'Aucune modification'
+            ) : !isFormValid ? (
+              'Compléter les champs'
+            ) : (
+              'Sauvegarder les modifications'
+            )}
           </Button>
         </div>
       </form>

@@ -373,9 +373,15 @@ const SubmissionDetails = () => {
                   <Switch
                     checked={proofAccepted}
                     onCheckedChange={setProofAccepted}
+                    disabled={submission.status !== 'Acceptée'}
                   />
                 </div>
               </div>
+              {submission.status !== 'Acceptée' && (
+                <p className="text-xs text-muted-foreground">
+                  💡 Disponible lorsque la soumission devient une commande
+                </p>
+              )}
 
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Livré:</span>
@@ -390,6 +396,11 @@ const SubmissionDetails = () => {
                   />
                 </div>
               </div>
+              {submission.status !== 'Acceptée' && (
+                <p className="text-xs text-muted-foreground">
+                  💡 Disponible lorsque la soumission devient une commande
+                </p>
+              )}
             </CardContent>
           </Card>
 
