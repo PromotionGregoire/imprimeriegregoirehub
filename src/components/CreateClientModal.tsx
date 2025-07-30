@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import { 
   Dialog, 
   DialogContent, 
@@ -107,447 +107,446 @@ const CreateClientModal = ({ isOpen, onClose }: CreateClientModalProps) => {
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <Tabs defaultValue="general" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="general">Général</TabsTrigger>
-                <TabsTrigger value="contacts">Contacts</TabsTrigger>
-                <TabsTrigger value="addresses">Adresses</TabsTrigger>
-                <TabsTrigger value="admin">Administration</TabsTrigger>
-              </TabsList>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            {/* Section 1: Informations Générales */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold border-b pb-2">Informations Générales</h3>
+              
+              <FormField
+                control={form.control}
+                name="business_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nom de l'entreprise *</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Nom de l'entreprise" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-              {/* Section 1: Informations Générales */}
-              <TabsContent value="general" className="space-y-4">
+              <FormField
+                control={form.control}
+                name="client_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Type de client</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionnez un type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {clientTypes.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="industry"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Industrie</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionnez une industrie" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {industries.map((industry) => (
+                          <SelectItem key={industry} value={industry}>
+                            {industry}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Section 2: Contacts */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold border-b pb-2">Contacts</h3>
+              
+              <FormField
+                control={form.control}
+                name="contact_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nom du contact principal *</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Nom du contact" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="main_contact_position"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Poste du contact principal</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Directeur général, Responsable marketing..." />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Courriel *</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="email" placeholder="contact@entreprise.com" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="phone_number"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Téléphone *</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="(514) 123-4567" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="secondary_contact_info"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Contact secondaire</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        {...field} 
+                        placeholder="Nom, poste, téléphone, email du contact secondaire..."
+                        rows={3}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Section 3: Adresses */}
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold border-b pb-2">Adresses</h3>
+              
+              <div className="space-y-4">
+                <h4 className="text-md font-medium">Adresse de facturation</h4>
+                
                 <FormField
                   control={form.control}
-                  name="business_name"
+                  name="billing_street"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nom de l'entreprise *</FormLabel>
+                      <FormLabel>Rue</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Nom de l'entreprise" />
+                        <Input {...field} placeholder="123 Rue Principal" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="client_type"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Type de client</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Sélectionnez un type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {clientTypes.map((type) => (
-                            <SelectItem key={type} value={type}>
-                              {type}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="industry"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Industrie</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Sélectionnez une industrie" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {industries.map((industry) => (
-                            <SelectItem key={industry} value={industry}>
-                              {industry}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </TabsContent>
-
-              {/* Section 2: Contacts */}
-              <TabsContent value="contacts" className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="contact_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nom du contact principal *</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="Nom du contact" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="main_contact_position"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Poste du contact principal</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="Directeur général, Responsable marketing..." />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Courriel *</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="email" placeholder="contact@entreprise.com" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="phone_number"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Téléphone *</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="(514) 123-4567" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="secondary_contact_info"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Contact secondaire</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          {...field} 
-                          placeholder="Nom, poste, téléphone, email du contact secondaire..."
-                          rows={3}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </TabsContent>
-
-              {/* Section 3: Adresses */}
-              <TabsContent value="addresses" className="space-y-6">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Adresse de facturation</h3>
-                  
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name="billing_street"
+                    name="billing_city"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Rue</FormLabel>
+                        <FormLabel>Ville</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="123 Rue Principal" />
+                          <Input {...field} placeholder="Montréal" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="billing_province"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Province</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Province" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {provinces.map((province) => (
+                              <SelectItem key={province} value={province}>
+                                {province}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="billing_postal_code"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Code postal</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="H1A 1A1" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="text-md font-medium">Adresse d'expédition</h4>
+                
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="same-as-billing" 
+                    checked={sameAsBilling}
+                    onCheckedChange={(checked) => setSameAsBilling(checked === true)}
+                  />
+                  <Label htmlFor="same-as-billing">
+                    Identique à l'adresse de facturation
+                  </Label>
+                </div>
+
+                {!sameAsBilling && (
+                  <div className="space-y-4">
                     <FormField
                       control={form.control}
-                      name="billing_city"
+                      name="shipping_street"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Ville</FormLabel>
+                          <FormLabel>Rue</FormLabel>
                           <FormControl>
-                            <Input {...field} placeholder="Montréal" />
+                            <Input {...field} placeholder="123 Rue d'expédition" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
 
-                    <FormField
-                      control={form.control}
-                      name="billing_province"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Province</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Province" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {provinces.map((province) => (
-                                <SelectItem key={province} value={province}>
-                                  {province}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="billing_postal_code"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Code postal</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="H1A 1A1" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Adresse d'expédition</h3>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="same-as-billing" 
-                      checked={sameAsBilling}
-                      onCheckedChange={(checked) => setSameAsBilling(checked === true)}
-                    />
-                    <Label htmlFor="same-as-billing">
-                      Identique à l'adresse de facturation
-                    </Label>
-                  </div>
-
-                  {!sameAsBilling && (
-                    <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
                       <FormField
                         control={form.control}
-                        name="shipping_street"
+                        name="shipping_city"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Rue</FormLabel>
+                            <FormLabel>Ville</FormLabel>
                             <FormControl>
-                              <Input {...field} placeholder="123 Rue d'expédition" />
+                              <Input {...field} placeholder="Ville" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="shipping_city"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Ville</FormLabel>
-                              <FormControl>
-                                <Input {...field} placeholder="Ville" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="shipping_province"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Province</FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Province" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {provinces.map((province) => (
-                                    <SelectItem key={province} value={province}>
-                                      {province}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
                       <FormField
                         control={form.control}
-                        name="shipping_postal_code"
+                        name="shipping_province"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Code postal</FormLabel>
-                            <FormControl>
-                              <Input {...field} placeholder="H1A 1A1" />
-                            </FormControl>
+                            <FormLabel>Province</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Province" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {provinces.map((province) => (
+                                  <SelectItem key={province} value={province}>
+                                    {province}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
                     </div>
-                  )}
-                </div>
-              </TabsContent>
 
-              {/* Section 4: Administration & Suivi */}
-              <TabsContent value="admin" className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="lead_source"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Source</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="D'où vient ce prospect ?" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {leadSources.map((source) => (
-                            <SelectItem key={source} value={source}>
-                              {source}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    <FormField
+                      control={form.control}
+                      name="shipping_postal_code"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Code postal</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="H1A 1A1" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
 
-                <FormField
-                  control={form.control}
-                  name="tax_numbers"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Numéros de taxes (TPS/TVQ)</FormLabel>
+            {/* Section 4: Administration & Suivi */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold border-b pb-2">Administration & Suivi</h3>
+              
+              <FormField
+                control={form.control}
+                name="lead_source"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Source</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <Input {...field} placeholder="123456789 TPS, 987654321 TVQ" />
+                        <SelectTrigger>
+                          <SelectValue placeholder="D'où vient ce prospect ?" />
+                        </SelectTrigger>
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                      <SelectContent>
+                        {leadSources.map((source) => (
+                          <SelectItem key={source} value={source}>
+                            {source}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                <FormField
-                  control={form.control}
-                  name="default_payment_terms"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Termes de paiement par défaut</FormLabel>
+              <FormField
+                control={form.control}
+                name="tax_numbers"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Numéros de taxes (TPS/TVQ)</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="123456789 TPS, 987654321 TVQ" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="default_payment_terms"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Termes de paiement par défaut</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Net 30 jours" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Statut du client</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <Input {...field} placeholder="Net 30 jours" />
+                        <SelectTrigger>
+                          <SelectValue placeholder="Statut" />
+                        </SelectTrigger>
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                      <SelectContent>
+                        {statuses.map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {status}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Statut du client</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Statut" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {statuses.map((status) => (
-                            <SelectItem key={status} value={status}>
-                              {status}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="assigned_user_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Employé assigné</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Sélectionnez un employé" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {profiles?.map((profile) => (
-                            <SelectItem key={profile.id} value={profile.id}>
-                              {profile.full_name} ({profile.role})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="general_notes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Notes générales</FormLabel>
+              <FormField
+                control={form.control}
+                name="assigned_user_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Employé assigné</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <Textarea 
-                          {...field} 
-                          placeholder="Notes internes sur le client, préférences, historique..."
-                          rows={4}
-                        />
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionnez un employé" />
+                        </SelectTrigger>
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </TabsContent>
-            </Tabs>
+                      <SelectContent>
+                        {profiles?.map((profile) => (
+                          <SelectItem key={profile.id} value={profile.id}>
+                            {profile.full_name} ({profile.role})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="general_notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Notes générales</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        {...field} 
+                        placeholder="Notes internes sur le client, préférences, historique..."
+                        rows={4}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>
