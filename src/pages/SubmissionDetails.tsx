@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit, Copy, Send, FileText, MoreHorizontal, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -5,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Switch } from '@/components/ui/switch';
 import { useSubmissionDetails } from '@/hooks/useSubmissionDetails';
 import { useCloneSubmission, useDeleteSubmission, useUpdateSubmissionStatus } from '@/hooks/useSubmissionActions';
 import { useToast } from '@/hooks/use-toast';
@@ -20,6 +22,10 @@ const SubmissionDetails = () => {
   const cloneSubmission = useCloneSubmission();
   const deleteSubmission = useDeleteSubmission();
   const updateSubmissionStatus = useUpdateSubmissionStatus();
+  
+  // Toggle states
+  const [proofAccepted, setProofAccepted] = useState(false);
+  const [delivered, setDelivered] = useState(false);
 
   if (isLoading) {
     return (
@@ -348,6 +354,41 @@ const SubmissionDetails = () => {
                   <Send className="w-4 h-4 mr-2" />
                   Renvoyer le courriel
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Proof and Delivery Status */}
+          <Card>
+            <CardHeader>
+              <CardTitle>État de la Soumission</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Épreuve acceptée:</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">
+                    {proofAccepted ? 'Oui' : 'Non'}
+                  </span>
+                  <Switch
+                    checked={proofAccepted}
+                    onCheckedChange={setProofAccepted}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Livré:</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">
+                    {delivered ? 'Oui' : 'En cours'}
+                  </span>
+                  <Switch
+                    checked={delivered}
+                    onCheckedChange={setDelivered}
+                    disabled={submission.status !== 'Acceptée'}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
