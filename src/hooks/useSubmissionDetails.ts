@@ -12,7 +12,8 @@ export const useSubmissionDetails = (submissionId: string) => {
           clients (
             business_name,
             contact_name,
-            email
+            email,
+            assigned_user_id
           ),
           submission_items (
             id,

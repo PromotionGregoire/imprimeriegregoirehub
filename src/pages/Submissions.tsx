@@ -8,6 +8,8 @@ import { Plus, Search, Filter, FileText, Calendar, DollarSign } from 'lucide-rea
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAllSubmissions } from '@/hooks/useAllSubmissions';
 import { Skeleton } from '@/components/ui/skeleton';
+import ModernSubmissionCard from '@/components/ModernSubmissionCard';
+import EmployeeAssignManager from '@/components/EmployeeAssignManager';
 
 const Submissions = () => {
   const navigate = useNavigate();
@@ -155,85 +157,13 @@ const Submissions = () => {
             </Card>
           </div>
         ) : (
-          filteredSubmissions.map((submission) => {
-            const cardData = getSubmissionCardData(submission);
-            
-            return (
-              <Card 
-                key={submission.id} 
-                className={`cursor-pointer hover:shadow-lg transition-all duration-200 ${cardData.borderColor}`}
-                onClick={() => navigate(`/dashboard/submissions/${submission.id}`)}
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        <FileText className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg font-semibold">
-                          {submission.submission_number}
-                        </CardTitle>
-                        <p className="text-sm text-muted-foreground font-medium">
-                          {submission.clients?.business_name}
-                        </p>
-                      </div>
-                    </div>
-                    <Badge 
-                      variant={cardData.badgeInfo.variant}
-                      className={cardData.badgeInfo.color || ''}
-                    >
-                      {cardData.badgeInfo.text}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="pt-0">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Date d'envoi:</span>
-                      <span className="font-medium">
-                        {submission.sent_at 
-                          ? new Date(submission.sent_at).toLocaleDateString('fr-FR')
-                          : 'Non envoyée'
-                        }
-                      </span>
-                    </div>
-                    
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <Calendar className="h-3 w-3" />
-                        <span>Échéance:</span>
-                      </div>
-                      <span className="font-medium">
-                        {submission.deadline 
-                          ? new Date(submission.deadline).toLocaleDateString('fr-FR')
-                          : 'Non définie'
-                        }
-                      </span>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1 text-muted-foreground text-sm">
-                        <DollarSign className="h-3 w-3" />
-                        <span>Montant:</span>
-                      </div>
-                      <span className="text-lg font-bold text-primary">
-                        ${Number(submission.total_price || 0).toFixed(2)}
-                      </span>
-                    </div>
-                    
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">Assigné à:</span>
-                      <span className="font-medium">
-                        {submission.clients?.profiles?.full_name || 'Non assigné'}
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })
+          filteredSubmissions.map((submission) => (
+            <ModernSubmissionCard
+              key={submission.id}
+              submission={submission}
+              onViewDetails={(id) => navigate(`/dashboard/submissions/${id}`)}
+            />
+          ))
         )}
       </div>
     </div>

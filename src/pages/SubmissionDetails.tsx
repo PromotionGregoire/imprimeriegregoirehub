@@ -10,6 +10,7 @@ import { useCloneSubmission, useDeleteSubmission, useUpdateSubmissionStatus } fr
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import StatusManager from '@/components/StatusManager';
+import EmployeeAssignManager from '@/components/EmployeeAssignManager';
 
 const SubmissionDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -202,6 +203,14 @@ const SubmissionDetails = () => {
                   <div className="font-bold text-2xl text-primary">
                     ${Number(submission.total_price || 0).toFixed(2)}
                   </div>
+                </div>
+                <div className="col-span-2 md:col-span-3">
+                  <div className="text-sm text-muted-foreground mb-2">Employé assigné</div>
+                  <EmployeeAssignManager 
+                    clientId={submission.client_id}
+                    currentAssignedUserId={submission.clients?.assigned_user_id}
+                    type="client"
+                  />
                 </div>
               </div>
             </CardContent>
