@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import StatusManager from '@/components/StatusManager';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import ModernSubmissionCard from '@/components/ModernSubmissionCard';
 
 const Submissions = () => {
   const navigate = useNavigate();
@@ -232,7 +233,7 @@ const Submissions = () => {
           </div>
         ) : (
           filteredSubmissions.map((submission) => (
-            <SubmissionCard
+            <ModernSubmissionCard
               key={submission.id}
               submission={submission}
               onViewDetails={(id) => navigate(`/dashboard/submissions/${id}`)}
@@ -241,172 +242,6 @@ const Submissions = () => {
         )}
       </div>
     </div>
-  );
-};
-
-const SubmissionCard = ({ submission, onViewDetails }: { submission: any; onViewDetails: (id: string) => void }) => {
-  const [proofAccepted, setProofAccepted] = useState(submission.status === 'Acceptée');
-  const [delivered, setDelivered] = useState(submission.status === 'Livrée');
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-CA', {
-      style: 'currency',
-      currency: 'CAD',
-    }).format(price);
-  };
-
-  const formatDate = (dateString: string) => {
-    return format(new Date(dateString), 'dd/MM/yyyy', { locale: fr });
-  };
-
-  const getCardStyle = () => {
-    const deadline = submission.deadline ? new Date(submission.deadline) : null;
-    const today = new Date();
-    const daysLeft = deadline ? Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) : null;
-
-    // PRIORITÉ : Épreuve acceptée = VERT (prend le dessus sur orange/rouge)
-    if (proofAccepted) {
-      return 'bg-green-50 border-green-200';
-    }
-
-    // Si livré = VIOLET (prend le dessus sur tout)
-    if (delivered) {
-      return 'bg-purple-50 border-purple-200';
-    }
-
-    // Ensuite, couleurs selon statut et timing
-    switch (submission.status) {
-      case 'Livrée':
-        return 'bg-purple-50 border-purple-200';
-      case 'Acceptée':
-        return 'bg-green-50 border-green-200';
-      case 'Envoyée':
-        if (daysLeft !== null && daysLeft <= 1) {
-          return 'bg-red-50 border-red-200';
-        } else if (daysLeft !== null && daysLeft <= 4) {
-          return 'bg-orange-50 border-orange-200';
-        }
-        return 'bg-white border-gray-200';
-      default:
-        return 'bg-white border-gray-200';
-    }
-  };
-
-  const getDeadlineText = () => {
-    const deadline = submission.deadline ? new Date(submission.deadline) : null;
-    const today = new Date();
-    const daysLeft = deadline ? Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) : null;
-
-    if (!deadline) return 'Non définie';
-    if (daysLeft === 1) return `${formatDate(submission.deadline)} (1 jour restant)`;
-    if (daysLeft && daysLeft > 1) return `${formatDate(submission.deadline)} (${daysLeft} jours restants)`;
-    return formatDate(submission.deadline);
-  };
-
-  return (
-    <Card className={`group hover:shadow-lg transition-all duration-200 cursor-pointer ${getCardStyle()}`} onClick={() => onViewDetails(submission.id)}>
-      <CardContent className="p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-              <FileText className="w-4 h-4 text-gray-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-900">
-                Soumission #{submission.submission_number}
-              </h3>
-              <p className="text-sm text-gray-500">
-                {submission.clients?.business_name}
-              </p>
-            </div>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onViewDetails(submission.id);
-            }}
-            className="opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <FileText className="w-4 h-4" />
-          </Button>
-        </div>
-
-        {/* Details Grid */}
-        <div className="space-y-3 mb-4">
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Date d'envoi:</span>
-            <span className="text-sm font-medium">
-              {submission.sent_at ? formatDate(submission.sent_at) : 'Non envoyée'}
-            </span>
-          </div>
-          
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">📅 Échéance:</span>
-            <span className="text-sm font-medium">
-              {getDeadlineText()}
-            </span>
-          </div>
-          
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Prix:</span>
-            <span className="text-lg font-bold text-gray-900">
-              {formatPrice(Number(submission.total_price) || 0)}
-            </span>
-          </div>
-        </div>
-
-        {/* Toggles */}
-        <div className="space-y-3 pt-3 border-t border-gray-100">
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Épreuve acceptée:</span>
-            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-              <span className={`text-sm font-medium ${proofAccepted ? 'text-green-600' : 'text-gray-500'}`}>
-                {proofAccepted ? 'Oui' : 'Non'}
-              </span>
-              <Switch
-                checked={proofAccepted}
-                onCheckedChange={setProofAccepted}
-                className="data-[state=checked]:bg-green-600"
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Livré:</span>
-            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-              <span className={`text-sm font-medium ${delivered ? 'text-green-600' : 'text-gray-500'}`}>
-                {delivered ? 'Oui' : 'En cours'}
-              </span>
-              <Switch
-                checked={delivered}
-                onCheckedChange={setDelivered}
-                className="data-[state=checked]:bg-green-600"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* View Proof Link */}
-        {submission.approval_token && (
-          <div className="pt-3 border-t border-gray-100">
-            <Button
-              variant="link"
-              className="p-0 h-auto text-blue-600 hover:text-blue-800"
-              onClick={(e) => {
-                e.stopPropagation();
-                window.open(`/approval/${submission.approval_token}`, '_blank');
-              }}
-            >
-              <ExternalLink className="w-3 h-3 mr-1" />
-              Voir le lien d'épreuve →
-            </Button>
-          </div>
-        )}
-      </CardContent>
-    </Card>
   );
 };
 

@@ -15,8 +15,9 @@ interface ModernSubmissionCardProps {
 }
 
 const ModernSubmissionCard = ({ submission, onViewDetails }: ModernSubmissionCardProps) => {
-  const [proofAccepted, setProofAccepted] = useState(false);
-  const [delivered, setDelivered] = useState(false);
+  // Initialize based on submission status or stored state  
+  const [proofAccepted, setProofAccepted] = useState(submission.status === 'Acceptée');
+  const [delivered, setDelivered] = useState(submission.status === 'Livrée');
   
   const proofToggle = useProofToggle(submission.id);
   const deliveryToggle = useDeliveryToggle(submission.id);
@@ -54,33 +55,39 @@ const ModernSubmissionCard = ({ submission, onViewDetails }: ModernSubmissionCar
     await deliveryToggle.mutateAsync({ isDelivered: checked });
   };
 
-  // Dynamic card styling with PRIORITY logic
+  // Dynamic card styling with PRIORITY logic - BACKGROUND color based on state
   const getCardStyles = () => {
-    const baseClass = "group cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white";
+    const baseClass = "group cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1";
+    let backgroundClass = "bg-white";
     let borderClass = "border-l-4";
     
     // PRIORITÉ 1: Si épreuve acceptée = VERT (prend le dessus sur tout)
     if (proofAccepted) {
-      borderClass += " border-l-green-500";
-      return `${baseClass} ${borderClass}`;
+      backgroundClass = "bg-green-50";
+      borderClass += " border-l-green-500 border-green-200";
+      return `${baseClass} ${backgroundClass} ${borderClass}`;
     }
     
     // PRIORITÉ 2: Si livré = VIOLET 
     if (delivered) {
-      borderClass += " border-l-purple-500";
-      return `${baseClass} ${borderClass}`;
+      backgroundClass = "bg-purple-50";
+      borderClass += " border-l-purple-500 border-purple-200";
+      return `${baseClass} ${backgroundClass} ${borderClass}`;
     }
     
     // PRIORITÉ 3: Couleurs selon statut et timing
     switch (submission.status) {
       case 'Acceptée':
-        borderClass += " border-l-green-500";
+        backgroundClass = "bg-green-50";
+        borderClass += " border-l-green-500 border-green-200";
         break;
       case 'Modification Demandée':
-        borderClass += " border-l-blue-500";
+        backgroundClass = "bg-blue-50";
+        borderClass += " border-l-blue-500 border-blue-200";
         break;
       case 'Refusée':
-        borderClass += " border-l-red-500";
+        backgroundClass = "bg-red-50";
+        borderClass += " border-l-red-500 border-red-200";
         break;
       case 'Envoyée':
         // Vérifier le timing seulement si pas accepté
@@ -89,21 +96,26 @@ const ModernSubmissionCard = ({ submission, onViewDetails }: ModernSubmissionCar
             (new Date().getTime() - new Date(submission.sent_at).getTime()) / (1000 * 60 * 60 * 24)
           );
           if (daysSinceLastMessage > 10) {
-            borderClass += " border-l-red-400";
+            backgroundClass = "bg-red-50";
+            borderClass += " border-l-red-400 border-red-200";
           } else if (daysSinceLastMessage > 5) {
-            borderClass += " border-l-yellow-400";
+            backgroundClass = "bg-orange-50";
+            borderClass += " border-l-orange-400 border-orange-200";
           } else {
-            borderClass += " border-l-blue-400";
+            backgroundClass = "bg-blue-50";
+            borderClass += " border-l-blue-400 border-blue-200";
           }
         } else {
-          borderClass += " border-l-blue-400";
+          backgroundClass = "bg-blue-50";
+          borderClass += " border-l-blue-400 border-blue-200";
         }
         break;
       default:
-        borderClass += " border-l-gray-300";
+        backgroundClass = "bg-gray-50";
+        borderClass += " border-l-gray-300 border-gray-200";
     }
     
-    return `${baseClass} ${borderClass}`;
+    return `${baseClass} ${backgroundClass} ${borderClass}`;
   };
 
   return (
