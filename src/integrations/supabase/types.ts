@@ -14,13 +14,213 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      clients: {
+        Row: {
+          business_name: string
+          client_number: string
+          contact_name: string
+          created_at: string
+          email: string
+          id: string
+          phone_number: string
+          updated_at: string
+        }
+        Insert: {
+          business_name: string
+          client_number?: string
+          contact_name: string
+          created_at?: string
+          email: string
+          id?: string
+          phone_number: string
+          updated_at?: string
+        }
+        Update: {
+          business_name?: string
+          client_number?: string
+          contact_name?: string
+          created_at?: string
+          email?: string
+          id?: string
+          phone_number?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          order_number: string
+          status: string
+          submission_id: string
+          total_price: number
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          order_number?: string
+          status?: string
+          submission_id: string
+          total_price: number
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          order_number?: string
+          status?: string
+          submission_id?: string
+          total_price?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string
+          id: string
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          full_name: string
+          id: string
+          role?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          id?: string
+          role?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      submission_items: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          product_name: string
+          quantity: number
+          submission_id: string
+          unit_price: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          product_name: string
+          quantity?: number
+          submission_id: string
+          unit_price: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          product_name?: string
+          quantity?: number
+          submission_id?: string
+          unit_price?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submission_items_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      submissions: {
+        Row: {
+          client_id: string
+          created_at: string
+          deadline: string | null
+          id: string
+          sent_at: string | null
+          status: string
+          submission_number: string
+          total_price: number | null
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          deadline?: string | null
+          id?: string
+          sent_at?: string | null
+          status?: string
+          submission_number?: string
+          total_price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          deadline?: string | null
+          id?: string
+          sent_at?: string | null
+          status?: string
+          submission_number?: string
+          total_price?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submissions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_client_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_order_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_submission_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
