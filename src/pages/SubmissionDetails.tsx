@@ -222,7 +222,10 @@ const SubmissionDetails = () => {
               <CardTitle>Centre de Contrôle</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button className="w-full justify-start">
+              <Button 
+                className="w-full justify-start"
+                onClick={() => navigate(`/dashboard/submissions/edit/${submission.id}`)}
+              >
                 <Edit className="w-4 h-4 mr-2" />
                 Modifier la Soumission
               </Button>
