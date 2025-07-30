@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Filter } from 'lucide-react';
+import { Plus, Search, Filter, FileText, Calendar, DollarSign } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAllSubmissions } from '@/hooks/useAllSubmissions';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,32 +16,51 @@ const Submissions = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
-  const getStatusBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-      'Brouillon': 'outline',
-      'Envoyée': 'default',
-      'Acceptée': 'secondary',
-      'Modification Demandée': 'destructive',
-      'Refusée': 'destructive',
+  const getSubmissionCardData = (submission: any) => {
+    const sentDate = submission.sent_at ? new Date(submission.sent_at) : null;
+    const daysSinceSent = sentDate ? Math.floor((new Date().getTime() - sentDate.getTime()) / (1000 * 60 * 60 * 24)) : 0;
+    
+    let borderColor = 'border-border'; // Default
+    let badgeInfo = { 
+      variant: 'outline' as 'default' | 'secondary' | 'destructive' | 'outline', 
+      text: submission.status, 
+      color: '' 
     };
     
-    return (
-      <Badge variant={variants[status] || 'outline'}>
-        {status}
-      </Badge>
-    );
-  };
-
-  const getRowClassName = (submission: any) => {
-    if (submission.status !== 'Envoyée' || !submission.sent_at) return '';
+    switch (submission.status) {
+      case 'Acceptée':
+        borderColor = 'border-l-4 border-l-[#CBE54E]';
+        badgeInfo = { variant: 'secondary', text: 'Acceptée', color: 'bg-[#CBE54E] text-black' };
+        break;
+        
+      case 'Modification Demandée':
+        borderColor = 'border-l-4 border-l-[#308695]';
+        badgeInfo = { variant: 'secondary', text: 'Modification Demandée', color: 'bg-[#308695] text-white' };
+        break;
+        
+      case 'Refusée':
+        borderColor = 'border-l-4 border-l-destructive';
+        badgeInfo = { variant: 'destructive', text: 'Refusée', color: '' };
+        break;
+        
+      case 'Envoyée':
+        if (daysSinceSent > 10) {
+          borderColor = 'border-l-4 border-l-[#D45769]';
+          badgeInfo = { variant: 'destructive', text: 'Suivi Urgent', color: 'bg-[#D45769] text-white' };
+        } else if (daysSinceSent > 5) {
+          borderColor = 'border-l-4 border-l-[#e69d45]';
+          badgeInfo = { variant: 'secondary', text: 'Suivi Requis', color: 'bg-[#e69d45] text-white' };
+        } else {
+          badgeInfo = { variant: 'default', text: 'Envoyée', color: '' };
+        }
+        break;
+        
+      case 'Brouillon':
+        badgeInfo = { variant: 'outline', text: 'Brouillon', color: '' };
+        break;
+    }
     
-    const sentDate = new Date(submission.sent_at);
-    const daysSince = Math.floor((new Date().getTime() - sentDate.getTime()) / (1000 * 60 * 60 * 24));
-    
-    if (daysSince > 10) return 'border-l-4 border-l-destructive';
-    if (daysSince > 5) return 'border-l-4 border-l-orange-500';
-    
-    return '';
+    return { borderColor, badgeInfo, daysSinceSent };
   };
 
   const filteredSubmissions = useMemo(() => {
@@ -119,61 +138,102 @@ const Submissions = () => {
         </CardContent>
       </Card>
 
-      {/* Submissions List */}
-      <div className="space-y-3">
+      {/* Submissions Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredSubmissions.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-12">
-              <p className="text-muted-foreground">
-                {searchTerm || statusFilter !== 'all' 
-                  ? 'Aucune soumission trouvée avec ces critères'
-                  : 'Aucune soumission pour le moment'
-                }
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          filteredSubmissions.map((submission) => (
-            <Card 
-              key={submission.id} 
-              className={`cursor-pointer hover:shadow-md transition-shadow ${getRowClassName(submission)}`}
-              onClick={() => navigate(`/dashboard/submissions/${submission.id}`)}
-            >
-              <CardContent className="p-4">
-                <div className="grid grid-cols-12 gap-4 items-center">
-                  <div className="col-span-3">
-                    <div className="font-medium">{submission.submission_number}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {new Date(submission.created_at).toLocaleDateString('fr-FR')}
-                    </div>
-                  </div>
-                  
-                  <div className="col-span-3">
-                    <div className="font-medium">{submission.clients?.business_name}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {submission.clients?.contact_name}
-                    </div>
-                  </div>
-                  
-                  <div className="col-span-2 text-right">
-                    <div className="font-medium">
-                      {submission.total_price ? `$${Number(submission.total_price).toFixed(2)}` : '-'}
-                    </div>
-                  </div>
-                  
-                  <div className="col-span-2">
-                    {getStatusBadge(submission.status)}
-                  </div>
-                  
-                  <div className="col-span-2 text-right">
-                    <div className="text-sm text-muted-foreground">
-                      {submission.clients?.profiles?.full_name || 'Non assigné'}
-                    </div>
-                  </div>
-                </div>
+          <div className="col-span-full">
+            <Card>
+              <CardContent className="text-center py-12">
+                <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">
+                  {searchTerm || statusFilter !== 'all' 
+                    ? 'Aucune soumission trouvée avec ces critères'
+                    : 'Aucune soumission pour le moment'
+                  }
+                </p>
               </CardContent>
             </Card>
-          ))
+          </div>
+        ) : (
+          filteredSubmissions.map((submission) => {
+            const cardData = getSubmissionCardData(submission);
+            
+            return (
+              <Card 
+                key={submission.id} 
+                className={`cursor-pointer hover:shadow-lg transition-all duration-200 ${cardData.borderColor}`}
+                onClick={() => navigate(`/dashboard/submissions/${submission.id}`)}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-primary/10 rounded-lg">
+                        <FileText className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg font-semibold">
+                          {submission.submission_number}
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground font-medium">
+                          {submission.clients?.business_name}
+                        </p>
+                      </div>
+                    </div>
+                    <Badge 
+                      variant={cardData.badgeInfo.variant}
+                      className={cardData.badgeInfo.color || ''}
+                    >
+                      {cardData.badgeInfo.text}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="pt-0">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Date d'envoi:</span>
+                      <span className="font-medium">
+                        {submission.sent_at 
+                          ? new Date(submission.sent_at).toLocaleDateString('fr-FR')
+                          : 'Non envoyée'
+                        }
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <Calendar className="h-3 w-3" />
+                        <span>Échéance:</span>
+                      </div>
+                      <span className="font-medium">
+                        {submission.deadline 
+                          ? new Date(submission.deadline).toLocaleDateString('fr-FR')
+                          : 'Non définie'
+                        }
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1 text-muted-foreground text-sm">
+                        <DollarSign className="h-3 w-3" />
+                        <span>Montant:</span>
+                      </div>
+                      <span className="text-lg font-bold text-primary">
+                        ${Number(submission.total_price || 0).toFixed(2)}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Assigné à:</span>
+                      <span className="font-medium">
+                        {submission.clients?.profiles?.full_name || 'Non assigné'}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })
         )}
       </div>
     </div>
