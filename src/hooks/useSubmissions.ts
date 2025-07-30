@@ -96,23 +96,11 @@ export const useUpdateSubmission = () => {
       console.log('Data to update:', submissionData);
       
       // Build complete update data
-      const updateData: any = {};
-      
-      if (submissionData.client_id !== undefined) {
-        updateData.client_id = submissionData.client_id;
-      }
-      if (submissionData.deadline !== undefined) {
-        updateData.deadline = submissionData.deadline;
-      }
-      if (submissionData.total_price !== undefined) {
-        updateData.total_price = submissionData.total_price;
-      }
-      if (submissionData.subtotal !== undefined) {
-        // Store subtotal for reference if needed
-      }
-      if (submissionData.tax_amount !== undefined) {
-        // Store tax amount for reference if needed
-      }
+      const updateData: any = {
+        client_id: submissionData.client_id,
+        deadline: submissionData.deadline,
+        total_price: submissionData.total_price,
+      };
       
       console.log('Update data being sent to Supabase:', updateData);
       

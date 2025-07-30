@@ -16,6 +16,7 @@ import SubmissionDetails from "./pages/SubmissionDetails";
 import Orders from "./pages/Orders";
 import EditSubmission from "./pages/EditSubmission";
 import Products from "./pages/Products";
+import Proofs from "./pages/Proofs";
 import DashboardLayout from "./components/DashboardLayout";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
               <Route path="submissions/edit/:id" element={<EditSubmission />} />
               <Route path="products" element={<Products />} />
               <Route path="orders" element={<Orders />} />
+              <Route path="proofs" element={<Proofs />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

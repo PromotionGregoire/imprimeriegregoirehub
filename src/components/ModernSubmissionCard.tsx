@@ -3,11 +3,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, ExternalLink } from 'lucide-react';
+import { ArrowRight, ExternalLink, Loader2, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import StatusManager from './StatusManager';
 import { useProofToggle } from '@/hooks/useProofToggle';
+import { useForceAcceptSubmission } from '@/hooks/useForceAcceptSubmission';
 
 interface ModernSubmissionCardProps {
   submission: any;
@@ -19,6 +20,7 @@ const ModernSubmissionCard = ({ submission, onViewDetails }: ModernSubmissionCar
   const [proofAccepted, setProofAccepted] = useState(submission.status === 'Acceptée');
   
   const proofToggle = useProofToggle(submission.id);
+  const forceAcceptSubmission = useForceAcceptSubmission();
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-CA', {
@@ -175,23 +177,40 @@ const ModernSubmissionCard = ({ submission, onViewDetails }: ModernSubmissionCar
             </div>
           </div>
 
-          {/* Proof Accepted Toggle - Raccourci pour Acceptation Manuelle */}
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Accepter manuellement:</span>
-            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-              <span className={`text-sm font-medium ${proofAccepted ? 'text-green-600' : 'text-gray-500'}`}>
-                {proofAccepted ? 'Acceptée' : 'En attente'}
-              </span>
-              <Switch
-                checked={proofAccepted}
-                onCheckedChange={handleProofToggle}
-                disabled={submission.status === 'Acceptée' || proofToggle.isPending}
-                className="data-[state=checked]:bg-green-600"
-              />
-            </div>
+          {/* Bouton d'Acceptation Manuelle */}
+          <div className="flex justify-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                console.log('Forcing acceptance for submission:', submission.id);
+                forceAcceptSubmission.mutate({ 
+                  submissionId: submission.id,
+                  approvedBy: 'Acceptation manuelle via interface'
+                });
+              }}
+              disabled={submission.status === 'Acceptée' || forceAcceptSubmission.isPending}
+              className="bg-emerald-50 hover:bg-emerald-100 border-emerald-200 text-emerald-700 text-xs"
+            >
+              {forceAcceptSubmission.isPending ? (
+                <>
+                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                  Acceptation...
+                </>
+              ) : submission.status === 'Acceptée' ? (
+                <>
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                  Acceptée
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                  Accepter Soumission
+                </>
+              )}
+            </Button>
           </div>
-
-          {/* SUPPRIMÉ : Toggle "Livraison" pour simplifier les cartes */}
         </div>
 
         {/* View Proof Link */}

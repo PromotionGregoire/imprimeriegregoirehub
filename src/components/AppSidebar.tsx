@@ -22,6 +22,7 @@ const navigationItems = [
   { title: "Soumissions", url: "/dashboard/submissions", icon: FileText },
   { title: "Produits", url: "/dashboard/products", icon: Tag },
   { title: "Commandes", url: "/dashboard/orders", icon: Package },
+  { title: "Épreuves", url: "/dashboard/proofs", icon: FileText },
 ]
 
 export function AppSidebar() {

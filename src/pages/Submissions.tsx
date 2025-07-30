@@ -24,9 +24,9 @@ const Submissions = () => {
   // Calculate dashboard stats
   const stats = {
     total: submissions?.length || 0,
-    delivered: submissions?.filter(s => s.status === 'Livrée')?.length || 0,
-    proofAccepted: submissions?.filter(s => s.status === 'Acceptée')?.length || 0,
-    pendingApproval: submissions?.filter(s => s.status === 'Envoyée')?.length || 0,
+    completed: submissions?.filter(s => s.status === 'Acceptée')?.length || 0,
+    accepted: submissions?.filter(s => s.status === 'Acceptée')?.length || 0,
+    sent: submissions?.filter(s => s.status === 'Envoyée')?.length || 0,
     totalValue: submissions?.reduce((sum, s) => sum + (Number(s.total_price) || 0), 0) || 0
   };
 
@@ -128,22 +128,22 @@ const Submissions = () => {
         
         <Card className="bg-purple-50 border-purple-200">
           <CardContent className="p-4">
-            <div className="text-sm text-purple-600">Livrées</div>
-            <div className="text-2xl font-bold text-purple-700">{stats.delivered}</div>
+            <div className="text-sm text-purple-600">Complétées</div>
+            <div className="text-2xl font-bold text-purple-700">{stats.completed}</div>
           </CardContent>
         </Card>
         
         <Card className="bg-green-50 border-green-200">
           <CardContent className="p-4">
-            <div className="text-sm text-green-600">Épreuves Acceptées</div>
-            <div className="text-2xl font-bold text-green-700">{stats.proofAccepted}</div>
+            <div className="text-sm text-green-600">Acceptées</div>
+            <div className="text-2xl font-bold text-green-700">{stats.accepted}</div>
           </CardContent>
         </Card>
         
         <Card className="bg-orange-50 border-orange-200">
           <CardContent className="p-4">
-            <div className="text-sm text-orange-600">En Attente d'Approbation</div>
-            <div className="text-2xl font-bold text-orange-700">{stats.pendingApproval}</div>
+            <div className="text-sm text-orange-600">Envoyées</div>
+            <div className="text-2xl font-bold text-orange-700">{stats.sent}</div>
           </CardContent>
         </Card>
         
