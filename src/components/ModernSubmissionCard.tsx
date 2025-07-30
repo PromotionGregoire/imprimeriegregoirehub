@@ -54,11 +54,24 @@ const ModernSubmissionCard = ({ submission, onViewDetails }: ModernSubmissionCar
     await deliveryToggle.mutateAsync({ isDelivered: checked });
   };
 
-  // Dynamic card styling based on status and dates
+  // Dynamic card styling with PRIORITY logic
   const getCardStyles = () => {
     const baseClass = "group cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white";
     let borderClass = "border-l-4";
     
+    // PRIORITÉ 1: Si épreuve acceptée = VERT (prend le dessus sur tout)
+    if (proofAccepted) {
+      borderClass += " border-l-green-500";
+      return `${baseClass} ${borderClass}`;
+    }
+    
+    // PRIORITÉ 2: Si livré = VIOLET 
+    if (delivered) {
+      borderClass += " border-l-purple-500";
+      return `${baseClass} ${borderClass}`;
+    }
+    
+    // PRIORITÉ 3: Couleurs selon statut et timing
     switch (submission.status) {
       case 'Acceptée':
         borderClass += " border-l-green-500";
@@ -70,7 +83,7 @@ const ModernSubmissionCard = ({ submission, onViewDetails }: ModernSubmissionCar
         borderClass += " border-l-red-500";
         break;
       case 'Envoyée':
-        // Check follow-up timing
+        // Vérifier le timing seulement si pas accepté
         if (submission.sent_at) {
           const daysSinceLastMessage = Math.floor(
             (new Date().getTime() - new Date(submission.sent_at).getTime()) / (1000 * 60 * 60 * 24)

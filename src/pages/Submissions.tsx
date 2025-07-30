@@ -79,8 +79,8 @@ const Submissions = () => {
     const daysLeft = deadline ? Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) : null;
 
     if (!deadline) return 'Non définie';
-    if (daysLeft === 1) return `${formatDate(submission.deadline)} (1 day left)`;
-    if (daysLeft && daysLeft > 1) return `${formatDate(submission.deadline)} (${daysLeft} days left)`;
+    if (daysLeft === 1) return `${formatDate(submission.deadline)} (1 jour restant)`;
+    if (daysLeft && daysLeft > 1) return `${formatDate(submission.deadline)} (${daysLeft} jours restants)`;
     return formatDate(submission.deadline);
   };
 
@@ -120,35 +120,35 @@ const Submissions = () => {
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <Card className="bg-white">
           <CardContent className="p-4">
-            <div className="text-sm text-gray-600">Total Quotes</div>
+            <div className="text-sm text-gray-600">Total Soumissions</div>
             <div className="text-2xl font-bold">{stats.total}</div>
           </CardContent>
         </Card>
         
         <Card className="bg-purple-50 border-purple-200">
           <CardContent className="p-4">
-            <div className="text-sm text-purple-600">Delivered</div>
+            <div className="text-sm text-purple-600">Livrées</div>
             <div className="text-2xl font-bold text-purple-700">{stats.delivered}</div>
           </CardContent>
         </Card>
         
         <Card className="bg-green-50 border-green-200">
           <CardContent className="p-4">
-            <div className="text-sm text-green-600">Proof Accepted</div>
+            <div className="text-sm text-green-600">Épreuves Acceptées</div>
             <div className="text-2xl font-bold text-green-700">{stats.proofAccepted}</div>
           </CardContent>
         </Card>
         
         <Card className="bg-orange-50 border-orange-200">
           <CardContent className="p-4">
-            <div className="text-sm text-orange-600">Pending Approval</div>
+            <div className="text-sm text-orange-600">En Attente d'Approbation</div>
             <div className="text-2xl font-bold text-orange-700">{stats.pendingApproval}</div>
           </CardContent>
         </Card>
         
         <Card className="bg-blue-50 border-blue-200">
           <CardContent className="p-4">
-            <div className="text-sm text-blue-600">Total Value</div>
+            <div className="text-sm text-blue-600">Valeur Totale</div>
             <div className="text-2xl font-bold text-blue-700">{formatPrice(stats.totalValue)}</div>
           </CardContent>
         </Card>
@@ -157,27 +157,27 @@ const Submissions = () => {
       {/* Color Legend */}
       <Card>
         <CardContent className="p-4">
-          <div className="text-sm font-medium mb-3">Card Color Legend:</div>
+          <div className="text-sm font-medium mb-3">Légende des Couleurs de Cartes:</div>
           <div className="flex flex-wrap gap-4 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-purple-200 rounded"></div>
-              <span>Purple - Delivered</span>
+              <span>Violet - Livrées</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-green-200 rounded"></div>
-              <span>Green - Proof Accepted</span>
+              <span>Vert - Épreuves Acceptées</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-orange-200 rounded"></div>
-              <span>Orange - Deadline ≤ 4 days</span>
+              <span>Orange - Échéance ≤ 4 jours</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-red-200 rounded"></div>
-              <span>Red - Deadline ≤ 1 day</span>
+              <span>Rouge - Échéance ≤ 1 jour</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-gray-200 rounded"></div>
-              <span>Default - Normal status</span>
+              <span>Défaut - Statut normal</span>
             </div>
           </div>
         </CardContent>
@@ -190,7 +190,7 @@ const Submissions = () => {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
-                placeholder="Search quotes or clients..."
+                placeholder="Rechercher soumissions ou clients..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -202,7 +202,7 @@ const Submissions = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="all">Tous les Statuts</SelectItem>
                 <SelectItem value="Brouillon">Brouillon</SelectItem>
                 <SelectItem value="Envoyée">Envoyée</SelectItem>
                 <SelectItem value="Acceptée">Acceptée</SelectItem>
@@ -264,6 +264,17 @@ const SubmissionCard = ({ submission, onViewDetails }: { submission: any; onView
     const today = new Date();
     const daysLeft = deadline ? Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) : null;
 
+    // PRIORITÉ : Épreuve acceptée = VERT (prend le dessus sur orange/rouge)
+    if (proofAccepted) {
+      return 'bg-green-50 border-green-200';
+    }
+
+    // Si livré = VIOLET (prend le dessus sur tout)
+    if (delivered) {
+      return 'bg-purple-50 border-purple-200';
+    }
+
+    // Ensuite, couleurs selon statut et timing
     switch (submission.status) {
       case 'Livrée':
         return 'bg-purple-50 border-purple-200';
@@ -287,13 +298,13 @@ const SubmissionCard = ({ submission, onViewDetails }: { submission: any; onView
     const daysLeft = deadline ? Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) : null;
 
     if (!deadline) return 'Non définie';
-    if (daysLeft === 1) return `${formatDate(submission.deadline)} (1 day left)`;
-    if (daysLeft && daysLeft > 1) return `${formatDate(submission.deadline)} (${daysLeft} days left)`;
+    if (daysLeft === 1) return `${formatDate(submission.deadline)} (1 jour restant)`;
+    if (daysLeft && daysLeft > 1) return `${formatDate(submission.deadline)} (${daysLeft} jours restants)`;
     return formatDate(submission.deadline);
   };
 
   return (
-    <Card className={`group hover:shadow-lg transition-all duration-200 ${getCardStyle()}`}>
+    <Card className={`group hover:shadow-lg transition-all duration-200 cursor-pointer ${getCardStyle()}`} onClick={() => onViewDetails(submission.id)}>
       <CardContent className="p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
@@ -303,7 +314,7 @@ const SubmissionCard = ({ submission, onViewDetails }: { submission: any; onView
             </div>
             <div>
               <h3 className="font-semibold text-gray-900">
-                Quote #{submission.submission_number}
+                Soumission #{submission.submission_number}
               </h3>
               <p className="text-sm text-gray-500">
                 {submission.clients?.business_name}
@@ -313,7 +324,10 @@ const SubmissionCard = ({ submission, onViewDetails }: { submission: any; onView
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => onViewDetails(submission.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onViewDetails(submission.id);
+            }}
             className="opacity-0 group-hover:opacity-100 transition-opacity"
           >
             <FileText className="w-4 h-4" />
@@ -323,21 +337,21 @@ const SubmissionCard = ({ submission, onViewDetails }: { submission: any; onView
         {/* Details Grid */}
         <div className="space-y-3 mb-4">
           <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Date Sent:</span>
+            <span className="text-sm text-gray-600">Date d'envoi:</span>
             <span className="text-sm font-medium">
-              {submission.sent_at ? formatDate(submission.sent_at) : 'Not sent'}
+              {submission.sent_at ? formatDate(submission.sent_at) : 'Non envoyée'}
             </span>
           </div>
           
           <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">📅 Deadline:</span>
+            <span className="text-sm text-gray-600">📅 Échéance:</span>
             <span className="text-sm font-medium">
               {getDeadlineText()}
             </span>
           </div>
           
           <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Price:</span>
+            <span className="text-sm text-gray-600">Prix:</span>
             <span className="text-lg font-bold text-gray-900">
               {formatPrice(Number(submission.total_price) || 0)}
             </span>
@@ -347,27 +361,29 @@ const SubmissionCard = ({ submission, onViewDetails }: { submission: any; onView
         {/* Toggles */}
         <div className="space-y-3 pt-3 border-t border-gray-100">
           <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Proof Accepted:</span>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">
-                {proofAccepted ? 'Yes' : 'No'}
+            <span className="text-sm text-gray-600">Épreuve acceptée:</span>
+            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+              <span className={`text-sm font-medium ${proofAccepted ? 'text-green-600' : 'text-gray-500'}`}>
+                {proofAccepted ? 'Oui' : 'Non'}
               </span>
               <Switch
                 checked={proofAccepted}
                 onCheckedChange={setProofAccepted}
+                className="data-[state=checked]:bg-green-600"
               />
             </div>
           </div>
 
           <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Delivered:</span>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">
-                {delivered ? 'Yes' : 'In Progress'}
+            <span className="text-sm text-gray-600">Livré:</span>
+            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+              <span className={`text-sm font-medium ${delivered ? 'text-green-600' : 'text-gray-500'}`}>
+                {delivered ? 'Oui' : 'En cours'}
               </span>
               <Switch
                 checked={delivered}
                 onCheckedChange={setDelivered}
+                className="data-[state=checked]:bg-green-600"
               />
             </div>
           </div>
@@ -379,10 +395,13 @@ const SubmissionCard = ({ submission, onViewDetails }: { submission: any; onView
             <Button
               variant="link"
               className="p-0 h-auto text-blue-600 hover:text-blue-800"
-              onClick={() => window.open(`/approval/${submission.approval_token}`, '_blank')}
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(`/approval/${submission.approval_token}`, '_blank');
+              }}
             >
               <ExternalLink className="w-3 h-3 mr-1" />
-              View Proof Link →
+              Voir le lien d'épreuve →
             </Button>
           </div>
         )}
