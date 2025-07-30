@@ -17,7 +17,7 @@ const Login = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (user) {
-      navigate('/dashboard/clients');
+      navigate('/dashboard');
     }
   }, [user, navigate]);
 
@@ -33,7 +33,7 @@ const Login = () => {
       setLoading(false);
     } else {
       // Redirect will happen automatically via useEffect
-      navigate('/dashboard/clients');
+      navigate('/dashboard');
     }
   };
 
