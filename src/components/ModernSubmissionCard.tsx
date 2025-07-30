@@ -7,6 +7,7 @@ import { ArrowRight, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import StatusManager from './StatusManager';
+import { useProofToggle, useDeliveryToggle } from '@/hooks/useProofToggle';
 
 interface ModernSubmissionCardProps {
   submission: any;
@@ -16,6 +17,9 @@ interface ModernSubmissionCardProps {
 const ModernSubmissionCard = ({ submission, onViewDetails }: ModernSubmissionCardProps) => {
   const [proofAccepted, setProofAccepted] = useState(false);
   const [delivered, setDelivered] = useState(false);
+  
+  const proofToggle = useProofToggle(submission.id);
+  const deliveryToggle = useDeliveryToggle(submission.id);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-CA', {
@@ -38,6 +42,16 @@ const ModernSubmissionCard = ({ submission, onViewDetails }: ModernSubmissionCar
     if (delivered) return 'text-green-600';
     if (submission.status === 'Acceptée') return 'text-blue-600';
     return 'text-gray-500';
+  };
+
+  const handleProofToggle = async (checked: boolean) => {
+    setProofAccepted(checked);
+    await proofToggle.mutateAsync({ isAccepted: checked });
+  };
+
+  const handleDeliveryToggle = async (checked: boolean) => {
+    setDelivered(checked);
+    await deliveryToggle.mutateAsync({ isDelivered: checked });
   };
 
   // Dynamic card styling based on status and dates
@@ -91,14 +105,14 @@ const ModernSubmissionCard = ({ submission, onViewDetails }: ModernSubmissionCar
             <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
               <span className="text-xs font-medium text-gray-600">📋</span>
             </div>
-            <div>
-              <h3 className="font-semibold text-gray-900">
-                Quote #{submission.submission_number}
-              </h3>
-              <p className="text-sm text-gray-500">
-                {submission.clients?.business_name}
-              </p>
-            </div>
+          <div>
+            <h3 className="font-semibold text-gray-900">
+              Soumission #{submission.submission_number}
+            </h3>
+            <p className="text-sm text-gray-500">
+              {submission.clients?.business_name}
+            </p>
+          </div>
           </div>
           <Button
             variant="ghost"
@@ -151,13 +165,14 @@ const ModernSubmissionCard = ({ submission, onViewDetails }: ModernSubmissionCar
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600">Épreuve acceptée:</span>
             <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-              <span className="text-sm font-medium">
+              <span className={`text-sm font-medium ${proofAccepted ? 'text-green-600' : 'text-gray-500'}`}>
                 {proofAccepted ? 'Oui' : 'Non'}
               </span>
               <Switch
                 checked={proofAccepted}
-                onCheckedChange={setProofAccepted}
-                disabled={submission.status !== 'Acceptée'}
+                onCheckedChange={handleProofToggle}
+                disabled={submission.status !== 'Acceptée' || proofToggle.isPending}
+                className="data-[state=checked]:bg-green-600"
               />
             </div>
           </div>
@@ -171,8 +186,9 @@ const ModernSubmissionCard = ({ submission, onViewDetails }: ModernSubmissionCar
               </span>
               <Switch
                 checked={delivered}
-                onCheckedChange={setDelivered}
-                disabled={submission.status !== 'Acceptée'}
+                onCheckedChange={handleDeliveryToggle}
+                disabled={submission.status !== 'Acceptée' || deliveryToggle.isPending}
+                className="data-[state=checked]:bg-green-600"
               />
             </div>
           </div>

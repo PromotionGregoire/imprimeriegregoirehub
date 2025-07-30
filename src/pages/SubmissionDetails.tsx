@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import StatusManager from '@/components/StatusManager';
 import EmployeeAssignManager from '@/components/EmployeeAssignManager';
+import { useProofToggle, useDeliveryToggle } from '@/hooks/useProofToggle';
 
 const SubmissionDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -26,6 +27,9 @@ const SubmissionDetails = () => {
   // Toggle states
   const [proofAccepted, setProofAccepted] = useState(false);
   const [delivered, setDelivered] = useState(false);
+  
+  const proofToggle = useProofToggle(id!);
+  const deliveryToggle = useDeliveryToggle(id!);
 
   if (isLoading) {
     return (
@@ -145,6 +149,16 @@ const SubmissionDetails = () => {
         variant: 'destructive',
       });
     }
+  };
+
+  const handleProofToggle = async (checked: boolean) => {
+    setProofAccepted(checked);
+    await proofToggle.mutateAsync({ isAccepted: checked });
+  };
+
+  const handleDeliveryToggle = async (checked: boolean) => {
+    setDelivered(checked);
+    await deliveryToggle.mutateAsync({ isDelivered: checked });
   };
 
   return (
@@ -367,13 +381,14 @@ const SubmissionDetails = () => {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Épreuve acceptée:</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">
+                  <span className={`text-sm font-medium ${proofAccepted ? 'text-green-600' : 'text-gray-500'}`}>
                     {proofAccepted ? 'Oui' : 'Non'}
                   </span>
                   <Switch
                     checked={proofAccepted}
-                    onCheckedChange={setProofAccepted}
-                    disabled={submission.status !== 'Acceptée'}
+                    onCheckedChange={handleProofToggle}
+                    disabled={submission.status !== 'Acceptée' || proofToggle.isPending}
+                    className="data-[state=checked]:bg-green-600"
                   />
                 </div>
               </div>
@@ -386,13 +401,14 @@ const SubmissionDetails = () => {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Livré:</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">
+                  <span className={`text-sm font-medium ${delivered ? 'text-green-600' : 'text-gray-500'}`}>
                     {delivered ? 'Oui' : 'En cours'}
                   </span>
                   <Switch
                     checked={delivered}
-                    onCheckedChange={setDelivered}
-                    disabled={submission.status !== 'Acceptée'}
+                    onCheckedChange={handleDeliveryToggle}
+                    disabled={submission.status !== 'Acceptée' || deliveryToggle.isPending}
+                    className="data-[state=checked]:bg-green-600"
                   />
                 </div>
               </div>
