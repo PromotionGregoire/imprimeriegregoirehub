@@ -87,6 +87,10 @@ export const useUpdateSubmission = () => {
 
   return useMutation({
     mutationFn: async ({ id, submissionData }: { id: string; submissionData: Partial<SubmissionFormData> }) => {
+      console.log('=== UPDATE SUBMISSION HOOK DEBUG ===');
+      console.log('Submission ID:', id);
+      console.log('Data to update:', submissionData);
+      
       // Update submission
       const { data: submission, error: submissionError } = await supabase
         .from('submissions')
@@ -98,18 +102,27 @@ export const useUpdateSubmission = () => {
         .select()
         .single();
 
-      if (submissionError) throw submissionError;
+      console.log('Supabase update result:', { submission, submissionError });
+
+      if (submissionError) {
+        console.error('Submission update error:', submissionError);
+        throw submissionError;
+      }
 
       // Delete existing items
+      console.log('Deleting existing items for submission:', id);
       const { error: deleteError } = await supabase
         .from('submission_items')
         .delete()
         .eq('submission_id', id);
 
-      if (deleteError) throw deleteError;
+      if (deleteError) {
+        console.error('Delete items error:', deleteError);
+        throw deleteError;
+      }
 
       // Create new submission items
-      if (submissionData.items) {
+      if (submissionData.items && submissionData.items.length > 0) {
         const itemsWithSubmissionId = submissionData.items.map(item => ({
           submission_id: id,
           product_name: item.product_name,
@@ -118,11 +131,15 @@ export const useUpdateSubmission = () => {
           unit_price: item.unit_price
         }));
 
+        console.log('Creating new items:', itemsWithSubmissionId);
         const { error: itemsError } = await supabase
           .from('submission_items')
           .insert(itemsWithSubmissionId);
 
-        if (itemsError) throw itemsError;
+        if (itemsError) {
+          console.error('Insert items error:', itemsError);
+          throw itemsError;
+        }
       }
 
       // Log the activity
@@ -137,9 +154,11 @@ export const useUpdateSubmission = () => {
           }]);
       }
 
+      console.log('Update completed successfully');
       return submission;
     },
     onSuccess: (data) => {
+      console.log('Invalidating queries for submission:', data.id);
       queryClient.invalidateQueries({ queryKey: ['submission-details', data.id] });
       queryClient.invalidateQueries({ queryKey: ['all-submissions'] });
       queryClient.invalidateQueries({ queryKey: ['client-submissions', data.client_id] });

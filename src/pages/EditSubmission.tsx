@@ -165,6 +165,13 @@ const EditSubmission = () => {
   };
 
   const handleSubmit = async (data: FormData) => {
+    console.log('=== EDIT SUBMISSION DEBUG ===');
+    console.log('Form data received:', data);
+    console.log('Submission ID:', id);
+    console.log('Subtotal:', subtotal);
+    console.log('Taxes:', taxes);
+    console.log('Total:', total);
+    
     try {
       setIsSubmitting(true);
       
@@ -182,7 +189,10 @@ const EditSubmission = () => {
         total_price: total,
       };
 
-      await updateSubmission.mutateAsync({ id: id!, submissionData });
+      console.log('Submission data to send:', submissionData);
+      
+      const result = await updateSubmission.mutateAsync({ id: id!, submissionData });
+      console.log('Update result:', result);
 
       toast({
         title: 'Succès',
