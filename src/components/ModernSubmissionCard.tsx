@@ -7,7 +7,7 @@ import { ArrowRight, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import StatusManager from './StatusManager';
-import { useProofToggle, useDeliveryToggle } from '@/hooks/useProofToggle';
+import { useProofToggle } from '@/hooks/useProofToggle';
 
 interface ModernSubmissionCardProps {
   submission: any;
@@ -15,12 +15,10 @@ interface ModernSubmissionCardProps {
 }
 
 const ModernSubmissionCard = ({ submission, onViewDetails }: ModernSubmissionCardProps) => {
-  // Initialize based on submission status or stored state  
+  // État pour l'acceptation manuelle (raccourci rapide)
   const [proofAccepted, setProofAccepted] = useState(submission.status === 'Acceptée');
-  const [delivered, setDelivered] = useState(submission.status === 'Livrée');
   
   const proofToggle = useProofToggle(submission.id);
-  const deliveryToggle = useDeliveryToggle(submission.id);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-CA', {
@@ -33,26 +31,24 @@ const ModernSubmissionCard = ({ submission, onViewDetails }: ModernSubmissionCar
     return format(new Date(dateString), 'dd/MM/yyyy', { locale: fr });
   };
 
-  const getDeliveryStatusText = () => {
-    if (delivered) return 'Livré';
-    if (submission.status === 'Acceptée') return 'En cours';
-    return 'En attente';
-  };
-
-  const getDeliveryStatusColor = () => {
-    if (delivered) return 'text-green-600';
-    if (submission.status === 'Acceptée') return 'text-blue-600';
-    return 'text-gray-500';
-  };
 
   const handleProofToggle = async (checked: boolean) => {
+    if (checked) {
+      // Déclencher la modale de confirmation pour acceptation manuelle
+      const confirmed = window.confirm(
+        "⚠️ ATTENTION: Acceptation Manuelle\n\n" +
+        "Cette action va créer une commande officielle sans l'approbation numérique formelle du client.\n\n" +
+        "Ceci doit être utilisé uniquement en cas de confirmation verbale ou écrite externe.\n\n" +
+        "Voulez-vous continuer ?"
+      );
+      
+      if (!confirmed) {
+        return; // Annuler si pas confirmé
+      }
+    }
+    
     setProofAccepted(checked);
     await proofToggle.mutateAsync({ isAccepted: checked });
-  };
-
-  const handleDeliveryToggle = async (checked: boolean) => {
-    setDelivered(checked);
-    await deliveryToggle.mutateAsync({ isDelivered: checked });
   };
 
   // Dynamic card styling with PRIORITY logic - BACKGROUND color based on state
@@ -61,21 +57,14 @@ const ModernSubmissionCard = ({ submission, onViewDetails }: ModernSubmissionCar
     let backgroundClass = "bg-white";
     let borderClass = "border-l-4";
     
-    // PRIORITÉ 1: Si épreuve acceptée = VERT (prend le dessus sur tout)
+    // PRIORITÉ 1: Si épreuve acceptée manuellement = VERT (prend le dessus sur tout)
     if (proofAccepted) {
       backgroundClass = "bg-green-50";
       borderClass += " border-l-green-500 border-green-200";
       return `${baseClass} ${backgroundClass} ${borderClass}`;
     }
     
-    // PRIORITÉ 2: Si livré = VIOLET 
-    if (delivered) {
-      backgroundClass = "bg-purple-50";
-      borderClass += " border-l-purple-500 border-purple-200";
-      return `${baseClass} ${backgroundClass} ${borderClass}`;
-    }
-    
-    // PRIORITÉ 3: Couleurs selon statut et timing
+    // PRIORITÉ 2: Couleurs selon statut et timing
     switch (submission.status) {
       case 'Acceptée':
         backgroundClass = "bg-green-50";
@@ -186,37 +175,23 @@ const ModernSubmissionCard = ({ submission, onViewDetails }: ModernSubmissionCar
             </div>
           </div>
 
-          {/* Proof Accepted Toggle */}
+          {/* Proof Accepted Toggle - Raccourci pour Acceptation Manuelle */}
           <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Épreuve acceptée:</span>
+            <span className="text-sm text-gray-600">Accepter manuellement:</span>
             <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
               <span className={`text-sm font-medium ${proofAccepted ? 'text-green-600' : 'text-gray-500'}`}>
-                {proofAccepted ? 'Oui' : 'Non'}
+                {proofAccepted ? 'Acceptée' : 'En attente'}
               </span>
               <Switch
                 checked={proofAccepted}
                 onCheckedChange={handleProofToggle}
-                disabled={submission.status !== 'Acceptée' || proofToggle.isPending}
+                disabled={submission.status === 'Acceptée' || proofToggle.isPending}
                 className="data-[state=checked]:bg-green-600"
               />
             </div>
           </div>
 
-          {/* Delivered Toggle */}
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Livraison:</span>
-            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-              <span className={`text-sm font-medium ${getDeliveryStatusColor()}`}>
-                {getDeliveryStatusText()}
-              </span>
-              <Switch
-                checked={delivered}
-                onCheckedChange={handleDeliveryToggle}
-                disabled={submission.status !== 'Acceptée' || deliveryToggle.isPending}
-                className="data-[state=checked]:bg-green-600"
-              />
-            </div>
-          </div>
+          {/* SUPPRIMÉ : Toggle "Livraison" pour simplifier les cartes */}
         </div>
 
         {/* View Proof Link */}

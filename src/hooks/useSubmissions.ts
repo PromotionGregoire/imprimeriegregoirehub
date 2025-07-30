@@ -95,13 +95,20 @@ export const useUpdateSubmission = () => {
       console.log('Submission ID:', id);
       console.log('Data to update:', submissionData);
       
+      // Ensure we have the complete data for update
+      const updateData: any = {};
+      
+      if (submissionData.deadline !== undefined) {
+        updateData.deadline = submissionData.deadline;
+      }
+      if (submissionData.total_price !== undefined) {
+        updateData.total_price = submissionData.total_price;
+      }
+      
       // Update submission
       const { data: submission, error: submissionError } = await supabase
         .from('submissions')
-        .update({
-          deadline: submissionData.deadline,
-          total_price: submissionData.total_price,
-        })
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();
@@ -113,20 +120,21 @@ export const useUpdateSubmission = () => {
         throw submissionError;
       }
 
-      // Delete existing items
-      console.log('Deleting existing items for submission:', id);
-      const { error: deleteError } = await supabase
-        .from('submission_items')
-        .delete()
-        .eq('submission_id', id);
-
-      if (deleteError) {
-        console.error('Delete items error:', deleteError);
-        throw deleteError;
-      }
-
-      // Create new submission items
+      // Only update items if they are provided
       if (submissionData.items && submissionData.items.length > 0) {
+        // Delete existing items
+        console.log('Deleting existing items for submission:', id);
+        const { error: deleteError } = await supabase
+          .from('submission_items')
+          .delete()
+          .eq('submission_id', id);
+
+        if (deleteError) {
+          console.error('Delete items error:', deleteError);
+          throw deleteError;
+        }
+
+        // Create new submission items
         const itemsWithSubmissionId = submissionData.items.map(item => ({
           submission_id: id,
           product_name: item.product_name,
@@ -180,5 +188,8 @@ export const useUpdateSubmission = () => {
       queryClient.invalidateQueries({ queryKey: ['client-submissions', data.client_id] });
       queryClient.invalidateQueries({ queryKey: ['client-activity-logs', data.client_id] });
     },
+    onError: (error) => {
+      console.error('Update submission mutation error:', error);
+    }
   });
 };

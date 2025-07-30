@@ -381,42 +381,38 @@ const SubmissionDetails = () => {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Épreuve acceptée:</span>
                 <div className="flex items-center gap-2">
-                  <span className={`text-sm font-medium ${proofAccepted ? 'text-green-600' : 'text-gray-500'}`}>
-                    {proofAccepted ? 'Oui' : 'Non'}
+                  <span className={`text-sm font-medium text-gray-500`}>
+                    En attente de commande
                   </span>
                   <Switch
-                    checked={proofAccepted}
-                    onCheckedChange={handleProofToggle}
-                    disabled={submission.status !== 'Acceptée' || proofToggle.isPending}
-                    className="data-[state=checked]:bg-green-600"
+                    checked={false}
+                    onCheckedChange={() => {}} 
+                    disabled={true}
+                    className="opacity-50"
                   />
                 </div>
               </div>
-              {submission.status !== 'Acceptée' && (
-                <p className="text-xs text-muted-foreground">
-                  💡 Disponible lorsque la soumission devient une commande
-                </p>
-              )}
+              <p className="text-xs text-muted-foreground">
+                💡 Disponible lorsque la soumission devient une commande
+              </p>
 
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Livré:</span>
                 <div className="flex items-center gap-2">
-                  <span className={`text-sm font-medium ${delivered ? 'text-green-600' : 'text-gray-500'}`}>
-                    {delivered ? 'Oui' : 'En cours'}
+                  <span className={`text-sm font-medium text-gray-500`}>
+                    En attente de commande
                   </span>
                   <Switch
-                    checked={delivered}
-                    onCheckedChange={handleDeliveryToggle}
-                    disabled={submission.status !== 'Acceptée' || deliveryToggle.isPending}
-                    className="data-[state=checked]:bg-green-600"
+                    checked={false}
+                    onCheckedChange={() => {}}
+                    disabled={true}
+                    className="opacity-50"
                   />
                 </div>
               </div>
-              {submission.status !== 'Acceptée' && (
-                <p className="text-xs text-muted-foreground">
-                  💡 Disponible lorsque la soumission devient une commande
-                </p>
-              )}
+              <p className="text-xs text-muted-foreground">
+                💡 Disponible lorsque la soumission devient une commande
+              </p>
             </CardContent>
           </Card>
 
