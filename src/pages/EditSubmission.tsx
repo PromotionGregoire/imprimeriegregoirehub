@@ -191,8 +191,8 @@ const EditSubmission = () => {
 
       console.log('Submission data to send:', submissionData);
       
-      const result = await updateSubmission.mutateAsync({ id: id!, submissionData });
-      console.log('Update result:', result);
+      await updateSubmission.mutateAsync({ id: id!, submissionData });
+      console.log('Update completed successfully');
 
       toast({
         title: 'Succès',
