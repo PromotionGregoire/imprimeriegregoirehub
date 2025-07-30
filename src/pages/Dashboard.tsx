@@ -106,6 +106,7 @@ const Dashboard = () => {
             {clients.map((client) => (
               <ClientCard
                 key={client.id}
+                id={client.id}
                 business_name={client.business_name}
                 contact_name={client.contact_name}
                 email={client.email}

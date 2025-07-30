@@ -1,8 +1,10 @@
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Mail, Phone, Building2, MapPin } from 'lucide-react';
 
 interface ClientCardProps {
+  id: string;
   business_name: string;
   contact_name: string;
   email: string;
@@ -17,6 +19,7 @@ interface ClientCardProps {
 }
 
 const ClientCard = ({ 
+  id,
   business_name, 
   contact_name, 
   email, 
@@ -29,6 +32,7 @@ const ClientCard = ({
   billing_city,
   billing_province
 }: ClientCardProps) => {
+  const navigate = useNavigate();
   const getStatusColor = (status?: string) => {
     switch (status) {
       case 'Actif': return 'bg-green-100 text-green-800 border-green-200';
@@ -39,7 +43,7 @@ const ClientCard = ({
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate(`/dashboard/clients/${id}`)}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex-1">
