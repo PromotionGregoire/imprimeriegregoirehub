@@ -9,6 +9,13 @@ interface Client {
   phone_number: string;
   client_number: string;
   created_at: string;
+  main_contact_position?: string;
+  client_type?: string;
+  industry?: string;
+  status?: string;
+  billing_city?: string;
+  billing_province?: string;
+  assigned_user_id?: string;
 }
 
 export const useClients = () => {

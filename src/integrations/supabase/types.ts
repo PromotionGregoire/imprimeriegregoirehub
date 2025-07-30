@@ -16,36 +16,98 @@ export type Database = {
     Tables: {
       clients: {
         Row: {
+          assigned_user_id: string | null
+          billing_city: string | null
+          billing_postal_code: string | null
+          billing_province: string | null
+          billing_street: string | null
           business_name: string
           client_number: string
+          client_type: string | null
           contact_name: string
           created_at: string
+          default_payment_terms: string | null
           email: string
+          general_notes: string | null
           id: string
+          industry: string | null
+          lead_source: string | null
+          main_contact_position: string | null
           phone_number: string
+          secondary_contact_info: string | null
+          shipping_city: string | null
+          shipping_postal_code: string | null
+          shipping_province: string | null
+          shipping_street: string | null
+          status: string | null
+          tax_numbers: string | null
           updated_at: string
         }
         Insert: {
+          assigned_user_id?: string | null
+          billing_city?: string | null
+          billing_postal_code?: string | null
+          billing_province?: string | null
+          billing_street?: string | null
           business_name: string
           client_number?: string
+          client_type?: string | null
           contact_name: string
           created_at?: string
+          default_payment_terms?: string | null
           email: string
+          general_notes?: string | null
           id?: string
+          industry?: string | null
+          lead_source?: string | null
+          main_contact_position?: string | null
           phone_number: string
+          secondary_contact_info?: string | null
+          shipping_city?: string | null
+          shipping_postal_code?: string | null
+          shipping_province?: string | null
+          shipping_street?: string | null
+          status?: string | null
+          tax_numbers?: string | null
           updated_at?: string
         }
         Update: {
+          assigned_user_id?: string | null
+          billing_city?: string | null
+          billing_postal_code?: string | null
+          billing_province?: string | null
+          billing_street?: string | null
           business_name?: string
           client_number?: string
+          client_type?: string | null
           contact_name?: string
           created_at?: string
+          default_payment_terms?: string | null
           email?: string
+          general_notes?: string | null
           id?: string
+          industry?: string | null
+          lead_source?: string | null
+          main_contact_position?: string | null
           phone_number?: string
+          secondary_contact_info?: string | null
+          shipping_city?: string | null
+          shipping_postal_code?: string | null
+          shipping_province?: string | null
+          shipping_street?: string | null
+          status?: string | null
+          tax_numbers?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "clients_assigned_user_id_fkey"
+            columns: ["assigned_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       orders: {
         Row: {

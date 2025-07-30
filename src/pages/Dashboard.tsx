@@ -1,12 +1,15 @@
+import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useClients } from '@/hooks/useClients';
 import { Button } from '@/components/ui/button';
 import ClientCard from '@/components/ClientCard';
+import CreateClientModal from '@/components/CreateClientModal';
 import { Plus, Users } from 'lucide-react';
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const { data: clients, isLoading, error } = useClients();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -68,7 +71,7 @@ const Dashboard = () => {
             <h1 className="text-2xl font-bold">Clients</h1>
           </div>
           <div className="flex items-center gap-4">
-            <Button className="gap-2">
+            <Button className="gap-2" onClick={() => setIsCreateModalOpen(true)}>
               <Plus className="h-4 w-4" />
               Nouveau Client
             </Button>
@@ -93,7 +96,7 @@ const Dashboard = () => {
             <p className="text-muted-foreground mb-6">
               Cliquez sur "Nouveau Client" pour en ajouter un.
             </p>
-            <Button className="gap-2">
+            <Button className="gap-2" onClick={() => setIsCreateModalOpen(true)}>
               <Plus className="h-4 w-4" />
               Nouveau Client
             </Button>
@@ -108,11 +111,22 @@ const Dashboard = () => {
                 email={client.email}
                 phone_number={client.phone_number}
                 client_number={client.client_number}
+                main_contact_position={client.main_contact_position}
+                client_type={client.client_type}
+                industry={client.industry}
+                status={client.status}
+                billing_city={client.billing_city}
+                billing_province={client.billing_province}
               />
             ))}
           </div>
         )}
       </div>
+
+      <CreateClientModal 
+        isOpen={isCreateModalOpen} 
+        onClose={() => setIsCreateModalOpen(false)} 
+      />
     </div>
   );
 };
