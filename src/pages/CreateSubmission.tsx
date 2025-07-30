@@ -105,10 +105,9 @@ const CreateSubmission = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto p-6 max-w-4xl">
+    <div className="p-6 space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Retour
@@ -116,7 +115,7 @@ const CreateSubmission = () => {
           <h1 className="text-3xl font-bold">Nouvelle Soumission</h1>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-6 max-w-4xl">
           {/* Informations Générales */}
           <Card>
             <CardHeader>
@@ -313,8 +312,7 @@ const CreateSubmission = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
 export default CreateSubmission;

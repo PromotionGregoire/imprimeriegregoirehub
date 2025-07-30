@@ -11,6 +11,8 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import ClientDetails from "./pages/ClientDetails";
 import CreateSubmission from "./pages/CreateSubmission";
+import Submissions from "./pages/Submissions";
+import DashboardLayout from "./components/DashboardLayout";
 
 const queryClient = new QueryClient();
 
@@ -26,19 +28,14 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
-                <Dashboard />
+                <DashboardLayout />
               </ProtectedRoute>
-            } />
-            <Route path="/dashboard/clients/:id" element={
-              <ProtectedRoute>
-                <ClientDetails />
-              </ProtectedRoute>
-            } />
-            <Route path="/dashboard/submissions/new" element={
-              <ProtectedRoute>
-                <CreateSubmission />
-              </ProtectedRoute>
-            } />
+            }>
+              <Route index element={<Dashboard />} />
+              <Route path="clients/:id" element={<ClientDetails />} />
+              <Route path="submissions" element={<Submissions />} />
+              <Route path="submissions/new" element={<CreateSubmission />} />
+            </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
