@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Edit, MoreHorizontal, DollarSign, FileText, ShoppingCart, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { useClientDetails, useClientKPIs, useClientSubmissions, useClientOrders, useClientActivityLogs } from '@/hooks/useClientDetails';
+import CreateClientModal from '@/components/CreateClientModal';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -13,6 +15,7 @@ import { fr } from 'date-fns/locale';
 const ClientDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const { data: client, isLoading: clientLoading } = useClientDetails(id!);
   const { data: kpis, isLoading: kpisLoading } = useClientKPIs(id!);
@@ -93,7 +96,7 @@ const ClientDetails = () => {
             <Plus className="w-4 h-4 mr-2" />
             Nouvelle Soumission
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => setIsEditModalOpen(true)}>
             <Edit className="w-4 h-4 mr-2" />
             Modifier
           </Button>
@@ -430,6 +433,14 @@ const ClientDetails = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Edit Modal */}
+      <CreateClientModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        client={client}
+        mode="edit"
+      />
     </div>
   );
 };

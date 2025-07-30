@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from './useAuth';
 
 interface Profile {
   id: string;
@@ -52,6 +53,7 @@ interface ClientFormData {
 
 export const useCreateClient = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async (clientData: ClientFormData) => {
@@ -65,10 +67,61 @@ export const useCreateClient = () => {
         throw error;
       }
 
+      // Log the activity
+      if (user) {
+        await supabase
+          .from('activity_logs')
+          .insert([{
+            client_id: data.id,
+            action_type: 'client_created',
+            description: `L'employé ${user.email} a créé un nouveau client.`,
+            created_by: user.id
+          }]);
+      }
+
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
+    },
+  });
+};
+
+export const useUpdateClient = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: ClientFormData }) => {
+      const { data, error } = await supabase
+        .from('clients')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      // Log the activity
+      if (user) {
+        await supabase
+          .from('activity_logs')
+          .insert([{
+            client_id: id,
+            action_type: 'client_updated',
+            description: `L'employé ${user.email} a mis à jour les informations du client.`,
+            created_by: user.id
+          }]);
+      }
+
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.invalidateQueries({ queryKey: ['client-details', data.id] });
+      queryClient.invalidateQueries({ queryKey: ['client-activity-logs', data.id] });
     },
   });
 };

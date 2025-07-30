@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,7 +17,7 @@ import {
   DialogFooter 
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useCreateClient, useProfiles } from '@/hooks/useClientMutations';
+import { useCreateClient, useUpdateClient, useProfiles } from '@/hooks/useClientMutations';
 import { useToast } from '@/hooks/use-toast';
 
 const clientSchema = z.object({
@@ -47,25 +47,86 @@ const clientSchema = z.object({
 
 type ClientFormData = z.infer<typeof clientSchema>;
 
+interface Client {
+  id: string;
+  business_name: string;
+  contact_name: string;
+  email: string;
+  phone_number: string;
+  main_contact_position?: string;
+  secondary_contact_info?: string;
+  billing_street?: string;
+  billing_city?: string;
+  billing_province?: string;
+  billing_postal_code?: string;
+  shipping_street?: string;
+  shipping_city?: string;
+  shipping_province?: string;
+  shipping_postal_code?: string;
+  tax_numbers?: string;
+  default_payment_terms?: string;
+  client_type?: string;
+  industry?: string;
+  lead_source?: string;
+  status?: string;
+  assigned_user_id?: string;
+  general_notes?: string;
+}
+
 interface CreateClientModalProps {
   isOpen: boolean;
   onClose: () => void;
+  client?: Client; // For edit mode
+  mode?: 'create' | 'edit';
 }
 
-const CreateClientModal = ({ isOpen, onClose }: CreateClientModalProps) => {
+const CreateClientModal = ({ isOpen, onClose, client, mode = 'create' }: CreateClientModalProps) => {
   const [sameAsBilling, setSameAsBilling] = useState(true);
+  const [hasChanges, setHasChanges] = useState(false);
   const createClient = useCreateClient();
+  const updateClient = useUpdateClient();
   const { data: profiles } = useProfiles();
   const { toast } = useToast();
 
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
-    defaultValues: {
+    defaultValues: client || {
       client_type: 'Entreprise',
       status: 'Prospect',
       default_payment_terms: 'Net 30 jours',
     },
   });
+
+  // Reset form when client data changes (for edit mode)
+  useEffect(() => {
+    if (client && mode === 'edit') {
+      form.reset(client);
+      // Check if shipping address is same as billing
+      const isSame = client.shipping_street === client.billing_street &&
+                     client.shipping_city === client.billing_city &&
+                     client.shipping_province === client.billing_province &&
+                     client.shipping_postal_code === client.billing_postal_code;
+      setSameAsBilling(isSame);
+    } else if (mode === 'create') {
+      form.reset({
+        client_type: 'Entreprise',
+        status: 'Prospect',
+        default_payment_terms: 'Net 30 jours',
+      });
+      setSameAsBilling(true);
+    }
+    setHasChanges(false);
+  }, [client, mode, form]);
+
+  // Track form changes
+  useEffect(() => {
+    const subscription = form.watch(() => {
+      if (mode === 'edit' && client) {
+        setHasChanges(true);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, mode, client]);
 
   const onSubmit = async (data: ClientFormData) => {
     try {
@@ -77,17 +138,31 @@ const CreateClientModal = ({ isOpen, onClose }: CreateClientModalProps) => {
         data.shipping_postal_code = data.billing_postal_code;
       }
 
-      await createClient.mutateAsync(data);
-      toast({
-        title: 'Client créé avec succès',
-        description: `${data.business_name} a été ajouté à votre liste de clients.`,
-      });
+      if (mode === 'edit' && client) {
+        await updateClient.mutateAsync({ id: client.id, updates: data });
+        toast({
+          title: 'Client mis à jour avec succès',
+          description: `${data.business_name} a été modifié.`,
+        });
+      } else {
+        await createClient.mutateAsync(data);
+        toast({
+          title: 'Client créé avec succès',
+          description: `${data.business_name} a été ajouté à votre liste de clients.`,
+        });
+      }
+      
       onClose();
-      form.reset();
+      if (mode === 'create') {
+        form.reset();
+      }
+      setHasChanges(false);
     } catch (error) {
       toast({
         title: 'Erreur',
-        description: 'Une erreur est survenue lors de la création du client.',
+        description: mode === 'edit' 
+          ? 'Une erreur est survenue lors de la modification du client.'
+          : 'Une erreur est survenue lors de la création du client.',
         variant: 'destructive',
       });
     }
@@ -103,7 +178,12 @@ const CreateClientModal = ({ isOpen, onClose }: CreateClientModalProps) => {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Nouveau Client</DialogTitle>
+          <DialogTitle>
+            {mode === 'edit' && client 
+              ? `Modification du client : ${client.business_name}`
+              : 'Nouveau Client'
+            }
+          </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -566,8 +646,14 @@ const CreateClientModal = ({ isOpen, onClose }: CreateClientModalProps) => {
               <Button type="button" variant="outline" onClick={onClose}>
                 Annuler
               </Button>
-              <Button type="submit" disabled={createClient.isPending}>
-                {createClient.isPending ? 'Enregistrement...' : 'Enregistrer'}
+              <Button 
+                type="submit" 
+                disabled={mode === 'edit' ? !hasChanges || updateClient.isPending : createClient.isPending}
+              >
+                {mode === 'edit' 
+                  ? (updateClient.isPending ? 'Sauvegarde...' : 'Sauvegarder les modifications')
+                  : (createClient.isPending ? 'Enregistrement...' : 'Enregistrer')
+                }
               </Button>
             </DialogFooter>
           </form>
