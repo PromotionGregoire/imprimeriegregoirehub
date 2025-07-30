@@ -75,7 +75,7 @@ const ClientDetails = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
@@ -89,7 +89,7 @@ const ClientDetails = () => {
         </div>
         
         <div className="flex items-center space-x-2">
-          <Button size="sm">
+          <Button size="sm" onClick={() => navigate(`/dashboard/submissions/new?client_id=${id}`)}>
             <Plus className="w-4 h-4 mr-2" />
             Nouvelle Soumission
           </Button>
