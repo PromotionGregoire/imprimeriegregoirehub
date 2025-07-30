@@ -471,9 +471,23 @@ const CreateClientModal = ({ isOpen, onClose }: CreateClientModalProps) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Termes de paiement par défaut</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Net 30 jours" />
-                    </FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionnez les termes" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="COD (collect on delivery)">COD (collect on delivery)</SelectItem>
+                        <SelectItem value="Paiement sur commande">Paiement sur commande</SelectItem>
+                        <SelectItem value="Dépôt sur commande">Dépôt sur commande</SelectItem>
+                        <SelectItem value="Dû immédiatement">Dû immédiatement</SelectItem>
+                        <SelectItem value="Net 15 jours">Net 15 jours</SelectItem>
+                        <SelectItem value="Net 30 jours">Net 30 jours</SelectItem>
+                        <SelectItem value="Net 45 jours">Net 45 jours</SelectItem>
+                        <SelectItem value="Net 60 jours">Net 60 jours</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
