@@ -287,10 +287,13 @@ export type Database = {
       }
       submissions: {
         Row: {
+          approval_token: string | null
+          approved_by: string | null
           client_id: string
           created_at: string
           deadline: string | null
           id: string
+          modification_request_notes: string | null
           sent_at: string | null
           status: string
           submission_number: string
@@ -298,10 +301,13 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approval_token?: string | null
+          approved_by?: string | null
           client_id: string
           created_at?: string
           deadline?: string | null
           id?: string
+          modification_request_notes?: string | null
           sent_at?: string | null
           status?: string
           submission_number?: string
@@ -309,10 +315,13 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approval_token?: string | null
+          approved_by?: string | null
           client_id?: string
           created_at?: string
           deadline?: string | null
           id?: string
+          modification_request_notes?: string | null
           sent_at?: string | null
           status?: string
           submission_number?: string
