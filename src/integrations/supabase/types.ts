@@ -187,6 +187,39 @@ export type Database = {
           },
         ]
       }
+      products: {
+        Row: {
+          category: string
+          created_at: string
+          default_price: number | null
+          description: string | null
+          id: string
+          name: string
+          product_code: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          default_price?: number | null
+          description?: string | null
+          id?: string
+          name: string
+          product_code: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          default_price?: number | null
+          description?: string | null
+          id?: string
+          name?: string
+          product_code?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

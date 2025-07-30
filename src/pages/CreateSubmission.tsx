@@ -1,318 +1,490 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useForm, useFieldArray } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Trash2, Plus, ArrowLeft } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { CalendarIcon, Plus, Trash2, ArrowLeft } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import { useClients } from '@/hooks/useClients';
-import { useCreateSubmission, SubmissionItem } from '@/hooks/useSubmissions';
+import { useCreateSubmission, SubmissionFormData } from '@/hooks/useSubmissions';
+import { useProducts } from '@/hooks/useProducts';
 import { useToast } from '@/hooks/use-toast';
+
+const submissionItemSchema = z.object({
+  product_type: z.string().min(1, 'Le type de produit est requis'),
+  product_id: z.string().optional(),
+  product_name: z.string().min(1, 'Le nom du produit est requis'),
+  description: z.string().optional(),
+  quantity: z.number().min(1, 'La quantité doit être au moins 1'),
+  unit_price: z.number().min(0, 'Le prix unitaire doit être positif'),
+});
+
+const submissionSchema = z.object({
+  client_id: z.string().min(1, 'Le client est requis'),
+  deadline: z.date().optional(),
+  items: z.array(submissionItemSchema).min(1, 'Au moins un produit est requis'),
+  tax_region: z.string(),
+  manual_tps: z.number().optional(),
+  manual_tvq: z.number().optional(),
+});
+
+type FormData = z.infer<typeof submissionSchema>;
 
 const CreateSubmission = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const clientId = searchParams.get('client_id');
+  const { data: clients } = useClients();
+  const { data: products } = useProducts();
+  const createSubmission = useCreateSubmission();
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const { data: clients, isLoading: clientsLoading } = useClients();
-  const createSubmissionMutation = useCreateSubmission();
-  
-  const [selectedClientId, setSelectedClientId] = useState(clientId || '');
-  const [deadline, setDeadline] = useState('');
-  const [items, setItems] = useState<SubmissionItem[]>([
-    { product_name: '', description: '', quantity: 1, unit_price: 0 }
-  ]);
-  const [tpsEnabled, setTpsEnabled] = useState(false);
-  const [tvqEnabled, setTvqEnabled] = useState(false);
-  const [customTaxAmount, setCustomTaxAmount] = useState(0);
+  const prefilledClientId = searchParams.get('client_id');
 
-  const selectedClient = clients?.find(client => client.id === selectedClientId);
+  const form = useForm<FormData>({
+    resolver: zodResolver(submissionSchema),
+    defaultValues: {
+      client_id: prefilledClientId || '',
+      deadline: undefined,
+      items: [{
+        product_type: '',
+        product_id: '',
+        product_name: '',
+        description: '',
+        quantity: 1,
+        unit_price: 0,
+      }],
+      tax_region: 'quebec',
+      manual_tps: 0,
+      manual_tvq: 0,
+    },
+  });
 
-  const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
-  
-  const tpsAmount = tpsEnabled ? subtotal * 0.05 : 0;
-  const tvqAmount = tvqEnabled ? subtotal * 0.09975 : 0;
-  const taxAmount = tpsAmount + tvqAmount + ((!tpsEnabled && !tvqEnabled) ? customTaxAmount : 0);
-  const totalPrice = subtotal + taxAmount;
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: 'items',
+  });
+
+  const { watch, setValue, register } = form;
+  const watchedItems = watch('items');
+  const watchedTaxRegion = watch('tax_region');
+
+  // Calculate subtotal
+  const subtotal = watchedItems.reduce((sum, item) => {
+    return sum + (item.quantity * item.unit_price);
+  }, 0);
+
+  // Calculate taxes based on region
+  const calculateTaxes = () => {
+    const manualTPS = watch('manual_tps') || 0;
+    const manualTVQ = watch('manual_tvq') || 0;
+    
+    switch (watchedTaxRegion) {
+      case 'quebec':
+        return {
+          tps: subtotal * 0.05,
+          tvq: subtotal * 0.09975,
+        };
+      case 'ontario':
+        return {
+          tps: subtotal * 0.13, // HST
+          tvq: 0,
+        };
+      case 'manual':
+        return {
+          tps: manualTPS,
+          tvq: manualTVQ,
+        };
+      case 'none':
+        return {
+          tps: 0,
+          tvq: 0,
+        };
+      default:
+        return { tps: 0, tvq: 0 };
+    }
+  };
+
+  const taxes = calculateTaxes();
+  const total = subtotal + taxes.tps + taxes.tvq;
+
+  // Handle product type change
+  const handleProductTypeChange = (index: number, productType: string) => {
+    setValue(`items.${index}.product_type`, productType);
+    setValue(`items.${index}.product_id`, '');
+    setValue(`items.${index}.product_name`, '');
+    setValue(`items.${index}.description`, '');
+    setValue(`items.${index}.unit_price`, 0);
+  };
+
+  // Handle product selection
+  const handleProductSelection = (index: number, productId: string) => {
+    const selectedProduct = products?.find(p => p.id === productId);
+    if (selectedProduct) {
+      setValue(`items.${index}.product_id`, productId);
+      setValue(`items.${index}.product_name`, selectedProduct.name);
+      setValue(`items.${index}.description`, selectedProduct.description || '');
+      setValue(`items.${index}.unit_price`, Number(selectedProduct.default_price));
+    }
+  };
 
   const addItem = () => {
-    setItems([...items, { product_name: '', description: '', quantity: 1, unit_price: 0 }]);
+    append({
+      product_type: '',
+      product_id: '',
+      product_name: '',
+      description: '',
+      quantity: 1,
+      unit_price: 0,
+    });
   };
 
-  const removeItem = (index: number) => {
-    if (items.length > 1) {
-      setItems(items.filter((_, i) => i !== index));
-    }
-  };
-
-  const updateItem = (index: number, field: keyof SubmissionItem, value: string | number) => {
-    const updatedItems = [...items];
-    updatedItems[index] = { ...updatedItems[index], [field]: value };
-    setItems(updatedItems);
-  };
-
-  const handleSubmit = async (status: 'Brouillon' | 'Envoyée') => {
-    if (!selectedClientId) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez sélectionner un client",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (items.some(item => !item.product_name.trim())) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez remplir le nom de tous les produits",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const handleSubmit = async (data: FormData, status: 'Brouillon' | 'Envoyée') => {
     try {
-      const submission = await createSubmissionMutation.mutateAsync({
-        submissionData: {
-          client_id: selectedClientId,
-          deadline: deadline || undefined,
-          items: items.filter(item => item.product_name.trim()),
-          subtotal,
-          tax_amount: taxAmount,
-          total_price: totalPrice
-        },
-        status
-      });
+      setIsSubmitting(true);
+
+      const submissionData: SubmissionFormData = {
+        client_id: data.client_id,
+        deadline: data.deadline?.toISOString(),
+        items: data.items.map(item => ({
+          product_name: item.product_name,
+          description: item.description,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+        })),
+        subtotal,
+        tax_amount: taxes.tps + taxes.tvq,
+        total_price: total,
+      };
+
+      await createSubmission.mutateAsync({ submissionData, status });
 
       toast({
-        title: "Succès",
+        title: 'Succès',
         description: status === 'Brouillon' 
-          ? "Soumission sauvegardée en brouillon" 
-          : "Soumission envoyée au client",
+          ? 'Soumission sauvegardée en brouillon'
+          : 'Soumission envoyée au client',
       });
 
-      navigate(`/dashboard/clients/${selectedClientId}`);
+      navigate(`/dashboard/clients/${data.client_id}`);
     } catch (error) {
       toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la création de la soumission",
-        variant: "destructive",
+        title: 'Erreur',
+        description: 'Une erreur est survenue lors de la création de la soumission',
+        variant: 'destructive',
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  const onSubmit = (data: FormData) => handleSubmit(data, 'Envoyée');
 
   return (
     <div className="p-6 space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Retour
-          </Button>
-          <h1 className="text-3xl font-bold">Nouvelle Soumission</h1>
-        </div>
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Retour
+        </Button>
+        <h1 className="text-3xl font-bold">Nouvelle Soumission</h1>
+      </div>
 
-        <div className="space-y-6 max-w-4xl">
-          {/* Informations Générales */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Informations Générales</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="client">Client *</Label>
-                  {clientId ? (
-                    <Input
-                      value={selectedClient?.business_name || 'Chargement...'}
-                      disabled
-                      className="bg-muted"
-                    />
-                  ) : (
-                    <Select value={selectedClientId} onValueChange={setSelectedClientId}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner un client" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {clients?.map((client) => (
-                          <SelectItem key={client.id} value={client.id}>
-                            {client.business_name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="date">Date</Label>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-w-6xl">
+        {/* Informations Générales */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Informations Générales</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="client">Client *</Label>
+                {prefilledClientId ? (
                   <Input
-                    value={new Date().toLocaleDateString('fr-FR')}
+                    value={clients?.find(c => c.id === prefilledClientId)?.business_name || 'Chargement...'}
                     disabled
                     className="bg-muted"
                   />
-                </div>
-                <div>
-                  <Label htmlFor="deadline">Date d'échéance</Label>
-                  <Input
-                    type="datetime-local"
-                    value={deadline}
-                    onChange={(e) => setDeadline(e.target.value)}
-                  />
-                </div>
+                ) : (
+                  <Select
+                    value={watch('client_id')}
+                    onValueChange={(value) => setValue('client_id', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner un client" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {clients?.map((client) => (
+                        <SelectItem key={client.id} value={client.id}>
+                          {client.business_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
-            </CardContent>
-          </Card>
+              
+              <div>
+                <Label>Date</Label>
+                <Input
+                  value={new Date().toLocaleDateString('fr-FR')}
+                  disabled
+                  className="bg-muted"
+                />
+              </div>
+              
+              <div>
+                <Label>Date d'échéance</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !watch('deadline') && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {watch('deadline') ? format(watch('deadline'), 'dd/MM/yyyy') : 'Sélectionner une date'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={watch('deadline')}
+                      onSelect={(date) => setValue('deadline', date)}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Lignes de Produits */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Lignes de Produits</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {items.map((item, index) => (
-                  <div key={index} className="grid grid-cols-12 gap-2 items-end p-4 border rounded-lg">
-                    <div className="col-span-3">
-                      <Label>Nom du produit *</Label>
-                      <Input
-                        value={item.product_name}
-                        onChange={(e) => updateItem(index, 'product_name', e.target.value)}
-                        placeholder="Ex: Impression cartes"
-                      />
+        {/* Lignes de Produits */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Lignes de Produits</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {fields.map((item, index) => {
+                const currentItem = watchedItems[index];
+                return (
+                  <div key={index} className="grid grid-cols-12 gap-4 items-start p-4 border rounded-lg">
+                    {/* Product Type Selection */}
+                    <div className="col-span-2">
+                      <Label>Type de produit</Label>
+                      <Select
+                        value={currentItem?.product_type || ''}
+                        onValueChange={(value) => handleProductTypeChange(index, value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Type..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Impression">Impression</SelectItem>
+                          <SelectItem value="Article Promotionnel">Article Promotionnel</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
+
+                    {/* Product Selection */}
+                    <div className="col-span-3">
+                      <Label>Produit</Label>
+                      {currentItem?.product_type ? (
+                        <Select
+                          value={currentItem?.product_id || ''}
+                          onValueChange={(value) => handleProductSelection(index, value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner un produit..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {products
+                              ?.filter(p => p.category === currentItem.product_type)
+                              .map(product => (
+                                <SelectItem key={product.id} value={product.id}>
+                                  {product.name}
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input
+                          {...register(`items.${index}.product_name`)}
+                          placeholder="Nom du produit"
+                        />
+                      )}
+                    </div>
+
                     <div className="col-span-3">
                       <Label>Description</Label>
                       <Textarea
-                        value={item.description || ''}
-                        onChange={(e) => updateItem(index, 'description', e.target.value)}
-                        placeholder="Détails du produit"
-                        className="min-h-[40px]"
+                        {...register(`items.${index}.description`)}
+                        placeholder="Description du produit"
+                        rows={2}
                       />
                     </div>
+                    
                     <div className="col-span-2">
-                      <Label>Qté</Label>
+                      <Label>Quantité</Label>
                       <Input
                         type="number"
                         min="1"
-                        value={item.quantity}
-                        onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 1)}
+                        {...register(`items.${index}.quantity`, { valueAsNumber: true })}
                       />
                     </div>
+                    
                     <div className="col-span-2">
-                      <Label>Prix unitaire</Label>
+                      <Label>Prix unitaire ($)</Label>
                       <Input
                         type="number"
                         step="0.01"
                         min="0"
-                        value={item.unit_price}
-                        onChange={(e) => updateItem(index, 'unit_price', parseFloat(e.target.value) || 0)}
+                        {...register(`items.${index}.unit_price`, { valueAsNumber: true })}
                       />
                     </div>
-                    <div className="col-span-1">
-                      <Label>Total</Label>
-                      <div className="h-10 flex items-center px-3 bg-muted rounded text-sm font-medium">
-                        ${(item.quantity * item.unit_price).toFixed(2)}
+                    
+                    <div className="col-span-1 text-right pt-6">
+                      <div className="font-medium">
+                        ${((currentItem?.quantity || 0) * (currentItem?.unit_price || 0)).toFixed(2)}
                       </div>
                     </div>
-                    <div className="col-span-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeItem(index)}
-                        disabled={items.length === 1}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                    
+                    <div className="col-span-1 pt-6">
+                      {fields.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => remove(index)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
-                ))}
-                
-                <Button variant="outline" onClick={addItem} className="w-full">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Ajouter une ligne
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                );
+              })}
+              
+              <Button type="button" variant="outline" onClick={addItem} className="w-full">
+                <Plus className="w-4 h-4 mr-2" />
+                Ajouter une ligne
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Calcul des Totaux */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Calcul des Totaux</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+        {/* Calcul des Totaux */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Calcul des Totaux</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between">
+                <span>Sous-total:</span>
+                <span className="font-medium">${subtotal.toFixed(2)}</span>
+              </div>
+              
               <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span>Sous-total:</span>
-                  <span className="font-medium">${subtotal.toFixed(2)}</span>
+                <div>
+                  <Label>Région fiscale</Label>
+                  <Select
+                    value={watchedTaxRegion}
+                    onValueChange={(value) => setValue('tax_region', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="quebec">Québec (TPS 5% + TVQ 9.975%)</SelectItem>
+                      <SelectItem value="ontario">Ontario (HST 13%)</SelectItem>
+                      <SelectItem value="manual">Autre (Taxes manuelles)</SelectItem>
+                      <SelectItem value="none">Pas de taxes</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      checked={tpsEnabled}
-                      onCheckedChange={(checked) => setTpsEnabled(checked === true)}
-                    />
-                    <Label>TPS (5%)</Label>
-                    {tpsEnabled && <span className="ml-auto">${tpsAmount.toFixed(2)}</span>}
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      checked={tvqEnabled}
-                      onCheckedChange={(checked) => setTvqEnabled(checked === true)}
-                    />
-                    <Label>TVQ (9.975%)</Label>
-                    {tvqEnabled && <span className="ml-auto">${tvqAmount.toFixed(2)}</span>}
-                  </div>
-                  
-                  {!tpsEnabled && !tvqEnabled && (
-                    <div className="flex items-center space-x-2">
-                      <Label>Taxes personnalisées:</Label>
+                {watchedTaxRegion === 'manual' && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>TPS ($)</Label>
                       <Input
                         type="number"
                         step="0.01"
                         min="0"
-                        value={customTaxAmount}
-                        onChange={(e) => setCustomTaxAmount(parseFloat(e.target.value) || 0)}
-                        className="w-24"
+                        {...register('manual_tps', { valueAsNumber: true })}
                       />
                     </div>
-                  )}
-                </div>
-
-                <div className="border-t pt-3">
-                  <div className="flex justify-between text-lg font-bold">
-                    <span>Total Final:</span>
-                    <span>${totalPrice.toFixed(2)}</span>
+                    <div>
+                      <Label>TVQ ($)</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        {...register('manual_tvq', { valueAsNumber: true })}
+                      />
+                    </div>
                   </div>
+                )}
+                
+                <div className="flex justify-between">
+                  <span>
+                    {watchedTaxRegion === 'ontario' ? 'HST:' : 'TPS:'}
+                  </span>
+                  <span>${taxes.tps.toFixed(2)}</span>
                 </div>
+                
+                {watchedTaxRegion === 'quebec' && (
+                  <div className="flex justify-between">
+                    <span>TVQ:</span>
+                    <span>${taxes.tvq.toFixed(2)}</span>
+                  </div>
+                )}
               </div>
-            </CardContent>
-          </Card>
+              
+              <div className="flex justify-between text-lg font-bold border-t pt-3">
+                <span>TOTAL:</span>
+                <span>${total.toFixed(2)}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Actions */}
-          <div className="flex gap-4 justify-end">
-            <Button
-              variant="outline"
-              onClick={() => handleSubmit('Brouillon')}
-              disabled={createSubmissionMutation.isPending}
-            >
-              Enregistrer comme Brouillon
-            </Button>
-            <Button
-              onClick={() => handleSubmit('Envoyée')}
-              disabled={createSubmissionMutation.isPending}
-            >
-              Enregistrer et Envoyer par Courriel
-            </Button>
-          </div>
+        {/* Actions */}
+        <div className="flex gap-4 justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => form.handleSubmit((data) => handleSubmit(data, 'Brouillon'))()}
+            disabled={isSubmitting}
+          >
+            Enregistrer comme Brouillon
+          </Button>
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+          >
+            Enregistrer et Envoyer par Courriel
+          </Button>
         </div>
-      </div>
-    );
-  };
+      </form>
+    </div>
+  );
+};
 
 export default CreateSubmission;

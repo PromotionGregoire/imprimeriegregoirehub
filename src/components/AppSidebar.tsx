@@ -1,4 +1,4 @@
-import { Users, FileText, Package, LogOut } from "lucide-react"
+import { Users, FileText, Package, LogOut, Tag } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import { useAuth } from "@/hooks/useAuth"
 import {
@@ -20,6 +20,7 @@ import { Separator } from "@/components/ui/separator"
 const navigationItems = [
   { title: "Clients", url: "/dashboard", icon: Users },
   { title: "Soumissions", url: "/dashboard/submissions", icon: FileText },
+  { title: "Produits", url: "/dashboard/products", icon: Tag },
   { title: "Commandes", url: "/dashboard/orders", icon: Package },
 ]
 
