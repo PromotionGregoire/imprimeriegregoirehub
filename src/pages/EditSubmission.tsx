@@ -111,15 +111,25 @@ const EditSubmission = () => {
       };
       
       reset(formData);
-      setOriginalData(formData);
-      setHasChanges(false);
+      // Set original data after a small delay to ensure form is populated
+      setTimeout(() => {
+        setOriginalData(formData);
+        setHasChanges(false);
+      }, 100);
     }
   }, [submission, reset]);
 
   // Detect changes in form values
   useEffect(() => {
     if (originalData && watchedValues) {
-      const hasChanged = JSON.stringify(watchedValues) !== JSON.stringify(originalData);
+      // Simple comparison of key values that matter for changes
+      const currentItems = watchedValues.items || [];
+      const originalItems = originalData.items || [];
+      
+      const itemsChanged = JSON.stringify(currentItems) !== JSON.stringify(originalItems);
+      const deadlineChanged = watchedValues.deadline?.getTime() !== originalData.deadline?.getTime();
+      
+      const hasChanged = itemsChanged || deadlineChanged;
       setHasChanges(hasChanged);
     }
   }, [watchedValues, originalData]);
@@ -223,8 +233,9 @@ const EditSubmission = () => {
         description: `Les modifications ont été sauvegardées. Nouveau montant: ${total.toFixed(2)}$`,
       });
 
-      // Reset form state
-      setOriginalData(watchedValues);
+      // Reset change detection after successful save
+      const newFormData = { ...watchedValues };
+      setOriginalData(newFormData);
       setHasChanges(false);
 
       navigate(`/dashboard/submissions/${id}`);
@@ -251,12 +262,16 @@ const EditSubmission = () => {
   };
 
   const isFormValid = useMemo(() => {
-    return isValid && watchedItems.every(item => 
+    // Basic form validation: check required fields and that items exist
+    const hasValidItems = watchedItems && watchedItems.length > 0 && watchedItems.every(item => 
       item.product_name && 
+      item.product_name.trim() !== '' &&
       item.quantity > 0 && 
       item.unit_price >= 0
     );
-  }, [isValid, watchedItems]);
+    
+    return hasValidItems && watchedItems.length > 0;
+  }, [watchedItems]);
 
   if (isLoading) {
     return (
@@ -564,8 +579,8 @@ const EditSubmission = () => {
           </CardContent>
         </Card>
 
-        {/* Validation Alert */}
-        {!isFormValid && (
+        {/* Validation Alert - Only show when form is actually invalid */}
+        {!isFormValid && watchedItems && watchedItems.length > 0 && (
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
@@ -586,10 +601,11 @@ const EditSubmission = () => {
           </Button>
           <Button
             type="submit"
-            disabled={isSubmitting || !hasChanges || !isFormValid}
+            disabled={isSubmitting || (!hasChanges && originalData) || !isFormValid}
             className={cn(
               "min-w-[200px] transition-all",
-              hasChanges && isFormValid ? "bg-primary hover:bg-primary/90" : "bg-muted text-muted-foreground"
+              // Show primary color when form is ready to save
+              (hasChanges || !originalData) && isFormValid ? "bg-primary hover:bg-primary/90" : "bg-muted text-muted-foreground"
             )}
           >
             {isSubmitting ? (
@@ -597,11 +613,17 @@ const EditSubmission = () => {
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 Sauvegarde en cours...
               </>
-            ) : !hasChanges ? (
-              'Aucune modification'
+            ) : !originalData ? (
+              // Form is still loading
+              'Chargement...'
             ) : !isFormValid ? (
+              // Form has validation errors
               'Compléter les champs'
+            ) : !hasChanges ? (
+              // No changes made
+              'Aucune modification'
             ) : (
+              // Ready to save
               'Sauvegarder les modifications'
             )}
           </Button>
