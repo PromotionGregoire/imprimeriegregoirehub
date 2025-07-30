@@ -193,12 +193,42 @@ const EditSubmission = () => {
   };
 
   const handleSubmit = async (data: FormData) => {
-    console.log('=== EDIT SUBMISSION DEBUG ===');
+    console.log('=== EDIT SUBMISSION FRONTEND DEBUG ===');
     console.log('Form data received:', data);
     console.log('Submission ID:', id);
     console.log('Subtotal:', subtotal);
     console.log('Taxes:', taxes);
     console.log('Total:', total);
+    console.log('Items from form:', data.items);
+    console.log('Form is valid:', isFormValid);
+    console.log('Has changes:', hasChanges);
+    
+    // VALIDATION: Ensure we have the minimum required data
+    if (!data.items || data.items.length === 0) {
+      toast({
+        title: '❌ Erreur de validation',
+        description: 'Au moins un produit est requis',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // VALIDATION: Ensure all items have required fields
+    const invalidItems = data.items.filter(item => 
+      !item.product_name || 
+      !item.product_name.trim() || 
+      item.quantity <= 0 || 
+      item.unit_price < 0
+    );
+
+    if (invalidItems.length > 0) {
+      toast({
+        title: '❌ Erreur de validation',
+        description: 'Tous les produits doivent avoir un nom, une quantité > 0 et un prix ≥ 0',
+        variant: 'destructive',
+      });
+      return;
+    }
     
     try {
       setIsSubmitting(true);
@@ -209,8 +239,8 @@ const EditSubmission = () => {
         client_id: data.client_id,
         deadline: data.deadline?.toISOString(),
         items: data.items.map(item => ({
-          product_name: item.product_name,
-          description: item.description,
+          product_name: item.product_name.trim(),
+          description: item.description?.trim() || '',
           quantity: item.quantity,
           unit_price: item.unit_price,
         })),
@@ -219,14 +249,18 @@ const EditSubmission = () => {
         total_price: total,
       };
 
+      console.log('=== SUBMITTING DATA TO HOOK ===');
       console.log('Submission data to send:', submissionData);
+      console.log('Items count:', submissionData.items.length);
+      console.log('Previous total:', previousTotal);
       
       await updateSubmission.mutateAsync({ 
         id: id!, 
         submissionData,
-        previousTotal, // Pour la journalisation détaillée
+        previousTotal,
       });
-      console.log('Update completed successfully');
+      
+      console.log('✅ Update completed successfully');
 
       toast({
         title: '✅ Soumission mise à jour avec succès',

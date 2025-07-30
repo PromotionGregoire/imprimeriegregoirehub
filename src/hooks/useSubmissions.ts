@@ -95,17 +95,28 @@ export const useUpdateSubmission = () => {
       console.log('Submission ID:', id);
       console.log('Data to update:', submissionData);
       
-      // Ensure we have the complete data for update
+      // Build complete update data
       const updateData: any = {};
       
+      if (submissionData.client_id !== undefined) {
+        updateData.client_id = submissionData.client_id;
+      }
       if (submissionData.deadline !== undefined) {
         updateData.deadline = submissionData.deadline;
       }
       if (submissionData.total_price !== undefined) {
         updateData.total_price = submissionData.total_price;
       }
+      if (submissionData.subtotal !== undefined) {
+        // Store subtotal for reference if needed
+      }
+      if (submissionData.tax_amount !== undefined) {
+        // Store tax amount for reference if needed
+      }
       
-      // Update submission
+      console.log('Update data being sent to Supabase:', updateData);
+      
+      // Update submission main record
       const { data: submission, error: submissionError } = await supabase
         .from('submissions')
         .update(updateData)
@@ -120,9 +131,9 @@ export const useUpdateSubmission = () => {
         throw submissionError;
       }
 
-      // Only update items if they are provided
-      if (submissionData.items && submissionData.items.length > 0) {
-        // Delete existing items
+      // ALWAYS update items if provided (even if empty array - clear all items)
+      if (submissionData.items !== undefined) {
+        // Delete existing items first
         console.log('Deleting existing items for submission:', id);
         const { error: deleteError } = await supabase
           .from('submission_items')
@@ -134,24 +145,27 @@ export const useUpdateSubmission = () => {
           throw deleteError;
         }
 
-        // Create new submission items
-        const itemsWithSubmissionId = submissionData.items.map(item => ({
-          submission_id: id,
-          product_name: item.product_name,
-          description: item.description,
-          quantity: item.quantity,
-          unit_price: item.unit_price
-        }));
+        // Insert new items (if any)
+        if (submissionData.items.length > 0) {
+          const itemsWithSubmissionId = submissionData.items.map(item => ({
+            submission_id: id,
+            product_name: item.product_name,
+            description: item.description,
+            quantity: item.quantity,
+            unit_price: item.unit_price
+          }));
 
-        console.log('Creating new items:', itemsWithSubmissionId);
-        const { error: itemsError } = await supabase
-          .from('submission_items')
-          .insert(itemsWithSubmissionId);
+          console.log('Creating new items:', itemsWithSubmissionId);
+          const { error: itemsError } = await supabase
+            .from('submission_items')
+            .insert(itemsWithSubmissionId);
 
-        if (itemsError) {
-          console.error('Insert items error:', itemsError);
-          throw itemsError;
+          if (itemsError) {
+            console.error('Insert items error:', itemsError);
+            throw itemsError;
+          }
         }
+        console.log('Items update completed successfully');
       }
 
       // Enhanced activity logging
