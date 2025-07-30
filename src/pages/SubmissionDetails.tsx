@@ -9,6 +9,7 @@ import { useSubmissionDetails } from '@/hooks/useSubmissionDetails';
 import { useCloneSubmission, useDeleteSubmission, useUpdateSubmissionStatus } from '@/hooks/useSubmissionActions';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import StatusManager from '@/components/StatusManager';
 
 const SubmissionDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -167,7 +168,7 @@ const SubmissionDetails = () => {
         </div>
         
         <div className="flex items-center gap-3">
-          {getStatusBadge(submission.status)}
+          <StatusManager submission={submission} currentStatus={submission.status} />
         </div>
       </div>
 
