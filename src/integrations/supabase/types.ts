@@ -567,6 +567,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      generate_product_code: {
+        Args: { product_name: string; product_category: string }
+        Returns: string
+      }
       generate_submission_number: {
         Args: Record<PropertyKey, never>
         Returns: string

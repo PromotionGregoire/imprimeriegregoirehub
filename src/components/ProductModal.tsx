@@ -17,10 +17,11 @@ import ProductSuppliersManager from './ProductSuppliersManager';
 
 const productSchema = z.object({
   name: z.string().min(1, 'Le nom est requis'),
-  product_code: z.string().min(1, 'Le code produit est requis'),
+  product_code: z.string().optional(),
   description: z.string().optional(),
   default_price: z.number().min(0, 'Le prix doit être positif'),
   category: z.enum(['Impression', 'Article Promotionnel']),
+  supplier_ids: z.array(z.string()).optional(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -39,6 +40,7 @@ const ProductModal = ({ trigger, product, onSave, isLoading, isOpen: controlledO
   const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setIsOpen = onOpenChange || setInternalOpen;
   const [variants, setVariants] = useState<any[]>([]);
+  const [selectedSuppliers, setSelectedSuppliers] = useState<string[]>([]);
   
   const { data: suppliers } = useSuppliers();
   
@@ -50,6 +52,7 @@ const ProductModal = ({ trigger, product, onSave, isLoading, isOpen: controlledO
       description: '',
       default_price: 0,
       category: 'Impression',
+      supplier_ids: [],
     },
   });
 
@@ -61,6 +64,7 @@ const ProductModal = ({ trigger, product, onSave, isLoading, isOpen: controlledO
         description: product.description || '',
         default_price: product.default_price || 0,
         category: product.category || 'Impression',
+        supplier_ids: [],
       });
     } else if (!product && isOpen) {
       form.reset({
@@ -69,12 +73,18 @@ const ProductModal = ({ trigger, product, onSave, isLoading, isOpen: controlledO
         description: '',
         default_price: 0,
         category: 'Impression',
+        supplier_ids: [],
       });
+      setSelectedSuppliers([]);
     }
   }, [product, isOpen, form]);
 
   const handleSubmit = (data: ProductFormData) => {
-    onSave(data);
+    const submitData = {
+      ...data,
+      supplier_ids: selectedSuppliers,
+    };
+    onSave(submitData);
     if (!isLoading) {
       setIsOpen(false);
     }
@@ -123,11 +133,14 @@ const ProductModal = ({ trigger, product, onSave, isLoading, isOpen: controlledO
                 name="product_code"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Code produit *</FormLabel>
+                    <FormLabel>Code produit</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Ex: TSH-001" />
+                      <Input {...field} placeholder="Sera généré automatiquement si vide" />
                     </FormControl>
                     <FormMessage />
+                    <p className="text-xs text-muted-foreground">
+                      Laissez vide pour génération automatique
+                    </p>
                   </FormItem>
                 )}
               />
@@ -187,6 +200,35 @@ const ProductModal = ({ trigger, product, onSave, isLoading, isOpen: controlledO
                 </FormItem>
               )}
             />
+
+            {/* Fournisseurs associés pour nouveau produit */}
+            {!product && suppliers && suppliers.length > 0 && (
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Fournisseurs Associés</Label>
+                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto border rounded-md p-3">
+                  {suppliers.map((supplier) => (
+                    <div key={supplier.id} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id={`supplier-${supplier.id}`}
+                        checked={selectedSuppliers.includes(supplier.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedSuppliers(prev => [...prev, supplier.id]);
+                          } else {
+                            setSelectedSuppliers(prev => prev.filter(id => id !== supplier.id));
+                          }
+                        }}
+                        className="rounded border-input"
+                      />
+                      <Label htmlFor={`supplier-${supplier.id}`} className="text-sm">
+                        {supplier.name}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Gestionnaire de fournisseurs pour produit existant */}
             {product?.id && (

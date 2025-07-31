@@ -46,17 +46,35 @@ export const useProductsByCategory = (category: string) => {
 
 export const useCreateProduct = () => {
   const queryClient = useQueryClient();
-
+  
   return useMutation({
-    mutationFn: async (productData: Omit<Product, 'id' | 'created_at' | 'updated_at'>) => {
-      const { data, error } = await supabase
+    mutationFn: async (productData: any) => {
+      const { supplier_ids, ...product } = productData;
+      
+      // Create the product
+      const { data: newProduct, error } = await supabase
         .from('products')
-        .insert([productData])
+        .insert([product])
         .select()
         .single();
 
       if (error) throw error;
-      return data;
+
+      // If supplier_ids are provided, create the associations
+      if (supplier_ids && supplier_ids.length > 0) {
+        const associations = supplier_ids.map((supplierId: string) => ({
+          product_id: newProduct.id,
+          supplier_id: supplierId
+        }));
+
+        const { error: associationError } = await supabase
+          .from('product_suppliers')
+          .insert(associations);
+
+        if (associationError) throw associationError;
+      }
+
+      return newProduct;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });

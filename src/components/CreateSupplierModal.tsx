@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus } from 'lucide-react';
 import { useSupplierMutations } from '@/hooks/useSupplierMutations';
+import { useSupplierSpecialtyMutations, useSupplierSpecialties } from '@/hooks/useSupplierSpecialties';
 
 interface CreateSupplierModalProps {
   trigger?: React.ReactNode;
@@ -34,6 +35,8 @@ const CreateSupplierModal = ({ trigger, supplier, isOpen: controlledOpen, onOpen
   const [selectedServiceCategories, setSelectedServiceCategories] = useState<string[]>([]);
 
   const { createSupplier, updateSupplier } = useSupplierMutations();
+  const { updateSupplierSpecialties } = useSupplierSpecialtyMutations();
+  const { data: existingSpecialties } = useSupplierSpecialties(supplier?.id);
   
   // Initialiser les données si on édite
   React.useEffect(() => {
@@ -49,6 +52,19 @@ const CreateSupplierModal = ({ trigger, supplier, isOpen: controlledOpen, onOpen
         website_2: supplier.website_2 || '',
         notes: supplier.notes || '',
       });
+      
+      // Load existing specialties
+      if (existingSpecialties) {
+        const goods = existingSpecialties
+          .filter(s => s.category_type === 'Bien')
+          .map(s => s.category_name);
+        const services = existingSpecialties
+          .filter(s => s.category_type === 'Service')
+          .map(s => s.category_name);
+        
+        setSelectedGoodsCategories(goods);
+        setSelectedServiceCategories(services);
+      }
     } else if (!supplier && isOpen) {
       // Reset for new supplier
       setFormData({
@@ -65,36 +81,57 @@ const CreateSupplierModal = ({ trigger, supplier, isOpen: controlledOpen, onOpen
       setSelectedGoodsCategories([]);
       setSelectedServiceCategories([]);
     }
-  }, [supplier, isOpen]);
+  }, [supplier, isOpen, existingSpecialties]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.name || (!formData.is_goods_supplier && !formData.is_service_supplier)) {
       return;
     }
 
-    const mutation = supplier ? updateSupplier : createSupplier;
-    const data = supplier ? { id: supplier.id, ...formData } : formData;
-
-    mutation.mutate(data, {
-      onSuccess: () => {
-        setIsOpen(false);
-        setFormData({
-          name: '',
-          is_goods_supplier: false,
-          is_service_supplier: false,
-          contact_person: '',
-          email: '',
-          phone: '',
-          website_1: '',
-          website_2: '',
-          notes: '',
+    try {
+      if (supplier) {
+        // Update supplier
+        await updateSupplier.mutateAsync({ id: supplier.id, ...formData });
+        
+        // Update specialties
+        await updateSupplierSpecialties.mutateAsync({
+          supplierId: supplier.id,
+          goodsCategories: selectedGoodsCategories,
+          serviceCategories: selectedServiceCategories,
         });
-        setSelectedGoodsCategories([]);
-        setSelectedServiceCategories([]);
-      },
-    });
+      } else {
+        // Create supplier
+        const newSupplier = await createSupplier.mutateAsync(formData);
+        
+        // Add specialties if any
+        if (selectedGoodsCategories.length > 0 || selectedServiceCategories.length > 0) {
+          await updateSupplierSpecialties.mutateAsync({
+            supplierId: newSupplier.id,
+            goodsCategories: selectedGoodsCategories,
+            serviceCategories: selectedServiceCategories,
+          });
+        }
+      }
+
+      setIsOpen(false);
+      setFormData({
+        name: '',
+        is_goods_supplier: false,
+        is_service_supplier: false,
+        contact_person: '',
+        email: '',
+        phone: '',
+        website_1: '',
+        website_2: '',
+        notes: '',
+      });
+      setSelectedGoodsCategories([]);
+      setSelectedServiceCategories([]);
+    } catch (error) {
+      console.error('Error saving supplier:', error);
+    }
   };
 
   const handleChange = (field: string, value: string | boolean) => {
@@ -302,8 +339,8 @@ const CreateSupplierModal = ({ trigger, supplier, isOpen: controlledOpen, onOpen
             <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
               Annuler
             </Button>
-            <Button type="submit" disabled={createSupplier.isPending || updateSupplier.isPending}>
-              {(createSupplier.isPending || updateSupplier.isPending) ? 'Sauvegarde...' : (supplier ? 'Mettre à jour' : 'Créer')}
+            <Button type="submit" disabled={createSupplier.isPending || updateSupplier.isPending || updateSupplierSpecialties.isPending}>
+              {(createSupplier.isPending || updateSupplier.isPending || updateSupplierSpecialties.isPending) ? 'Sauvegarde...' : (supplier ? 'Mettre à jour' : 'Créer')}
             </Button>
           </div>
         </form>
