@@ -201,7 +201,7 @@ const Submissions = () => {
 
       {/* Search & Status Filter Bar */}
       <Card>
-        <CardContent className="p-base-400">
+        <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row gap-base-400">
             {/* Search Bar */}
             <div className="relative flex-1">
