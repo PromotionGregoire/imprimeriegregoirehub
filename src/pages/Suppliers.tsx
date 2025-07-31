@@ -10,6 +10,8 @@ import CreateSupplierModal from '@/components/CreateSupplierModal';
 const Suppliers = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [editingSupplier, setEditingSupplier] = useState<any>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
   
   const { data: suppliers, isLoading, error } = useSuppliers();
   const { deleteSupplier } = useSupplierMutations();
@@ -36,8 +38,8 @@ const Suppliers = () => {
   };
 
   const handleEdit = (supplier: any) => {
-    // TODO: Implement edit functionality
-    console.log('Edit supplier:', supplier);
+    setEditingSupplier(supplier);
+    setEditModalOpen(true);
   };
 
   const handleDelete = (id: string) => {
@@ -87,6 +89,16 @@ const Suppliers = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Fournisseurs</h1>
         <CreateSupplierModal />
+        
+        {/* Modal d'édition contrôlé */}
+        <CreateSupplierModal
+          supplier={editingSupplier}
+          isOpen={editModalOpen}
+          onOpenChange={(open) => {
+            setEditModalOpen(open);
+            if (!open) setEditingSupplier(null);
+          }}
+        />
       </div>
       
       {/* Statistics Cards */}

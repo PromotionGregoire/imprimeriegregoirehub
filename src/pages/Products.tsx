@@ -19,6 +19,8 @@ const Products = () => {
   
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   const filteredProducts = products?.filter(product => {
     const matchesSearch = !searchTerm || 
@@ -35,8 +37,19 @@ const Products = () => {
   };
 
   const handleUpdateProduct = (data: any) => {
-    // TODO: Implement update with product ID
-    console.log('Update product:', data);
+    if (editingProduct) {
+      updateProduct.mutate({ id: editingProduct.id, updates: data }, {
+        onSuccess: () => {
+          setEditingProduct(null);
+          setEditModalOpen(false);
+        }
+      });
+    }
+  };
+
+  const handleEdit = (product: any) => {
+    setEditingProduct(product);
+    setEditModalOpen(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -74,7 +87,21 @@ const Products = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Produits</h1>
-        <ProductModal onSave={handleCreateProduct} />
+        <div className="flex gap-2">
+          <ProductModal onSave={handleCreateProduct} />
+          
+          {/* Modal d'édition contrôlé */}
+          <ProductModal
+            product={editingProduct}
+            onSave={handleUpdateProduct}
+            isLoading={updateProduct.isPending}
+            isOpen={editModalOpen}
+            onOpenChange={(open) => {
+              setEditModalOpen(open);
+              if (!open) setEditingProduct(null);
+            }}
+          />
+        </div>
       </div>
 
       {/* Search and Filters */}
@@ -148,15 +175,9 @@ const Products = () => {
                   
                   <div className="col-span-1 text-right">
                     <div className="flex gap-1 justify-end">
-                      <ProductModal
-                        trigger={
-                          <Button variant="ghost" size="sm">
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                        }
-                        product={product}
-                        onSave={handleUpdateProduct}
-                      />
+                      <Button variant="ghost" size="sm" onClick={() => handleEdit(product)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="sm"

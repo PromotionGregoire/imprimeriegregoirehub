@@ -13,6 +13,7 @@ import { z } from 'zod';
 import { useProducts } from '@/hooks/useProducts';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import ProductVariantManager from './ProductVariantManager';
+import ProductSuppliersManager from './ProductSuppliersManager';
 
 const productSchema = z.object({
   name: z.string().min(1, 'Le nom est requis'),
@@ -20,7 +21,6 @@ const productSchema = z.object({
   description: z.string().optional(),
   default_price: z.number().min(0, 'Le prix doit être positif'),
   category: z.enum(['Impression', 'Article Promotionnel']),
-  supplier_id: z.string().optional(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -30,10 +30,14 @@ interface ProductModalProps {
   product?: any;
   onSave: (data: ProductFormData) => void;
   isLoading?: boolean;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-const ProductModal = ({ trigger, product, onSave, isLoading }: ProductModalProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+const ProductModal = ({ trigger, product, onSave, isLoading, isOpen: controlledOpen, onOpenChange }: ProductModalProps) => {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setIsOpen = onOpenChange || setInternalOpen;
   const [variants, setVariants] = useState<any[]>([]);
   
   const { data: suppliers } = useSuppliers();
@@ -46,7 +50,6 @@ const ProductModal = ({ trigger, product, onSave, isLoading }: ProductModalProps
       description: '',
       default_price: 0,
       category: 'Impression',
-      supplier_id: '',
     },
   });
 
@@ -58,7 +61,6 @@ const ProductModal = ({ trigger, product, onSave, isLoading }: ProductModalProps
         description: product.description || '',
         default_price: product.default_price || 0,
         category: product.category || 'Impression',
-        supplier_id: product.supplier_id || '',
       });
     } else if (!product && isOpen) {
       form.reset({
@@ -67,7 +69,6 @@ const ProductModal = ({ trigger, product, onSave, isLoading }: ProductModalProps
         description: '',
         default_price: 0,
         category: 'Impression',
-        supplier_id: '',
       });
     }
   }, [product, isOpen, form]);
@@ -155,32 +156,6 @@ const ProductModal = ({ trigger, product, onSave, isLoading }: ProductModalProps
 
               <FormField
                 control={form.control}
-                name="supplier_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Fournisseur</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner un fournisseur" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="">Aucun fournisseur</SelectItem>
-                        {suppliers?.map((supplier) => (
-                          <SelectItem key={supplier.id} value={supplier.id}>
-                            {supplier.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
                 name="default_price"
                 render={({ field }) => (
                   <FormItem>
@@ -212,6 +187,16 @@ const ProductModal = ({ trigger, product, onSave, isLoading }: ProductModalProps
                 </FormItem>
               )}
             />
+
+            {/* Gestionnaire de fournisseurs pour produit existant */}
+            {product?.id && (
+              <div className="space-y-4">
+                <ProductSuppliersManager 
+                  productId={product.id}
+                  productCategory={product.category}
+                />
+              </div>
+            )}
 
             {/* Product Variants Manager */}
             {product?.id && (

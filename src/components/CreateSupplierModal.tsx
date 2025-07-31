@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,10 +10,15 @@ import { useSupplierMutations } from '@/hooks/useSupplierMutations';
 
 interface CreateSupplierModalProps {
   trigger?: React.ReactNode;
+  supplier?: any; // For editing mode
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-const CreateSupplierModal = ({ trigger }: CreateSupplierModalProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+const CreateSupplierModal = ({ trigger, supplier, isOpen: controlledOpen, onOpenChange }: CreateSupplierModalProps) => {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setIsOpen = onOpenChange || setInternalOpen;
   const [formData, setFormData] = useState({
     name: '',
     is_goods_supplier: false,
@@ -27,7 +32,38 @@ const CreateSupplierModal = ({ trigger }: CreateSupplierModalProps) => {
   });
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
-  const { createSupplier } = useSupplierMutations();
+  const { createSupplier, updateSupplier } = useSupplierMutations();
+  
+  // Initialiser les données si on édite
+  React.useEffect(() => {
+    if (supplier && isOpen) {
+      setFormData({
+        name: supplier.name || '',
+        is_goods_supplier: supplier.is_goods_supplier || false,
+        is_service_supplier: supplier.is_service_supplier || false,
+        contact_person: supplier.contact_person || '',
+        email: supplier.email || '',
+        phone: supplier.phone || '',
+        website_1: supplier.website_1 || '',
+        website_2: supplier.website_2 || '',
+        notes: supplier.notes || '',
+      });
+    } else if (!supplier && isOpen) {
+      // Reset for new supplier
+      setFormData({
+        name: '',
+        is_goods_supplier: false,
+        is_service_supplier: false,
+        contact_person: '',
+        email: '',
+        phone: '',
+        website_1: '',
+        website_2: '',
+        notes: '',
+      });
+      setSelectedCategories([]);
+    }
+  }, [supplier, isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +72,10 @@ const CreateSupplierModal = ({ trigger }: CreateSupplierModalProps) => {
       return;
     }
 
-    createSupplier.mutate(formData, {
+    const mutation = supplier ? updateSupplier : createSupplier;
+    const data = supplier ? { id: supplier.id, ...formData } : formData;
+
+    mutation.mutate(data, {
       onSuccess: () => {
         setIsOpen(false);
         setFormData({
@@ -81,7 +120,9 @@ const CreateSupplierModal = ({ trigger }: CreateSupplierModalProps) => {
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Créer un nouveau fournisseur</DialogTitle>
+          <DialogTitle>
+            {supplier ? 'Modifier le fournisseur' : 'Créer un nouveau fournisseur'}
+          </DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -209,8 +250,8 @@ const CreateSupplierModal = ({ trigger }: CreateSupplierModalProps) => {
             <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
               Annuler
             </Button>
-            <Button type="submit" disabled={createSupplier.isPending}>
-              {createSupplier.isPending ? 'Création...' : 'Créer'}
+            <Button type="submit" disabled={createSupplier.isPending || updateSupplier.isPending}>
+              {(createSupplier.isPending || updateSupplier.isPending) ? 'Sauvegarde...' : (supplier ? 'Mettre à jour' : 'Créer')}
             </Button>
           </div>
         </form>
