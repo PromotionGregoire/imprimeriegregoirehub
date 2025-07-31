@@ -1,6 +1,6 @@
 import React from 'react'
 import { cn } from '@/lib/utils'
-import { Check, Clock, XCircle, FileText, Send, CheckCircle } from 'lucide-react'
+import { Check, Clock, XCircle, FileText, Send, CheckCircle, Eye, RefreshCw } from 'lucide-react'
 
 type SubmissionStatus = 'Brouillon' | 'Envoyée' | 'Acceptée' | 'Refusée' | 'En révision'
 
@@ -99,7 +99,15 @@ export function SubmissionStatusTimeline({
       <div className="flex items-center justify-between relative">
         {statusSteps.map((step, index) => {
           const stepState = getStepState(index)
-          const Icon = index === 2 ? getResultIcon() : step.icon
+          
+          // Get the correct icon based on status and step
+          let Icon = step.icon
+          if (index === 1 && status === 'En révision') {
+            Icon = RefreshCw
+          } else if (index === 2) {
+            Icon = getResultIcon()
+          }
+          
           const isCompleted = stepState === 'completed'
           const isCurrent = stepState === 'current'
           
