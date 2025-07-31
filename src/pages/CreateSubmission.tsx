@@ -19,7 +19,7 @@ import { useCreateSubmission, SubmissionFormData } from '@/hooks/useSubmissions'
 import { useProducts } from '@/hooks/useProducts';
 import { useToast } from '@/hooks/use-toast';
 import { AdvancedDatePicker } from '@/components/ui/advanced-date-picker';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
 const submissionItemSchema = z.object({
   product_type: z.string().min(1, 'Le type de produit est requis'),
@@ -205,300 +205,302 @@ const CreateSubmission = () => {
         <h1 className="text-3xl font-bold">Nouvelle Soumission</h1>
       </div>
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-w-6xl">
-        {/* Informations Générales */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Informations Générales</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="client">Client *</Label>
-                {prefilledClientId ? (
-                  <Input
-                    value={clients?.find(c => c.id === prefilledClientId)?.business_name || 'Chargement...'}
-                    disabled
-                    className="bg-muted"
-                  />
-                ) : (
-                  <Select
-                    value={watch('client_id')}
-                    onValueChange={(value) => setValue('client_id', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner un client" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {clients?.map((client) => (
-                        <SelectItem key={client.id} value={client.id}>
-                          {client.business_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              </div>
-              
-              <div>
-                <Label>Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start text-left font-normal"
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {format(currentDate, 'dd/MM/yyyy')}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={currentDate}
-                      onSelect={(date) => date && setCurrentDate(date)}
-                      initialFocus
-                      captionLayout="dropdown-buttons"
-                      fromYear={1900}
-                      toYear={2125}
-                      className={cn("p-3 pointer-events-auto")}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-w-6xl">
+          {/* Informations Générales */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Informations Générales</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="client">Client *</Label>
+                  {prefilledClientId ? (
+                    <Input
+                      value={clients?.find(c => c.id === prefilledClientId)?.business_name || 'Chargement...'}
+                      disabled
+                      className="bg-muted"
                     />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              
-              <FormField
-                control={form.control}
-                name="deadline"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Date d'échéance</FormLabel>
-                    <FormControl>
-                      <AdvancedDatePicker
-                        value={field.value}
-                        onChange={field.onChange}
-                        placeholder="Sélectionner une date d'échéance"
-                        includeTime={true}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Lignes de Produits */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Lignes de Produits</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {fields.map((item, index) => {
-                const currentItem = watchedItems[index];
-                return (
-                  <div key={index} className="grid grid-cols-12 gap-4 items-start p-4 border rounded-lg">
-                    {/* Product Type Selection */}
-                    <div className="col-span-2">
-                      <Label>Type de produit</Label>
-                      <Select
-                        value={currentItem?.product_type || ''}
-                        onValueChange={(value) => handleProductTypeChange(index, value)}
+                  ) : (
+                    <Select
+                      value={watch('client_id')}
+                      onValueChange={(value) => setValue('client_id', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner un client" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {clients?.map((client) => (
+                          <SelectItem key={client.id} value={client.id}>
+                            {client.business_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+                
+                <div>
+                  <Label>Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal"
                       >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Type..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Impression">Impression</SelectItem>
-                          <SelectItem value="Article Promotionnel">Article Promotionnel</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {format(currentDate, 'dd/MM/yyyy')}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={currentDate}
+                        onSelect={(date) => date && setCurrentDate(date)}
+                        initialFocus
+                        captionLayout="dropdown-buttons"
+                        fromYear={1900}
+                        toYear={2125}
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                
+                <FormField
+                  control={form.control}
+                  name="deadline"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Date d'échéance</FormLabel>
+                      <FormControl>
+                        <AdvancedDatePicker
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Sélectionner une date d'échéance"
+                          includeTime={true}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </CardContent>
+          </Card>
 
-                    {/* Product Selection */}
-                    <div className="col-span-3">
-                      <Label>Produit</Label>
-                      {currentItem?.product_type ? (
+          {/* Lignes de Produits */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Lignes de Produits</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {fields.map((item, index) => {
+                  const currentItem = watchedItems[index];
+                  return (
+                    <div key={index} className="grid grid-cols-12 gap-4 items-start p-4 border rounded-lg">
+                      {/* Product Type Selection */}
+                      <div className="col-span-2">
+                        <Label>Type de produit</Label>
                         <Select
-                          value={currentItem?.product_id || ''}
-                          onValueChange={(value) => handleProductSelection(index, value)}
+                          value={currentItem?.product_type || ''}
+                          onValueChange={(value) => handleProductTypeChange(index, value)}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner un produit..." />
+                            <SelectValue placeholder="Type..." />
                           </SelectTrigger>
                           <SelectContent>
-                            {products
-                              ?.filter(p => p.category === currentItem.product_type)
-                              .map(product => (
-                                <SelectItem key={product.id} value={product.id}>
-                                  {product.name}
-                                </SelectItem>
-                              ))}
+                            <SelectItem value="Impression">Impression</SelectItem>
+                            <SelectItem value="Article Promotionnel">Article Promotionnel</SelectItem>
                           </SelectContent>
                         </Select>
-                      ) : (
-                        <Input
-                          {...register(`items.${index}.product_name`)}
-                          placeholder="Nom du produit"
-                        />
-                      )}
-                    </div>
+                      </div>
 
-                    <div className="col-span-3">
-                      <Label>Description</Label>
-                      <Textarea
-                        {...register(`items.${index}.description`)}
-                        placeholder="Description du produit"
-                        rows={2}
-                      />
-                    </div>
-                    
-                    <div className="col-span-2">
-                      <Label>Quantité</Label>
-                      <Input
-                        type="number"
-                        min="1"
-                        {...register(`items.${index}.quantity`, { valueAsNumber: true })}
-                      />
-                    </div>
-                    
-                    <div className="col-span-2">
-                      <Label>Prix unitaire ($)</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        {...register(`items.${index}.unit_price`, { valueAsNumber: true })}
-                      />
-                    </div>
-                    
-                    <div className="col-span-1 text-right pt-6">
-                      <div className="font-medium">
-                        ${((currentItem?.quantity || 0) * (currentItem?.unit_price || 0)).toFixed(2)}
+                      {/* Product Selection */}
+                      <div className="col-span-3">
+                        <Label>Produit</Label>
+                        {currentItem?.product_type ? (
+                          <Select
+                            value={currentItem?.product_id || ''}
+                            onValueChange={(value) => handleProductSelection(index, value)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Sélectionner un produit..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {products
+                                ?.filter(p => p.category === currentItem.product_type)
+                                .map(product => (
+                                  <SelectItem key={product.id} value={product.id}>
+                                    {product.name}
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Input
+                            {...register(`items.${index}.product_name`)}
+                            placeholder="Nom du produit"
+                          />
+                        )}
+                      </div>
+
+                      <div className="col-span-3">
+                        <Label>Description</Label>
+                        <Textarea
+                          {...register(`items.${index}.description`)}
+                          placeholder="Description du produit"
+                          rows={2}
+                        />
+                      </div>
+                      
+                      <div className="col-span-2">
+                        <Label>Quantité</Label>
+                        <Input
+                          type="number"
+                          min="1"
+                          {...register(`items.${index}.quantity`, { valueAsNumber: true })}
+                        />
+                      </div>
+                      
+                      <div className="col-span-2">
+                        <Label>Prix unitaire ($)</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          {...register(`items.${index}.unit_price`, { valueAsNumber: true })}
+                        />
+                      </div>
+                      
+                      <div className="col-span-1 text-right pt-6">
+                        <div className="font-medium">
+                          ${((currentItem?.quantity || 0) * (currentItem?.unit_price || 0)).toFixed(2)}
+                        </div>
+                      </div>
+                      
+                      <div className="col-span-1 pt-6">
+                        {fields.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => remove(index)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
                       </div>
                     </div>
-                    
-                    <div className="col-span-1 pt-6">
-                      {fields.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => remove(index)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-              
-              <Button type="button" variant="outline" onClick={addItem} className="w-full">
-                <Plus className="w-4 h-4 mr-2" />
-                Ajouter une ligne
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Calcul des Totaux */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Calcul des Totaux</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex justify-between">
-                <span>Sous-total:</span>
-                <span className="font-medium">${subtotal.toFixed(2)}</span>
+                  );
+                })}
+                
+                <Button type="button" variant="outline" onClick={addItem} className="w-full">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Ajouter une ligne
+                </Button>
               </div>
-              
-              <div className="space-y-3">
-                <div>
-                  <Label>Région fiscale</Label>
-                  <Select
-                    value={watchedTaxRegion}
-                    onValueChange={(value) => setValue('tax_region', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="quebec">Québec (TPS 5% + TVQ 9.975%)</SelectItem>
-                      <SelectItem value="ontario">Ontario (HST 13%)</SelectItem>
-                      <SelectItem value="manual">Autre (Taxes manuelles)</SelectItem>
-                      <SelectItem value="none">Pas de taxes</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                {watchedTaxRegion === 'manual' && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>TPS ($)</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        {...register('manual_tps', { valueAsNumber: true })}
-                      />
-                    </div>
-                    <div>
-                      <Label>TVQ ($)</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        {...register('manual_tvq', { valueAsNumber: true })}
-                      />
-                    </div>
-                  </div>
-                )}
-                
+            </CardContent>
+          </Card>
+
+          {/* Calcul des Totaux */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Calcul des Totaux</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
                 <div className="flex justify-between">
-                  <span>
-                    {watchedTaxRegion === 'ontario' ? 'HST:' : 'TPS:'}
-                  </span>
-                  <span>${taxes.tps.toFixed(2)}</span>
+                  <span>Sous-total:</span>
+                  <span className="font-medium">${subtotal.toFixed(2)}</span>
                 </div>
                 
-                {watchedTaxRegion === 'quebec' && (
-                  <div className="flex justify-between">
-                    <span>TVQ:</span>
-                    <span>${taxes.tvq.toFixed(2)}</span>
+                <div className="space-y-3">
+                  <div>
+                    <Label>Région fiscale</Label>
+                    <Select
+                      value={watchedTaxRegion}
+                      onValueChange={(value) => setValue('tax_region', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="quebec">Québec (TPS 5% + TVQ 9.975%)</SelectItem>
+                        <SelectItem value="ontario">Ontario (HST 13%)</SelectItem>
+                        <SelectItem value="manual">Autre (Taxes manuelles)</SelectItem>
+                        <SelectItem value="none">Pas de taxes</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                )}
+                  
+                  {watchedTaxRegion === 'manual' && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>TPS ($)</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          {...register('manual_tps', { valueAsNumber: true })}
+                        />
+                      </div>
+                      <div>
+                        <Label>TVQ ($)</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          {...register('manual_tvq', { valueAsNumber: true })}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="flex justify-between">
+                    <span>
+                      {watchedTaxRegion === 'ontario' ? 'HST:' : 'TPS:'}
+                    </span>
+                    <span>${taxes.tps.toFixed(2)}</span>
+                  </div>
+                  
+                  {watchedTaxRegion === 'quebec' && (
+                    <div className="flex justify-between">
+                      <span>TVQ:</span>
+                      <span>${taxes.tvq.toFixed(2)}</span>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex justify-between text-lg font-bold border-t pt-3">
+                  <span>TOTAL:</span>
+                  <span>${total.toFixed(2)}</span>
+                </div>
               </div>
-              
-              <div className="flex justify-between text-lg font-bold border-t pt-3">
-                <span>TOTAL:</span>
-                <span>${total.toFixed(2)}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Actions */}
-        <div className="flex gap-4 justify-end">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => form.handleSubmit((data) => handleSubmit(data, 'Brouillon'))()}
-            disabled={isSubmitting}
-          >
-            Enregistrer comme Brouillon
-          </Button>
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-          >
-            Enregistrer et Envoyer par Courriel
-          </Button>
-        </div>
-      </form>
+          {/* Actions */}
+          <div className="flex gap-4 justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => form.handleSubmit((data) => handleSubmit(data, 'Brouillon'))()}
+              disabled={isSubmitting}
+            >
+              Enregistrer comme Brouillon
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+            >
+              Enregistrer et Envoyer par Courriel
+            </Button>
+          </div>
+        </form>
+      </Form>
     </div>
   );
 };
