@@ -36,6 +36,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // Check if password reset is required after login
         if (session?.user && event === 'SIGNED_IN') {
           setTimeout(async () => {
+            // Don't redirect if already on the force password change page
+            if (window.location.pathname === '/force-password-change') {
+              return;
+            }
+            
             const { data: profile } = await supabase
               .from('profiles')
               .select('password_reset_required')
