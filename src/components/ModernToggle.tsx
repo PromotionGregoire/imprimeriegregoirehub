@@ -20,19 +20,19 @@ const ModernToggle = ({
   description 
 }: ModernToggleProps) => {
   return (
-    <div className="flex items-center justify-between p-3 rounded-lg border bg-card/50 hover:bg-card transition-colors">
+    <div className="flex items-center justify-between py-base-300">
       <div className="flex-1">
         <Label 
           htmlFor={id} 
           className={cn(
-            "text-sm font-medium cursor-pointer",
+            "text-base-300 font-medium cursor-pointer leading-tight",
             disabled && "opacity-50 cursor-not-allowed"
           )}
         >
           {label}
         </Label>
         {description && (
-          <p className="text-xs text-muted-foreground mt-1">{description}</p>
+          <p className="text-base-200 text-muted-foreground mt-base-100 leading-relaxed">{description}</p>
         )}
       </div>
       <Switch
@@ -41,9 +41,8 @@ const ModernToggle = ({
         onCheckedChange={onCheckedChange}
         disabled={disabled}
         className={cn(
-          // Toggle moderne avec couleur verte solide quand actif
-          checked && "data-[state=checked]:bg-[#5a7a51] border-[#5a7a51]",
-          !checked && "bg-input",
+          // Uber-style switch with consistent green color
+          "ml-base-400",
           disabled && "opacity-50"
         )}
       />
