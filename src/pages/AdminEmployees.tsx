@@ -107,12 +107,21 @@ const AdminEmployees = () => {
     if (!employeeToDelete) return;
 
     try {
-      const { error } = await supabase
+      // First delete the profile from the profiles table
+      const { error: profileError } = await supabase
         .from('profiles')
         .delete()
         .eq('id', employeeToDelete.id);
 
-      if (error) throw error;
+      if (profileError) throw profileError;
+
+      // Then delete the auth user (this requires admin privileges)
+      const { error: authError } = await supabase.auth.admin.deleteUser(employeeToDelete.id);
+      
+      if (authError) {
+        console.warn('Could not delete auth user (this may require admin privileges):', authError);
+        // Don't throw here since the profile was already deleted
+      }
 
       refetch();
       toast({

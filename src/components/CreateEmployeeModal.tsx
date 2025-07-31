@@ -63,11 +63,22 @@ export const CreateEmployeeModal = ({ isOpen, onClose, onEmployeeCreated }: Crea
       });
       
       onEmployeeCreated();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating employee:', error);
+      
+      let errorMessage = "Impossible de créer l'employé. Veuillez réessayer.";
+      
+      // Handle specific error cases
+      if (error?.details?.includes('already been registered') || 
+          error?.message?.includes('already been registered')) {
+        errorMessage = "Cette adresse courriel est déjà utilisée. Veuillez utiliser une adresse différente.";
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Erreur",
-        description: "Impossible de créer l'employé. Veuillez réessayer.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
