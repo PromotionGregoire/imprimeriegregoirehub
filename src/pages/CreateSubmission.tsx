@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Plus, Trash2, ArrowLeft } from 'lucide-react';
+import { CalendarIcon, Plus, Trash2, ArrowLeft, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useClients } from '@/hooks/useClients';
@@ -45,21 +45,23 @@ const CreateSubmission = () => {
   console.log('CreateSubmission component rendering...');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { data: clients } = useClients();
-  const { data: products } = useProducts();
+  const { data: clients, isLoading: clientsLoading, error: clientsError } = useClients();
+  const { data: products, isLoading: productsLoading, error: productsError } = useProducts();
   const createSubmission = useCreateSubmission();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  const prefilledClientId = searchParams.get('client_id');
+  console.log('Prefilled client ID:', prefilledClientId);
+  console.log('Clients loading:', clientsLoading, 'error:', clientsError);
+  console.log('Products loading:', productsLoading, 'error:', productsError);
   console.log('Clients data:', clients);
   console.log('Products data:', products);
-  
-  const prefilledClientId = searchParams.get('client_id');
 
   const form = useForm<FormData>({
     resolver: zodResolver(submissionSchema),
     defaultValues: {
-      client_id: prefilledClientId || '',
+      client_id: '',
       deadline: undefined,
       items: [{
         product_type: '',
@@ -75,6 +77,20 @@ const CreateSubmission = () => {
     },
   });
 
+  // Safe client prefilling - only when data is loaded and client exists
+  useEffect(() => {
+    if (prefilledClientId && clients && !clientsLoading) {
+      const foundClient = clients.find(c => c.id === prefilledClientId);
+      if (foundClient) {
+        console.log('Setting prefilled client:', foundClient.business_name);
+        form.setValue('client_id', prefilledClientId);
+      } else {
+        console.warn('Prefilled client not found:', prefilledClientId);
+        // Don't set the value if client doesn't exist - let user select manually
+      }
+    }
+  }, [prefilledClientId, clients, clientsLoading, form]);
+
   // Set current date as default
   const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -87,10 +103,10 @@ const CreateSubmission = () => {
   const watchedItems = watch('items');
   const watchedTaxRegion = watch('tax_region');
 
-  // Calculate subtotal
-  const subtotal = watchedItems.reduce((sum, item) => {
-    return sum + (item.quantity * item.unit_price);
-  }, 0);
+  // Calculate subtotal safely
+  const subtotal = watchedItems?.reduce((sum, item) => {
+    return sum + ((item?.quantity || 0) * (item?.unit_price || 0));
+  }, 0) || 0;
 
   // Calculate taxes based on region
   const calculateTaxes = () => {
@@ -186,6 +202,7 @@ const CreateSubmission = () => {
 
       navigate(`/dashboard/clients/${data.client_id}`);
     } catch (error) {
+      console.error('Submission creation error:', error);
       toast({
         title: 'Erreur',
         description: 'Une erreur est survenue lors de la création de la soumission',
@@ -197,6 +214,48 @@ const CreateSubmission = () => {
   };
 
   const onSubmit = (data: FormData) => handleSubmit(data, 'Envoyée');
+
+  // Show loading state if critical data is still loading
+  if (clientsLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Retour
+          </Button>
+          <h1 className="text-3xl font-bold">Nouvelle Soumission</h1>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <div className="flex items-center gap-2">
+            <Loader2 className="w-5 h-5 animate-spin" />
+            <span>Chargement des données clients...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if clients failed to load
+  if (clientsError) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Retour
+          </Button>
+          <h1 className="text-3xl font-bold">Nouvelle Soumission</h1>
+        </div>
+        <div className="text-center py-12">
+          <p className="text-red-600 mb-4">Erreur lors du chargement des clients</p>
+          <Button onClick={() => window.location.reload()}>
+            Réessayer
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -220,9 +279,9 @@ const CreateSubmission = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="client">Client *</Label>
-                  {prefilledClientId ? (
+                  {prefilledClientId && clients ? (
                     <Input
-                      value={clients?.find(c => c.id === prefilledClientId)?.business_name || 'Chargement...'}
+                      value={clients?.find(c => c.id === prefilledClientId)?.business_name || 'Client introuvable'}
                       disabled
                       className="bg-muted"
                     />
@@ -302,9 +361,9 @@ const CreateSubmission = () => {
             <CardContent>
               <div className="space-y-4">
                 {fields.map((item, index) => {
-                  const currentItem = watchedItems[index];
+                  const currentItem = watchedItems?.[index];
                   return (
-                    <div key={index} className="grid grid-cols-12 gap-4 items-start p-4 border rounded-lg">
+                    <div key={item.id} className="grid grid-cols-12 gap-4 items-start p-4 border rounded-lg">
                       {/* Product Type Selection */}
                       <div className="col-span-2">
                         <Label>Type de produit</Label>
@@ -325,7 +384,7 @@ const CreateSubmission = () => {
                       {/* Product Selection */}
                       <div className="col-span-3">
                         <Label>Produit</Label>
-                        {currentItem?.product_type ? (
+                        {currentItem?.product_type && !productsLoading ? (
                           <Select
                             value={currentItem?.product_id || ''}
                             onValueChange={(value) => handleProductSelection(index, value)}
@@ -494,13 +553,27 @@ const CreateSubmission = () => {
               onClick={() => form.handleSubmit((data) => handleSubmit(data, 'Brouillon'))()}
               disabled={isSubmitting}
             >
-              Enregistrer comme Brouillon
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Enregistrement...
+                </>
+              ) : (
+                'Enregistrer comme Brouillon'
+              )}
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
             >
-              Enregistrer et Envoyer par Courriel
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Envoi...
+                </>
+              ) : (
+                'Enregistrer et Envoyer par Courriel'
+              )}
             </Button>
           </div>
         </form>
