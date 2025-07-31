@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
 import { 
   ArrowRight, 
   ExternalLink, 
@@ -12,6 +11,7 @@ import {
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { SubmissionStatusTimeline } from './SubmissionStatusTimeline';
+import ModernToggle from './ModernToggle';
 import { useForceAcceptSubmission } from '@/hooks/useForceAcceptSubmission';
 
 interface ModernSubmissionCardProps {
@@ -118,13 +118,13 @@ const ModernSubmissionCard = ({ submission, onClick }: ModernSubmissionCardProps
         </div>
 
         {/* Action Toggle */}
-        <div className="flex items-center justify-between pt-base-300 border-t border-border">
-          <span className="text-base-300 font-medium text-foreground">Accepter la Soumission</span>
-          <Switch
+        <div className="pt-base-300 border-t border-border">
+          <ModernToggle
+            id={`accept-${submission.id}`}
+            label="Accepter la Soumission"
             checked={submission.status === 'Acceptée'}
             onCheckedChange={handleAcceptSubmission}
             disabled={submission.status === 'Acceptée' || isAccepting}
-            onClick={(e) => e.stopPropagation()}
           />
         </div>
 

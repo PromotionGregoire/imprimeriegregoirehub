@@ -6,7 +6,7 @@ interface ModernToggleProps {
   id: string;
   label: string;
   checked: boolean;
-  onCheckedChange: () => void;
+  onCheckedChange: (checked?: boolean) => void;
   disabled?: boolean;
   description?: string;
 }
