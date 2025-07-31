@@ -10,7 +10,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import ClientDetails from "./pages/ClientDetails";
-import CreateSubmission from "./pages/CreateSubmission";
+import CreateSubmissionTest from "./pages/CreateSubmissionTest";
 import Submissions from "./pages/Submissions";
 import SubmissionDetails from "./pages/SubmissionDetails";
 import Orders from "./pages/Orders";
@@ -48,7 +48,7 @@ const App = () => (
               <Route index element={<Dashboard />} />
               <Route path="clients/:id" element={<ClientDetails />} />
               <Route path="submissions" element={<Submissions />} />
-              <Route path="submissions/new" element={<CreateSubmission />} />
+              <Route path="submissions/new" element={<CreateSubmissionTest />} />
               <Route path="submissions/:id" element={<SubmissionDetails />} />
               <Route path="submissions/edit/:id" element={<EditSubmission />} />
               <Route path="products" element={<Products />} />
