@@ -162,7 +162,7 @@ const Submissions = () => {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-base-400">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
         <Card className="bg-card border border-border">
           <CardContent className="p-base-400">
             <div className="text-base-300 text-muted-foreground font-medium">Total Soumissions</div>
