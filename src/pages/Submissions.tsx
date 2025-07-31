@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -274,7 +275,7 @@ const Submissions = () => {
             <ModernSubmissionCard
               key={submission.id}
               submission={submission}
-              onViewDetails={(id) => navigate(`/dashboard/submissions/${id}`)}
+              onClick={() => navigate(`/dashboard/submissions/${submission.id}`)}
             />
           ))
         )}
