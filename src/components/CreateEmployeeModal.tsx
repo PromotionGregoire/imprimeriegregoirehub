@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AdvancedDatePicker } from '@/components/ui/advanced-date-picker';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -154,11 +155,11 @@ export const CreateEmployeeModal = ({ isOpen, onClose, onEmployeeCreated }: Crea
 
             <div className="space-y-2">
               <Label htmlFor="hire_date">Date d'embauche</Label>
-              <Input
-                id="hire_date"
-                type="date"
-                value={formData.hire_date}
-                onChange={(e) => handleInputChange('hire_date', e.target.value)}
+              <AdvancedDatePicker
+                value={formData.hire_date ? new Date(formData.hire_date) : undefined}
+                onChange={(date) => handleInputChange('hire_date', date ? date.toISOString().split('T')[0] : '')}
+                placeholder="Sélectionner une date d'embauche"
+                includeTime={false}
               />
             </div>
 

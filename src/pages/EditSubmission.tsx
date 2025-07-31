@@ -19,6 +19,8 @@ import { useProducts } from '@/hooks/useProducts';
 import { useSubmissionDetails } from '@/hooks/useSubmissionDetails';
 import { useUpdateSubmission, SubmissionFormData } from '@/hooks/useSubmissions';
 import { useToast } from '@/hooks/use-toast';
+import { AdvancedDatePicker } from '@/components/ui/advanced-date-picker';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const submissionItemSchema = z.object({
@@ -378,35 +380,24 @@ const EditSubmission = () => {
                 />
               </div>
               
-              <div>
-                <Label>Date d'échéance</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !watch('deadline') && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {watch('deadline') ? format(watch('deadline'), 'dd/MM/yyyy') : 'Sélectionner une date'}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={watch('deadline')}
-                      onSelect={(date) => setValue('deadline', date)}
-                      initialFocus
-                      captionLayout="dropdown-buttons"
-                      fromYear={1900}
-                      toYear={2125}
-                      className={cn("p-3 pointer-events-auto")}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
+              <FormField
+                control={form.control}
+                name="deadline"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Date d'échéance</FormLabel>
+                    <FormControl>
+                      <AdvancedDatePicker
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Sélectionner une date d'échéance"
+                        includeTime={true}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
           </CardContent>
         </Card>
