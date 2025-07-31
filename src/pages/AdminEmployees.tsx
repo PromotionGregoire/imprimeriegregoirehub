@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Navigate } from 'react-router-dom';
-import DashboardLayout from '@/components/DashboardLayout';
+
 import { FlexibleDashboardToolbar } from '@/components/FlexibleDashboardToolbar';
 import { Button } from '@/components/ui/button';
 import { Plus, Users } from 'lucide-react';
