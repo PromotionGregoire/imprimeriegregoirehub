@@ -92,6 +92,7 @@ const handler = async (req: Request): Promise<Response> => {
       .from('profiles')
       .update({
         full_name: requestData.full_name,
+        email: requestData.email,
         role: requestData.role,
         job_title: requestData.job_title,
         employment_status: requestData.employment_status,
