@@ -6,9 +6,11 @@ import { Navigate } from 'react-router-dom';
 
 import { FlexibleDashboardToolbar } from '@/components/FlexibleDashboardToolbar';
 import { Button } from '@/components/ui/button';
-import { Plus, Users } from 'lucide-react';
+import { Plus, Users, Trash2 } from 'lucide-react';
 import { EmployeeCard } from '@/components/EmployeeCard';
 import { CreateEmployeeModal } from '@/components/CreateEmployeeModal';
+import { EditEmployeeModal } from '@/components/EditEmployeeModal';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 
 const AdminEmployees = () => {
@@ -18,6 +20,10 @@ const AdminEmployees = () => {
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState<any>(null);
 
   // Check if current user is admin
   const { data: currentUserProfile, isLoading: profileLoading } = useQuery({
@@ -79,6 +85,75 @@ const AdminEmployees = () => {
       title: "Employé créé",
       description: "Le nouvel employé a été créé avec succès.",
     });
+  };
+
+  const handleEditEmployee = (employee: any) => {
+    setSelectedEmployee(employee);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEmployeeUpdated = () => {
+    refetch();
+    setIsEditModalOpen(false);
+    setSelectedEmployee(null);
+  };
+
+  const handleDeleteEmployee = (employee: any) => {
+    setEmployeeToDelete(employee);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteEmployee = async () => {
+    if (!employeeToDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', employeeToDelete.id);
+
+      if (error) throw error;
+
+      refetch();
+      toast({
+        title: "Employé supprimé",
+        description: "L'employé a été supprimé avec succès.",
+      });
+    } catch (error) {
+      console.error('Error deleting employee:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer l'employé.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setEmployeeToDelete(null);
+    }
+  };
+
+  const handleResetPassword = async (employee: any) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ password_reset_required: true })
+        .eq('id', employee.id);
+
+      if (error) throw error;
+
+      refetch();
+      toast({
+        title: "Mot de passe réinitialisé",
+        description: "L'employé devra changer son mot de passe à la prochaine connexion.",
+      });
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de réinitialiser le mot de passe.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -155,7 +230,13 @@ const AdminEmployees = () => {
       {!isLoading && !error && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredEmployees.map((employee) => (
-            <EmployeeCard key={employee.id} employee={employee} />
+            <EmployeeCard 
+              key={employee.id} 
+              employee={employee}
+              onEdit={handleEditEmployee}
+              onDelete={handleDeleteEmployee}
+              onResetPassword={handleResetPassword}
+            />
           ))}
         </div>
       )}
@@ -178,6 +259,37 @@ const AdminEmployees = () => {
         onClose={() => setIsCreateModalOpen(false)}
         onEmployeeCreated={handleEmployeeCreated}
       />
+
+      <EditEmployeeModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        employee={selectedEmployee}
+        onEmployeeUpdated={handleEmployeeUpdated}
+      />
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer l'employé{' '}
+              <strong>{employeeToDelete?.full_name}</strong> ?
+              Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteEmployee}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

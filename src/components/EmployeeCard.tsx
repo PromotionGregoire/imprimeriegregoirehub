@@ -1,7 +1,10 @@
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Mail, Calendar, Phone, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Mail, Calendar, Phone, AlertCircle, MoreVertical, Edit, Trash2, Key } from 'lucide-react';
 
 interface Employee {
   id: string;
@@ -18,6 +21,9 @@ interface Employee {
 
 interface EmployeeCardProps {
   employee: Employee;
+  onEdit?: (employee: Employee) => void;
+  onDelete?: (employee: Employee) => void;
+  onResetPassword?: (employee: Employee) => void;
 }
 
 const getRoleBadgeVariant = (role: string) => {
@@ -44,7 +50,7 @@ const getRoleLabel = (role: string) => {
   }
 };
 
-export const EmployeeCard = ({ employee }: EmployeeCardProps) => {
+export const EmployeeCard = ({ employee, onEdit, onDelete, onResetPassword }: EmployeeCardProps) => {
   const initials = employee.full_name
     ?.split(' ')
     .map(name => name[0])
@@ -68,16 +74,50 @@ export const EmployeeCard = ({ employee }: EmployeeCardProps) => {
               )}
             </div>
           </div>
-          <div className="flex flex-col gap-2 items-end">
-            <Badge variant={getRoleBadgeVariant(employee.role)}>
-              {getRoleLabel(employee.role)}
-            </Badge>
-            {employee.password_reset_required && (
-              <Badge variant="outline" className="text-orange-600 border-orange-600">
-                <AlertCircle className="h-3 w-3 mr-1" />
-                Mot de passe temporaire
+          <div className="flex items-center gap-2">
+            <div className="flex flex-col gap-2 items-end">
+              <Badge variant={getRoleBadgeVariant(employee.role)}>
+                {getRoleLabel(employee.role)}
               </Badge>
-            )}
+              {employee.password_reset_required && (
+                <Badge variant="outline" className="text-orange-600 border-orange-600">
+                  <AlertCircle className="h-3 w-3 mr-1" />
+                  Mot de passe temporaire
+                </Badge>
+              )}
+            </div>
+            
+            {/* Actions Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-background border z-50">
+                {onEdit && (
+                  <DropdownMenuItem onClick={() => onEdit(employee)} className="cursor-pointer">
+                    <Edit className="h-4 w-4 mr-2" />
+                    Modifier
+                  </DropdownMenuItem>
+                )}
+                {onResetPassword && (
+                  <DropdownMenuItem onClick={() => onResetPassword(employee)} className="cursor-pointer">
+                    <Key className="h-4 w-4 mr-2" />
+                    Réinitialiser mot de passe
+                  </DropdownMenuItem>
+                )}
+                {onDelete && (
+                  <DropdownMenuItem 
+                    onClick={() => onDelete(employee)} 
+                    className="cursor-pointer text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Supprimer
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </CardHeader>
