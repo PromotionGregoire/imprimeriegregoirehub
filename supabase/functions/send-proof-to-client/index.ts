@@ -83,7 +83,7 @@ serve(async (req) => {
 
     // Send email to client
     const emailResponse = await resend.emails.send({
-      from: 'Promotion Grégoire <onboarding@resend.dev>',
+      from: 'Promotion Grégoire <info@promotiongregoire.com>',
       to: [clientEmail!],
       subject: `Épreuve prête pour approbation - Commande ${orderNumber}`,
       html: `
