@@ -175,7 +175,7 @@ const Proofs = () => {
         </CardHeader>
         <CardContent className="p-6 pt-0">
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-base-400 md:gap-base-600">
               {[...Array(8)].map((_, i) => (
                 <div key={i} className="space-y-3">
                   <Skeleton className="h-32 w-full rounded-lg" />
@@ -185,7 +185,7 @@ const Proofs = () => {
               ))}
             </div>
           ) : proofs && proofs.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-base-400 md:gap-base-600">
               {proofs.map((proof) => (
                 <ProofCard key={proof.id} proof={proof} />
               ))}

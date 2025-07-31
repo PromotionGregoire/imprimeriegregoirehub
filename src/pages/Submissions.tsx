@@ -233,7 +233,7 @@ const Submissions = () => {
       </Card>
 
       {/* Submissions Grid - 4-3-1 Responsive Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-base-400 md:gap-base-600 animate-fade-in">
+      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-base-400 md:gap-base-600 animate-fade-in">
         {submissions.length === 0 ? (
           <div className="col-span-full">
             <Card>
