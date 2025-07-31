@@ -7,7 +7,7 @@ import { useFilteredOrders } from '@/hooks/useFilteredOrders';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import OrderCard from '@/components/OrderCard';
+import EpuredOrderCard from '@/components/EpuredOrderCard';
 
 const Orders = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -35,7 +35,7 @@ const Orders = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['orders-with-details'] });
       toast({
         title: '✅ Statut mis à jour',
         description: 'Le statut de la commande a été modifié avec succès.',
@@ -211,7 +211,7 @@ const Orders = () => {
           </div>
         ) : (
           orders.map((order) => (
-            <OrderCard
+            <EpuredOrderCard
               key={order.id}
               order={order}
               onProofAccepted={handleProofAccepted}

@@ -6,14 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Switch } from '@/components/ui/switch';
+
 import { useSubmissionDetails } from '@/hooks/useSubmissionDetails';
 import { useCloneSubmission, useDeleteSubmission, useUpdateSubmissionStatus } from '@/hooks/useSubmissionActions';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import StatusManager from '@/components/StatusManager';
 import EmployeeAssignManager from '@/components/EmployeeAssignManager';
-import { useProofToggle, useDeliveryToggle } from '@/hooks/useProofToggle';
+
 
 const SubmissionDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -23,13 +23,6 @@ const SubmissionDetails = () => {
   const cloneSubmission = useCloneSubmission();
   const deleteSubmission = useDeleteSubmission();
   const updateSubmissionStatus = useUpdateSubmissionStatus();
-  
-  // Toggle states
-  const [proofAccepted, setProofAccepted] = useState(false);
-  const [delivered, setDelivered] = useState(false);
-  
-  const proofToggle = useProofToggle(id!);
-  const deliveryToggle = useDeliveryToggle(id!);
 
   if (isLoading) {
     return (
@@ -151,15 +144,6 @@ const SubmissionDetails = () => {
     }
   };
 
-  const handleProofToggle = async (checked: boolean) => {
-    setProofAccepted(checked);
-    await proofToggle.mutateAsync({ isAccepted: checked });
-  };
-
-  const handleDeliveryToggle = async (checked: boolean) => {
-    setDelivered(checked);
-    await deliveryToggle.mutateAsync({ isDelivered: checked });
-  };
 
   return (
     <div className="p-6 space-y-6">
@@ -369,50 +353,6 @@ const SubmissionDetails = () => {
                   Renvoyer le courriel
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Proof and Delivery Status */}
-          <Card>
-            <CardHeader>
-              <CardTitle>État de la Soumission</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Épreuve acceptée:</span>
-                <div className="flex items-center gap-2">
-                  <span className={`text-sm font-medium text-gray-500`}>
-                    En attente de commande
-                  </span>
-                  <Switch
-                    checked={false}
-                    onCheckedChange={() => {}} 
-                    disabled={true}
-                    className="opacity-50"
-                  />
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                💡 Disponible lorsque la soumission devient une commande
-              </p>
-
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Livré:</span>
-                <div className="flex items-center gap-2">
-                  <span className={`text-sm font-medium text-gray-500`}>
-                    En attente de commande
-                  </span>
-                  <Switch
-                    checked={false}
-                    onCheckedChange={() => {}}
-                    disabled={true}
-                    className="opacity-50"
-                  />
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                💡 Disponible lorsque la soumission devient une commande
-              </p>
             </CardContent>
           </Card>
 
