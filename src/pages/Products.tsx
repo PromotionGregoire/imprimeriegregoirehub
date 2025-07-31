@@ -154,44 +154,53 @@ const Products = () => {
           </Card>
         ) : (
           filteredProducts.map((product) => (
-            <Card key={product.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="grid grid-cols-12 gap-4 items-center">
-                  <div className="col-span-4">
-                    <div className="font-medium">{product.name}</div>
-                    <div className="text-sm text-muted-foreground">
+            <Card 
+              key={product.id} 
+              className="hover:shadow-md transition-shadow cursor-pointer"
+              onClick={() => window.location.href = `/dashboard/products/${product.id}`}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-lg">{product.name}</div>
+                    <div className="text-sm text-muted-foreground mt-1">
                       {product.product_code}
                     </div>
+                    {product.description && (
+                      <div className="text-sm text-muted-foreground mt-2">
+                        {product.description}
+                      </div>
+                    )}
                   </div>
                   
-                  <div className="col-span-4">
-                    <div className="text-sm text-muted-foreground">
-                      {product.description || 'Aucune description'}
+                  <div className="flex items-center gap-6 ml-6">
+                    <div className="text-right">
+                      <div className="font-semibold text-lg">
+                        ${Number(product.default_price).toFixed(2)}
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="col-span-2 text-right">
-                    <div className="font-medium">
-                      ${Number(product.default_price).toFixed(2)}
-                    </div>
-                  </div>
-                  
-                  <div className="col-span-1">
-                    {getCategoryBadge(product.category)}
-                  </div>
-                  
-                  <div className="col-span-1 text-right">
-                    <div className="flex gap-1 justify-end">
-                      <Button variant="ghost" size="sm" onClick={() => handleEdit(product)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(product.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                    
+                    <div className="flex items-center gap-3">
+                      {getCategoryBadge(product.category)}
+                      
+                      <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleEdit(product)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(product.id)}
+                          className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
