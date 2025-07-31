@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar, FileText, User, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
 import ModernToggle from './ModernToggle';
 
 interface OrderCardProps {
@@ -27,8 +28,17 @@ interface OrderCardProps {
 }
 
 const EpuredOrderCard = ({ order, onProofAccepted, onDelivered }: OrderCardProps) => {
+  const navigate = useNavigate();
   const isProofAccepted = order.status === 'En production' || order.status === 'Complétée';
   const isDelivered = order.status === 'Complétée';
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Éviter la navigation si on clique sur un toggle ou bouton
+    if ((e.target as HTMLElement).closest('button, [role="switch"]')) {
+      return;
+    }
+    navigate(`/dashboard/orders/${order.id}`);
+  };
 
   // Format submission number to remove "Soumission #" prefix
   const formatSubmissionNumber = (submissionNumber: string) => {
@@ -62,7 +72,10 @@ const EpuredOrderCard = ({ order, onProofAccepted, onDelivered }: OrderCardProps
   };
 
   return (
-    <Card className={`hover:shadow-lg transition-all duration-300 border-l-4 ${getBorderColor(order.status)}`}>
+    <Card 
+      className={`hover:shadow-lg transition-all duration-300 border-l-4 cursor-pointer ${getBorderColor(order.status)}`}
+      onClick={handleCardClick}
+    >
       <CardHeader className="pb-3">
         {/* En-tête : Numéro + Badge + Montant */}
         <div className="flex items-center justify-between">
