@@ -19,6 +19,7 @@ import Products from "./pages/Products";
 import Proofs from "./pages/Proofs";
 import OrderDetails from "./pages/OrderDetails";
 import Suppliers from "./pages/Suppliers";
+import SupplierDetails from "./pages/SupplierDetails";
 import AdminEmployees from "./pages/AdminEmployees";
 import ForcePasswordChange from "./pages/ForcePasswordChange";
 import DashboardLayout from "./components/DashboardLayout";
@@ -49,6 +50,7 @@ const App = () => (
               <Route path="submissions/edit/:id" element={<EditSubmission />} />
               <Route path="products" element={<Products />} />
               <Route path="suppliers" element={<Suppliers />} />
+              <Route path="suppliers/:id" element={<SupplierDetails />} />
               <Route path="orders" element={<Orders />} />
               <Route path="orders/:id" element={<OrderDetails />} />
               <Route path="proofs" element={<Proofs />} />

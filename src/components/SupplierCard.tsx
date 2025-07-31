@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Building, User, Mail, Phone, Edit, MoreHorizontal } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useNavigate } from 'react-router-dom';
 
 interface SupplierCardProps {
   supplier: {
@@ -22,6 +23,16 @@ interface SupplierCardProps {
 }
 
 const SupplierCard = ({ supplier, onEdit, onDelete }: SupplierCardProps) => {
+  const navigate = useNavigate();
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Éviter la navigation si on clique sur un menu déroulant, lien ou bouton
+    if ((e.target as HTMLElement).closest('button, a, [role="menuitem"]')) {
+      return;
+    }
+    navigate(`/dashboard/suppliers/${supplier.id}`);
+  };
+
   const getTypeBadges = () => {
     const badges = [];
     if (supplier.is_goods_supplier) {
@@ -34,7 +45,10 @@ const SupplierCard = ({ supplier, onEdit, onDelete }: SupplierCardProps) => {
   };
 
   return (
-    <Card className="hover:shadow-lg transition-all duration-300 border-0 shadow-md bg-gradient-to-br from-card to-card/80">
+    <Card 
+      className="hover:shadow-lg transition-all duration-300 border-0 shadow-md bg-gradient-to-br from-card to-card/80 cursor-pointer"
+      onClick={handleCardClick}
+    >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
