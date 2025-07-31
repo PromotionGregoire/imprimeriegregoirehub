@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import logoGregoire from '@/assets/logo-imprimerie-gregoire.png';
 
 const navigationItems = [
   { title: "Clients", url: "/dashboard", icon: Users },
@@ -80,9 +81,11 @@ export function AppSidebar() {
     >
       <SidebarHeader className="border-b border-slate-800 p-4">
         {!collapsed && (
-          <div className="text-white font-bold text-lg">
-            Promotions Grégoire
-          </div>
+          <img 
+            src={logoGregoire} 
+            alt="Promotions Grégoire" 
+            className="h-10 w-auto object-contain"
+          />
         )}
         {collapsed && (
           <div className="text-white font-bold text-center">
