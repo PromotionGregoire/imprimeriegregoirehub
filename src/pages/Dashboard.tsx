@@ -105,7 +105,7 @@ const Dashboard = () => {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-base-400 md:gap-base-600 animate-fade-in">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6 animate-fade-in">
           {clients.map((client) => (
             <ClientCard
               key={client.id}
