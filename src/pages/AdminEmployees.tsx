@@ -15,8 +15,8 @@ const AdminEmployees = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Check if current user is admin
@@ -66,8 +66,8 @@ const AdminEmployees = () => {
   const filteredEmployees = employees?.filter(employee => {
     const matchesSearch = employee.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          employee.job_title?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesRole = !roleFilter || employee.role === roleFilter;
-    const matchesStatus = !statusFilter || employee.employment_status === statusFilter;
+    const matchesRole = !roleFilter || roleFilter === 'all' || employee.role === roleFilter;
+    const matchesStatus = !statusFilter || statusFilter === 'all' || employee.employment_status === statusFilter;
     
     return matchesSearch && matchesRole && matchesStatus;
   }) || [];
@@ -104,7 +104,7 @@ const AdminEmployees = () => {
             value: roleFilter,
             onChange: setRoleFilter,
             options: [
-              { value: "", label: "Tous les rôles" },
+              { value: "all", label: "Tous les rôles" },
               { value: "EMPLOYEE", label: "Employé" },
               { value: "ACCOUNTANT", label: "Comptable" },
               { value: "ADMIN", label: "Admin" },
@@ -115,7 +115,7 @@ const AdminEmployees = () => {
             value: statusFilter,
             onChange: setStatusFilter,
             options: [
-              { value: "", label: "Tous les statuts" },
+              { value: "all", label: "Tous les statuts" },
               { value: "Temps plein", label: "Temps plein" },
               { value: "Temps partiel", label: "Temps partiel" },
               { value: "Contractuel", label: "Contractuel" },
