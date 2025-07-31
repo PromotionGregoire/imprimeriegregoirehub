@@ -202,15 +202,15 @@ const Submissions = () => {
       {/* Search & Status Filter Bar */}
       <Card>
         <CardContent className="p-6">
-          <div className="flex flex-col sm:flex-row gap-base-400">
+          <div className="flex flex-col sm:flex-row gap-4 md:gap-6">
             {/* Search Bar */}
             <div className="relative flex-1">
-              <Search className="absolute left-base-300 top-1/2 transform -translate-y-1/2 h-base-400 w-base-400 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Rechercher par numéro de soumission ou client..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-base-600"
+                className="pl-10 h-10 sm:h-11 lg:h-12"
               />
             </div>
 
