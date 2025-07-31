@@ -1,13 +1,24 @@
 import { useState } from 'react';
-import { useClients } from '@/hooks/useClients';
 import { Button } from '@/components/ui/button';
 import ClientCard from '@/components/ClientCard';
 import CreateClientModal from '@/components/CreateClientModal';
+import { DashboardToolbar } from '@/components/DashboardToolbar';
+import { useFilteredClients } from '@/hooks/useFilteredClients';
 import { Plus, Users } from 'lucide-react';
 
 const Dashboard = () => {
-  const { data: clients, isLoading, error } = useClients();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [periodFilter, setPeriodFilter] = useState('all');
+  
+  const { clients, isLoading, error } = useFilteredClients(searchQuery, statusFilter, periodFilter);
+
+  const clientStatusOptions = [
+    { value: 'Prospect', label: 'Prospect' },
+    { value: 'Actif', label: 'Actif' },
+    { value: 'Inactif', label: 'Inactif' },
+  ];
 
   if (isLoading) {
     return (
@@ -43,6 +54,18 @@ const Dashboard = () => {
         </Button>
       </div>
       
+      {/* Toolbar */}
+      <DashboardToolbar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        statusFilter={statusFilter}
+        onStatusChange={setStatusFilter}
+        periodFilter={periodFilter}
+        onPeriodChange={setPeriodFilter}
+        statusOptions={clientStatusOptions}
+        searchPlaceholder="Rechercher par nom d'entreprise, contact ou email..."
+      />
+
       {/* Main Content */}
       {!clients || clients.length === 0 ? (
         <div className="text-center py-12">

@@ -1,11 +1,24 @@
+import { useState } from 'react';
 import { ProofCard } from '@/components/ProofCard';
-import { useProofs } from '@/hooks/useProofs';
+import { DashboardToolbar } from '@/components/DashboardToolbar';
+import { useFilteredProofs } from '@/hooks/useFilteredProofs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Clock, AlertCircle } from 'lucide-react';
 
 const Proofs = () => {
-  const { data: proofs, isLoading, error } = useProofs();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [periodFilter, setPeriodFilter] = useState('all');
+  
+  const { proofs, isLoading, error } = useFilteredProofs(searchQuery, statusFilter, periodFilter);
+
+  const proofStatusOptions = [
+    { value: 'À préparer', label: 'À préparer' },
+    { value: 'En préparation', label: 'En préparation' },
+    { value: 'Envoyée', label: 'Envoyée' },
+    { value: 'En révision', label: 'En révision' },
+  ];
 
   if (error) {
     return (
@@ -35,6 +48,18 @@ const Proofs = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Gestion des Épreuves</h1>
       </div>
+
+      {/* Toolbar */}
+      <DashboardToolbar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        statusFilter={statusFilter}
+        onStatusChange={setStatusFilter}
+        periodFilter={periodFilter}
+        onPeriodChange={setPeriodFilter}
+        statusOptions={proofStatusOptions}
+        searchPlaceholder="Rechercher par numéro de commande ou client..."
+      />
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

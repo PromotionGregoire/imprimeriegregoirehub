@@ -1,25 +1,46 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Plus, Search, Filter, FileText, Calendar, DollarSign, ExternalLink } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useAllSubmissions } from '@/hooks/useAllSubmissions';
+import { Card, CardContent } from '@/components/ui/card';
+import { Plus, FileText, AlertCircle } from 'lucide-react';
+import { DashboardToolbar } from '@/components/DashboardToolbar';
+import { useFilteredSubmissions } from '@/hooks/useFilteredSubmissions';
 import { Skeleton } from '@/components/ui/skeleton';
-import StatusManager from '@/components/StatusManager';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import ModernSubmissionCard from '@/components/ModernSubmissionCard';
 
 const Submissions = () => {
   const navigate = useNavigate();
-  const { data: submissions, isLoading } = useAllSubmissions();
-  
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [periodFilter, setPeriodFilter] = useState('all');
+  
+  const { submissions, isLoading, error } = useFilteredSubmissions(searchQuery, statusFilter, periodFilter);
+
+  const submissionStatusOptions = [
+    { value: 'Brouillon', label: 'Brouillon' },
+    { value: 'Envoyée', label: 'Envoyée' },
+    { value: 'Acceptée', label: 'Acceptée' },
+    { value: 'Refusée', label: 'Refusée' },
+    { value: 'Livrée', label: 'Livrée' },
+  ];
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+            <h3 className="text-lg font-medium mb-2">Erreur de chargement</h3>
+            <p className="text-muted-foreground">
+              Impossible de charger les soumissions. Veuillez réessayer.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Calculate dashboard stats
   const stats = {
@@ -29,17 +50,6 @@ const Submissions = () => {
     sent: submissions?.filter(s => s.status === 'Envoyée')?.length || 0,
     totalValue: submissions?.reduce((sum, s) => sum + (Number(s.total_price) || 0), 0) || 0
   };
-
-  // Filter submissions
-  const filteredSubmissions = submissions?.filter(submission => {
-    const matchesSearch = 
-      submission.submission_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      submission.clients?.business_name.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || submission.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  }) || [];
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-CA', {
@@ -184,46 +194,27 @@ const Submissions = () => {
         </CardContent>
       </Card>
 
-      {/* Search and Filter */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="Rechercher soumissions ou clients..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-48">
-                <Filter className="w-4 h-4 mr-2" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tous les Statuts</SelectItem>
-                <SelectItem value="Brouillon">Brouillon</SelectItem>
-                <SelectItem value="Envoyée">Envoyée</SelectItem>
-                <SelectItem value="Acceptée">Acceptée</SelectItem>
-                <SelectItem value="Refusée">Refusée</SelectItem>
-                <SelectItem value="Livrée">Livrée</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Toolbar */}
+      <DashboardToolbar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        statusFilter={statusFilter}
+        onStatusChange={setStatusFilter}
+        periodFilter={periodFilter}
+        onPeriodChange={setPeriodFilter}
+        statusOptions={submissionStatusOptions}
+        searchPlaceholder="Rechercher par numéro de soumission ou client..."
+      />
 
       {/* Submissions Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredSubmissions.length === 0 ? (
+        {submissions.length === 0 ? (
           <div className="col-span-full">
             <Card>
               <CardContent className="text-center py-12">
                 <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">
-                  {searchTerm || statusFilter !== 'all' 
+                  {searchQuery || statusFilter !== 'all' 
                     ? 'Aucune soumission trouvée avec ces critères'
                     : 'Aucune soumission pour le moment'
                   }
@@ -232,7 +223,7 @@ const Submissions = () => {
             </Card>
           </div>
         ) : (
-          filteredSubmissions.map((submission) => (
+          submissions.map((submission) => (
             <ModernSubmissionCard
               key={submission.id}
               submission={submission}
