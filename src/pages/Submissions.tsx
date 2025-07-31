@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Plus, FileText, AlertCircle } from 'lucide-react';
-import { DashboardToolbar } from '@/components/DashboardToolbar';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Plus, FileText, AlertCircle, Search } from 'lucide-react';
 import { useFilteredSubmissions } from '@/hooks/useFilteredSubmissions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
@@ -127,42 +128,59 @@ const Submissions = () => {
         </Button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <Card className="bg-white">
-          <CardContent className="p-4">
-            <div className="text-sm text-gray-600">Total Soumissions</div>
-            <div className="text-2xl font-bold">{stats.total}</div>
-          </CardContent>
-        </Card>
+      {/* Stats Cards with Period Filter */}
+      <div className="space-y-4">
+        <div className="flex justify-end">
+          <Select value={periodFilter} onValueChange={setPeriodFilter}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Filtrer par période" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Toute période</SelectItem>
+              <SelectItem value="7days">7 derniers jours</SelectItem>
+              <SelectItem value="30days">Dernier mois</SelectItem>
+              <SelectItem value="90days">3 derniers mois</SelectItem>
+              <SelectItem value="365days">Dernière année</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         
-        <Card className="bg-purple-50 border-purple-200">
-          <CardContent className="p-4">
-            <div className="text-sm text-purple-600">Complétées</div>
-            <div className="text-2xl font-bold text-purple-700">{stats.completed}</div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-green-50 border-green-200">
-          <CardContent className="p-4">
-            <div className="text-sm text-green-600">Acceptées</div>
-            <div className="text-2xl font-bold text-green-700">{stats.accepted}</div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-orange-50 border-orange-200">
-          <CardContent className="p-4">
-            <div className="text-sm text-orange-600">Envoyées</div>
-            <div className="text-2xl font-bold text-orange-700">{stats.sent}</div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-blue-50 border-blue-200">
-          <CardContent className="p-4">
-            <div className="text-sm text-blue-600">Valeur Totale</div>
-            <div className="text-2xl font-bold text-blue-700">{formatPrice(stats.totalValue)}</div>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <Card className="bg-white">
+            <CardContent className="p-4">
+              <div className="text-sm text-gray-600">Total Soumissions</div>
+              <div className="text-2xl font-bold">{stats.total}</div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-purple-50 border-purple-200">
+            <CardContent className="p-4">
+              <div className="text-sm text-purple-600">Complétées</div>
+              <div className="text-2xl font-bold text-purple-700">{stats.completed}</div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-green-50 border-green-200">
+            <CardContent className="p-4">
+              <div className="text-sm text-green-600">Acceptées</div>
+              <div className="text-2xl font-bold text-green-700">{stats.accepted}</div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-orange-50 border-orange-200">
+            <CardContent className="p-4">
+              <div className="text-sm text-orange-600">Envoyées</div>
+              <div className="text-2xl font-bold text-orange-700">{stats.sent}</div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-blue-50 border-blue-200">
+            <CardContent className="p-4">
+              <div className="text-sm text-blue-600">Valeur Totale</div>
+              <div className="text-2xl font-bold text-blue-700">{formatPrice(stats.totalValue)}</div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Color Legend */}
@@ -195,16 +213,37 @@ const Submissions = () => {
       </Card>
 
       {/* Toolbar */}
-      <DashboardToolbar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        statusFilter={statusFilter}
-        onStatusChange={setStatusFilter}
-        periodFilter={periodFilter}
-        onPeriodChange={setPeriodFilter}
-        statusOptions={submissionStatusOptions}
-        searchPlaceholder="Rechercher par numéro de soumission ou client..."
-      />
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Search Bar */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Rechercher par numéro de soumission ou client..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
+            {/* Status Filter */}
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="Filtrer par statut" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les statuts</SelectItem>
+                {submissionStatusOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Submissions Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
