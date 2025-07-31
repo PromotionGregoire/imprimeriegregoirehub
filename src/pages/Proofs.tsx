@@ -4,7 +4,9 @@ import { FlexibleDashboardToolbar } from '@/components/FlexibleDashboardToolbar'
 import { useFilteredProofs } from '@/hooks/useFilteredProofs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Clock, AlertCircle, Eye, CheckCircle2, CircleDot } from 'lucide-react';
+import { FileText, Clock, AlertCircle, Eye, CheckCircle2, CircleDot, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const Proofs = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -44,10 +46,16 @@ const Proofs = () => {
     inRevision: proofs?.filter(proof => proof.status === 'En révision').length || 0,
   };
 
+  const navigate = useNavigate();
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Gestion des Épreuves</h1>
+        <Button onClick={() => navigate('/dashboard/orders')}>
+          <Plus className="h-4 w-4 mr-2" />
+          Nouvelle Épreuve
+        </Button>
       </div>
 
       {/* Toolbar */}

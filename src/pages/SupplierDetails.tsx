@@ -104,83 +104,89 @@ const SupplierDetails = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {supplier.contact_person && (
-              <div className="flex items-center gap-3">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Personne de contact</p>
-                  <p className="font-medium">{supplier.contact_person}</p>
-                </div>
+            <div className="flex items-center gap-3">
+              <User className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">Personne de contact</p>
+                <p className="font-medium">
+                  {supplier.contact_person || <span className="text-muted-foreground italic">Non spécifié</span>}
+                </p>
               </div>
-            )}
+            </div>
 
-            {supplier.email && (
-              <div className="flex items-center gap-3">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
+            <div className="flex items-center gap-3">
+              <Mail className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">Email</p>
+                {supplier.email ? (
                   <a
                     href={`mailto:${supplier.email}`}
                     className="font-medium text-primary hover:underline"
                   >
                     {supplier.email}
                   </a>
-                </div>
+                ) : (
+                  <span className="text-muted-foreground italic">Non spécifié</span>
+                )}
               </div>
-            )}
+            </div>
 
-            {supplier.phone && (
-              <div className="flex items-center gap-3">
-                <Phone className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Téléphone</p>
+            <div className="flex items-center gap-3">
+              <Phone className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">Téléphone</p>
+                {supplier.phone ? (
                   <a
                     href={`tel:${supplier.phone}`}
                     className="font-medium text-primary hover:underline"
                   >
                     {supplier.phone}
                   </a>
+                ) : (
+                  <span className="text-muted-foreground italic">Non spécifié</span>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Globe className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Site web principal</p>
+                  {supplier.website_1 ? (
+                    <a
+                      href={supplier.website_1}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-primary hover:underline"
+                    >
+                      {supplier.website_1}
+                    </a>
+                  ) : (
+                    <span className="text-muted-foreground italic">Non spécifié</span>
+                  )}
                 </div>
               </div>
-            )}
 
-            {(supplier.website_1 || supplier.website_2) && (
-              <div className="space-y-3">
-                {supplier.website_1 && (
-                  <div className="flex items-center gap-3">
-                    <Globe className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Site web principal</p>
-                      <a
-                        href={supplier.website_1}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-medium text-primary hover:underline"
-                      >
-                        {supplier.website_1}
-                      </a>
-                    </div>
-                  </div>
-                )}
-
-                {supplier.website_2 && (
-                  <div className="flex items-center gap-3">
-                    <Globe className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Site web secondaire</p>
-                      <a
-                        href={supplier.website_2}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-medium text-primary hover:underline"
-                      >
-                        {supplier.website_2}
-                      </a>
-                    </div>
-                  </div>
-                )}
+              <div className="flex items-center gap-3">
+                <Globe className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Site web secondaire</p>
+                  {supplier.website_2 ? (
+                    <a
+                      href={supplier.website_2}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-primary hover:underline"
+                    >
+                      {supplier.website_2}
+                    </a>
+                  ) : (
+                    <span className="text-muted-foreground italic">Non spécifié</span>
+                  )}
+                </div>
               </div>
-            )}
+            </div>
           </CardContent>
         </Card>
 
@@ -228,19 +234,21 @@ const SupplierDetails = () => {
         </Card>
 
         {/* Notes */}
-        {supplier.notes && (
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Notes
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Notes
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {supplier.notes ? (
               <p className="text-muted-foreground">{supplier.notes}</p>
-            </CardContent>
-          </Card>
-        )}
+            ) : (
+              <p className="text-muted-foreground italic">Aucune note ajoutée</p>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Pencil, Trash2, Tag, Building } from 'lucide-react';
+import { Search, Pencil, Trash2, Tag, Building, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -102,11 +102,14 @@ const Products = () => {
   return (
     <>
       <div className="p-6 space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Produits</h1>
-          <ProductModal onSave={handleCreateProduct} />
-        </div>
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Produits</h1>
+        <Button onClick={() => setEditModalOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Nouveau Produit
+        </Button>
+      </div>
 
       {/* Search and Filters */}
       <Card>
@@ -199,11 +202,11 @@ const Products = () => {
       </div>
     </div>
     
-    {/* Modal d'édition contrôlé - en dehors du div principal */}
+    {/* Modal de création/édition contrôlé - en dehors du div principal */}
     <ProductModal
       product={editingProduct}
-      onSave={handleUpdateProduct}
-      isLoading={updateProduct.isPending}
+      onSave={editingProduct ? handleUpdateProduct : handleCreateProduct}
+      isLoading={editingProduct ? updateProduct.isPending : createProduct.isPending}
       isOpen={editModalOpen}
       onOpenChange={(open) => {
         setEditModalOpen(open);

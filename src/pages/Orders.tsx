@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Package, DollarSign, TrendingUp } from 'lucide-react';
+import { Package, DollarSign, TrendingUp, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FlexibleDashboardToolbar } from '@/components/FlexibleDashboardToolbar';
 import { useFilteredOrders } from '@/hooks/useFilteredOrders';
@@ -108,6 +109,10 @@ const Orders = () => {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Commandes</h1>
+        <Button onClick={() => window.alert('La création de commande se fait automatiquement à partir des soumissions acceptées.')}>
+          <Plus className="h-4 w-4 mr-2" />
+          Nouvelle Commande
+        </Button>
       </div>
       
       {/* Period Filter */}

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Building, Package, TrendingUp } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { FlexibleDashboardToolbar } from '@/components/FlexibleDashboardToolbar';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import { useSupplierMutations } from '@/hooks/useSupplierMutations';
@@ -88,10 +89,13 @@ const Suppliers = () => {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Fournisseurs</h1>
-        <CreateSupplierModal />
+        <Button onClick={() => setEditModalOpen(true)}>
+          <Building className="h-4 w-4 mr-2" />
+          Nouveau Fournisseur
+        </Button>
       </div>
       
-      {/* Modal d'édition contrôlé */}
+      {/* Modal de création/édition contrôlé */}
       <CreateSupplierModal
         supplier={editingSupplier}
         isOpen={editModalOpen}
