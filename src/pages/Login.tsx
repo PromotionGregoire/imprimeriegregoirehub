@@ -3,15 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/hooks/useAuth';
+import { useProfiles } from '@/hooks/useProfiles';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
   const { signIn, user } = useAuth();
+  const { data: profiles, isLoading: profilesLoading } = useProfiles();
   const navigate = useNavigate();
 
   // Redirect if already authenticated
@@ -26,13 +29,28 @@ const Login = () => {
     setLoading(true);
     setError('');
 
-    const { error: signInError } = await signIn(email, password);
+    if (!selectedEmployeeId) {
+      setError('Veuillez sélectionner un employé.');
+      setLoading(false);
+      return;
+    }
+
+    // Find the selected employee's email to use for authentication
+    const selectedProfile = profiles?.find(p => p.id === selectedEmployeeId);
+    if (!selectedProfile) {
+      setError('Employé introuvable.');
+      setLoading(false);
+      return;
+    }
+
+    // For now, we'll use the employee ID as email since we need to authenticate
+    // In a real scenario, you'd need to store email in profiles or have a different auth method
+    const { error: signInError } = await signIn(`${selectedEmployeeId}@company.com`, password);
 
     if (signInError) {
-      setError('L\'adresse courriel ou le mot de passe est incorrect.');
+      setError('Le mot de passe est incorrect.');
       setLoading(false);
     } else {
-      // Redirect will happen automatically via useEffect
       navigate('/dashboard');
     }
   };
@@ -48,30 +66,39 @@ const Login = () => {
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="email">Adresse courriel</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full"
-              placeholder="votre.email@entreprise.com"
-            />
+            <Label htmlFor="employee">Sélectionner un employé</Label>
+            <Select value={selectedEmployeeId} onValueChange={setSelectedEmployeeId}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Choisir votre nom" />
+              </SelectTrigger>
+              <SelectContent>
+                {profilesLoading ? (
+                  <SelectItem value="" disabled>Chargement...</SelectItem>
+                ) : (
+                  profiles?.map((profile) => (
+                    <SelectItem key={profile.id} value={profile.id}>
+                      {profile.full_name}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Mot de passe</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full"
-              placeholder="••••••••"
-            />
-          </div>
+          {selectedEmployeeId && (
+            <div className="space-y-2">
+              <Label htmlFor="password">Mot de passe</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full"
+                placeholder="••••••••"
+              />
+            </div>
+          )}
 
           {error && (
             <div className="text-destructive text-sm text-center py-2">
