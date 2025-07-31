@@ -13,9 +13,9 @@ export const useProofs = () => {
           status,
           version,
           created_at,
-          orders!inner (
+          orders!fk_proofs_order_id (
             order_number,
-            clients!inner (
+            clients (
               business_name,
               contact_name
             )
