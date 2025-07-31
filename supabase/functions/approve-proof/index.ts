@@ -136,7 +136,7 @@ serve(async (req) => {
     // Email to client
     try {
       await resend.emails.send({
-        from: 'Promotion Grégoire <noreply@promotiongregoire.com>',
+        from: 'Promotion Grégoire <onboarding@resend.dev>',
         to: [clientEmail!],
         subject: `✅ Épreuve approuvée - Production démarrée pour ${orderNumber}`,
         html: `
@@ -186,7 +186,7 @@ serve(async (req) => {
     // Email to internal team
     try {
       await resend.emails.send({
-        from: 'Promotion Grégoire <noreply@promotiongregoire.com>',
+        from: 'Promotion Grégoire <onboarding@resend.dev>',
         to: ['info@promotiongregoire.ca'],
         subject: `🚀 Production à démarrer - ${orderNumber} approuvée`,
         html: `

@@ -100,7 +100,7 @@ serve(async (req) => {
     
     try {
       await resend.emails.send({
-        from: 'Promotion Grégoire <noreply@promotiongregoire.com>',
+        from: 'Promotion Grégoire <onboarding@resend.dev>',
         to: ['info@promotiongregoire.ca'],
         subject: `🔄 Modification demandée - Épreuve ${orderNumber}`,
         html: `
