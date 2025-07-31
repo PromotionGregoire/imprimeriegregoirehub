@@ -1,9 +1,11 @@
-import { Users, FileText, Package, Menu, ShoppingBag, Tag } from "lucide-react"
+import { Users, FileText, Package, Menu, ShoppingBag, Tag, LogOut } from "lucide-react"
 import { NavLink, useLocation, useNavigate } from "react-router-dom"
 import { cn } from "@/lib/utils"
 import { useState } from "react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/hooks/useAuth"
+import { Separator } from "@/components/ui/separator"
 
 const navigationItems = [
   { title: "Clients", url: "/dashboard", icon: Users },
@@ -23,6 +25,12 @@ export function BottomNavigation() {
   const navigate = useNavigate()
   const currentPath = location.pathname
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { signOut } = useAuth()
+
+  const handleSignOut = async () => {
+    await signOut()
+    setIsMenuOpen(false)
+  }
 
   const isActive = (path: string) => {
     if (path === "/dashboard") {
@@ -90,6 +98,15 @@ export function BottomNavigation() {
                     {item.title}
                   </Button>
                 ))}
+                <Separator className="my-2" />
+                <Button
+                  variant="ghost"
+                  className="justify-start h-14 text-base text-destructive hover:text-destructive"
+                  onClick={handleSignOut}
+                >
+                  <LogOut className="h-5 w-5 mr-3" />
+                  Déconnexion
+                </Button>
               </div>
             </SheetContent>
           </Sheet>
