@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Upload, Send, FileText, Download, Clock, User, Package, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Upload, Send, FileText, Download, Clock, User, Package, ExternalLink, Receipt } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -33,13 +33,21 @@ const ProofDetails = () => {
         .select(`
           *,
           orders!inner (
+            id,
             order_number,
             status,
             client_id,
+            submission_id,
             clients (
+              id,
               business_name,
               contact_name,
               email
+            ),
+            submissions (
+              id,
+              submission_number,
+              status
             )
           )
         `)
@@ -230,51 +238,79 @@ const ProofDetails = () => {
         </div>
       </div>
 
-      {/* Info Cards */}
+      {/* Info Cards - Navigation Hub */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+        {/* Client Card - Clickable */}
+        <Card 
+          className="cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-muted/20 border-primary/20"
+          onClick={() => navigate(`/dashboard/clients/${proof.orders.clients.id}`)}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Client</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
+            <div className="flex items-center gap-1">
+              <User className="h-4 w-4 text-muted-foreground" />
+              <ExternalLink className="h-3 w-3 text-primary" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-lg font-bold">{proof.orders.clients.business_name}</div>
+            <div className="text-lg font-bold text-primary hover:underline">
+              {proof.orders.clients.business_name}
+            </div>
             <p className="text-xs text-muted-foreground">
               {proof.orders.clients.contact_name}
+            </p>
+            <p className="text-xs text-primary/60 mt-1">
+              Cliquer pour voir le hub client →
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        {/* Order Card - Clickable */}
+        <Card 
+          className="cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-muted/20 border-primary/20"
+          onClick={() => navigate(`/dashboard/orders/${proof.orders.id}`)}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Commande</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+            <div className="flex items-center gap-1">
+              <Package className="h-4 w-4 text-muted-foreground" />
+              <ExternalLink className="h-3 w-3 text-primary" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div 
-              className="text-lg font-bold cursor-pointer text-primary hover:underline"
-              onClick={() => navigate(`/dashboard/orders/${proof.order_id}`)}
-            >
+            <div className="text-lg font-bold text-primary hover:underline">
               {proof.orders.order_number}
-              <ExternalLink className="h-3 w-3 ml-1 inline" />
             </div>
             <p className="text-xs text-muted-foreground">
               Statut: {proof.orders.status}
             </p>
+            <p className="text-xs text-primary/60 mt-1">
+              Cliquer pour voir les détails →
+            </p>
           </CardContent>
         </Card>
 
-        <Card>
+        {/* Submission Card - Clickable */}
+        <Card 
+          className="cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-muted/20 border-primary/20"
+          onClick={() => navigate(`/dashboard/submissions/${proof.orders.submissions.id}`)}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Dernière mise à jour</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Soumission d'Origine</CardTitle>
+            <div className="flex items-center gap-1">
+              <Receipt className="h-4 w-4 text-muted-foreground" />
+              <ExternalLink className="h-3 w-3 text-primary" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-lg font-bold">
-              {format(new Date(proof.updated_at), 'dd MMM yyyy', { locale: fr })}
+            <div className="text-lg font-bold text-primary hover:underline">
+              {proof.orders.submissions.submission_number}
             </div>
             <p className="text-xs text-muted-foreground">
-              {format(new Date(proof.updated_at), 'HH:mm', { locale: fr })}
+              Statut: {proof.orders.submissions.status}
+            </p>
+            <p className="text-xs text-primary/60 mt-1">
+              Cliquer pour voir la soumission →
             </p>
           </CardContent>
         </Card>
