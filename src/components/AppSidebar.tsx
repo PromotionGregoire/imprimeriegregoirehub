@@ -63,7 +63,7 @@ export function AppSidebar() {
   const getNavClassName = (active: boolean) =>
     active 
       ? "text-[#5a7a51] font-medium" 
-      : "hover:bg-[#1f2937] text-slate-300 hover:text-white"
+      : "hover:bg-sidebar-accent text-sidebar-foreground hover:text-sidebar-accent-foreground"
 
   // Admin navigation items
   const adminItems = currentUserProfile?.role === 'ADMIN' ? [
@@ -76,10 +76,10 @@ export function AppSidebar() {
 
   return (
     <Sidebar
-      className={`${collapsed ? "w-14" : "w-60"} bg-[#111827] border-[#1f2937]`}
+      className={`${collapsed ? "w-14" : "w-60"} bg-sidebar-background border-sidebar-border`}
       collapsible="icon"
     >
-      <SidebarHeader className="border-b border-[#1f2937] p-4 bg-[#111827]">
+      <SidebarHeader className="border-b border-sidebar-border p-4">
         {!collapsed && (
           <img 
             src={logoGregoire} 
@@ -88,15 +88,15 @@ export function AppSidebar() {
           />
         )}
         {collapsed && (
-          <div className="text-white font-bold text-center">
+          <div className="text-sidebar-foreground font-bold text-center">
             PG
           </div>
         )}
       </SidebarHeader>
 
-      <SidebarContent className="bg-[#111827]">
+      <SidebarContent className="bg-sidebar-background">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-slate-400 text-xs uppercase tracking-wider px-2">
+          <SidebarGroupLabel className="text-sidebar-foreground/60 text-xs uppercase tracking-wider px-2">
             {!collapsed && "Navigation"}
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -121,7 +121,7 @@ export function AppSidebar() {
         {/* Admin Section */}
         {adminItems.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-slate-400 text-xs uppercase tracking-wider px-2">
+            <SidebarGroupLabel className="text-sidebar-foreground/60 text-xs uppercase tracking-wider px-2">
               {!collapsed && "Administration"}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -145,18 +145,18 @@ export function AppSidebar() {
         )}
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-[#1f2937] p-4 bg-[#111827]">
+      <SidebarFooter className="border-t border-sidebar-border p-4 bg-sidebar-background">
         {!collapsed && (
           <div className="space-y-3">
-            <div className="text-sm text-slate-200">
+            <div className="text-sm text-sidebar-foreground">
               <div className="font-medium">{user?.email}</div>
-              <div className="text-xs text-slate-400">Employé connecté</div>
+              <div className="text-xs text-sidebar-foreground/60">Employé connecté</div>
             </div>
-            <Separator className="bg-[#1f2937]" />
+            <Separator className="bg-sidebar-border" />
             <Button
               variant="ghost"
               onClick={handleSignOut}
-              className="w-full justify-start text-slate-300 hover:text-white hover:bg-[#1f2937]"
+              className="w-full justify-start text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent"
             >
               <LogOut className="mr-2 h-4 w-4" />
               Se déconnecter
@@ -167,7 +167,7 @@ export function AppSidebar() {
           <Button
             variant="ghost"
             onClick={handleSignOut}
-            className="w-full p-2 text-slate-300 hover:text-white hover:bg-[#1f2937]"
+            className="w-full p-2 text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent"
           >
             <LogOut className="h-4 w-4" />
           </Button>
