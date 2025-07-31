@@ -25,10 +25,21 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    console.log('Starting create-employee function...');
+    
+    // Check if required environment variables are available
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !serviceRoleKey) {
+      console.error('Missing environment variables:', { supabaseUrl: !!supabaseUrl, serviceRoleKey: !!serviceRoleKey });
+      throw new Error('Missing required environment variables');
+    }
+
     // Initialize Supabase admin client
     const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      supabaseUrl,
+      serviceRoleKey,
       {
         auth: {
           autoRefreshToken: false,
@@ -63,6 +74,12 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const requestData: CreateEmployeeRequest = await req.json();
+    console.log('Request data received:', { ...requestData, password: '[REDACTED]' });
+
+    // Validate required fields
+    if (!requestData.full_name || !requestData.email || !requestData.password) {
+      throw new Error('Missing required fields: full_name, email, and password are required');
+    }
 
     console.log('Creating employee with data:', { ...requestData, password: '[REDACTED]' });
 
@@ -88,17 +105,18 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('User created successfully:', newUser.user.id);
 
     // Update the profile that was automatically created by the trigger
+    console.log('Updating profile for user:', newUser.user.id);
     const { error: updateError } = await supabaseAdmin
       .from('profiles')
       .update({
         full_name: requestData.full_name,
-        email: requestData.email,
         role: requestData.role,
-        job_title: requestData.job_title,
-        employment_status: requestData.employment_status,
+        job_title: requestData.job_title || null,
+        employment_status: requestData.employment_status || null,
         hire_date: requestData.hire_date || null,
-        emergency_contact_name: requestData.emergency_contact_name,
-        emergency_contact_phone: requestData.emergency_contact_phone,
+        emergency_contact_name: requestData.emergency_contact_name || null,
+        emergency_contact_phone: requestData.emergency_contact_phone || null,
+        email: requestData.email,
         password_reset_required: true
       })
       .eq('id', newUser.user.id);
