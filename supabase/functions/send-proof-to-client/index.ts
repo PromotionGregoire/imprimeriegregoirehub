@@ -79,7 +79,7 @@ serve(async (req) => {
     const clientName = proof.orders?.clients?.contact_name;
     const businessName = proof.orders?.clients?.business_name;
     const orderNumber = proof.orders?.order_number;
-    const approvalUrl = `${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '')}.lovableproject.com/approve/proof/${newApprovalToken}`;
+    const approvalUrl = `https://promotiongregoire.com/approve/proof/${newApprovalToken}`;
 
     // Send email to client
     const emailResponse = await resend.emails.send({
