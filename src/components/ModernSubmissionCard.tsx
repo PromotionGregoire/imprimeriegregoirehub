@@ -58,19 +58,19 @@ const ModernSubmissionCard = ({ submission, onClick }: ModernSubmissionCardProps
   };
 
   return (
-    <Card className="group cursor-pointer transition-all ease-uber hover:shadow-lg hover:-translate-y-1 bg-background border touch-area">
-      <CardContent className="p-base-600" onClick={onClick}>
+    <Card className="group cursor-pointer transition-all duration-300 ease-uber hover:shadow-xl hover:-translate-y-1 bg-background border border-border/60 hover:border-border rounded-xl touch-area">
+      <CardContent className="p-6" onClick={onClick}>
         {/* Header */}
-        <div className="flex items-center justify-between mb-base-400">
-          <div className="flex items-center gap-base-300">
-            <div className="w-base-600 h-base-600 rounded-full bg-primary/10 flex items-center justify-center">
-              <FileText className="h-base-400 w-base-400 text-primary" />
+        <div className="flex items-start justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <FileText className="h-5 w-5 text-primary" />
             </div>
-            <div>
-              <h3 className="font-semibold text-base-400 text-foreground">
+            <div className="min-w-0 flex-1">
+              <h3 className="font-semibold text-base text-foreground leading-tight truncate">
                 {submission.clients?.business_name}
               </h3>
-              <p className="text-base-300 text-muted-foreground font-mono">
+              <p className="text-sm text-muted-foreground font-mono mt-1">
                 {submission.submission_number}
               </p>
             </div>
@@ -82,43 +82,43 @@ const ModernSubmissionCard = ({ submission, onClick }: ModernSubmissionCardProps
               e.stopPropagation();
               onClick();
             }}
-            className="opacity-0 group-hover:opacity-100 transition-all ease-uber touch-area"
+            className="opacity-0 group-hover:opacity-100 transition-all duration-300 ease-uber touch-area flex-shrink-0 h-8 w-8"
           >
-            <ArrowRight className="h-base-400 w-base-400" />
+            <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
 
         {/* Key Information */}
-        <div className="space-y-base-300 mb-base-400">
-          <div className="flex justify-between items-center">
-            <span className="text-base-300 text-muted-foreground">Date d'envoi:</span>
-            <span className="text-base-300 font-medium">
+        <div className="space-y-3 mb-6">
+          <div className="flex justify-between items-center py-1">
+            <span className="text-sm text-muted-foreground">Date d'envoi:</span>
+            <span className="text-sm font-medium text-foreground">
               {submission.sent_at ? formatDate(submission.sent_at) : 'Non envoyée'}
             </span>
           </div>
           
-          <div className="flex justify-between items-center">
-            <span className="text-base-300 text-muted-foreground">Échéance:</span>
-            <span className="text-base-300 font-medium">
+          <div className="flex justify-between items-center py-1">
+            <span className="text-sm text-muted-foreground">Échéance:</span>
+            <span className="text-sm font-medium text-foreground">
               {submission.deadline ? formatDate(submission.deadline) : 'Non définie'}
             </span>
           </div>
           
-          <div className="flex justify-between items-center">
-            <span className="text-base-300 text-muted-foreground">Montant:</span>
-            <span className="text-base-500 font-bold text-foreground">
+          <div className="flex justify-between items-center py-1">
+            <span className="text-sm text-muted-foreground">Montant:</span>
+            <span className="text-lg font-bold text-foreground">
               {formatPrice(Number(submission.total_price) || 0)}
             </span>
           </div>
         </div>
 
         {/* Status Timeline */}
-        <div className="mb-base-400">
+        <div className="mb-6">
           <SubmissionStatusTimeline status={submission.status} />
         </div>
 
         {/* Action Toggle */}
-        <div className="pt-base-300 border-t border-border">
+        <div className="pt-4 border-t border-border/50">
           <ModernToggle
             id={`accept-${submission.id}`}
             label="Accepter la Soumission"
@@ -129,17 +129,17 @@ const ModernSubmissionCard = ({ submission, onClick }: ModernSubmissionCardProps
         </div>
 
         {/* Contextual Links */}
-        <div className="mt-base-400 space-y-base-200">
+        <div className="mt-4 space-y-2">
           {submission.approval_token && (
             <Button
               variant="link"
-              className="p-0 h-auto text-primary hover:text-primary/80 touch-area"
+              className="p-0 h-auto text-primary hover:text-primary/80 touch-area text-sm"
               onClick={(e) => {
                 e.stopPropagation();
                 window.open(`/approval/${submission.approval_token}`, '_blank');
               }}
             >
-              <ExternalLink className="w-base-300 h-base-300 mr-base-100" />
+              <ExternalLink className="w-3 h-3 mr-2" />
               Voir le lien d'épreuve
             </Button>
           )}
