@@ -16,6 +16,7 @@ import SubmissionDetails from "./pages/SubmissionDetails";
 import Orders from "./pages/Orders";
 import EditSubmission from "./pages/EditSubmission";
 import Products from "./pages/Products";
+import ProductDetails from "./pages/ProductDetails";
 import Proofs from "./pages/Proofs";
 import OrderDetails from "./pages/OrderDetails";
 import Suppliers from "./pages/Suppliers";
@@ -49,6 +50,7 @@ const App = () => (
               <Route path="submissions/:id" element={<SubmissionDetails />} />
               <Route path="submissions/edit/:id" element={<EditSubmission />} />
               <Route path="products" element={<Products />} />
+              <Route path="products/:id" element={<ProductDetails />} />
               <Route path="suppliers" element={<Suppliers />} />
               <Route path="suppliers/:id" element={<SupplierDetails />} />
               <Route path="orders" element={<Orders />} />
