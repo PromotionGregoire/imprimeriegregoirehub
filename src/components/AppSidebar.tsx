@@ -106,14 +106,10 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink
                       to={item.url}
-                      className={({ isActive }) => `${getNavClassName(isActive || isPathActive(item.url))} flex items-center gap-3 rounded-lg px-3 py-2 transition-all ease-uber`}
+                      className={`${getNavClassName(isPathActive(item.url))} flex items-center gap-3 rounded-lg px-3 py-2 transition-all ease-uber`}
                     >
-                      {({ isActive }) => (
-                        <>
-                          <item.icon className={`h-4 w-4 ${isActive || isPathActive(item.url) ? 'text-[#5a7a51]' : ''}`} />
-                          {!collapsed && <span>{item.title}</span>}
-                        </>
-                      )}
+                      <item.icon className={`h-4 w-4 ${isPathActive(item.url) ? 'text-[#5a7a51]' : ''}`} />
+                      {!collapsed && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -135,14 +131,10 @@ export function AppSidebar() {
                     <SidebarMenuButton asChild>
                         <NavLink
                           to={item.url}
-                          className={({ isActive }) => `${getNavClassName(isActive || isPathActive(item.url))} flex items-center gap-3 rounded-lg px-3 py-2 transition-all ease-uber`}
+                          className={`${getNavClassName(isPathActive(item.url))} flex items-center gap-3 rounded-lg px-3 py-2 transition-all ease-uber`}
                         >
-                          {({ isActive }) => (
-                            <>
-                              <item.icon className={`h-4 w-4 ${isActive || isPathActive(item.url) ? 'text-[#5a7a51]' : ''}`} />
-                              {!collapsed && <span>{item.title}</span>}
-                            </>
-                          )}
+                          <item.icon className={`h-4 w-4 ${isPathActive(item.url) ? 'text-[#5a7a51]' : ''}`} />
+                          {!collapsed && <span>{item.title}</span>}
                         </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
