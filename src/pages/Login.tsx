@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfiles } from '@/hooks/useProfiles';
+import logoGregoire from '@/assets/logo-imprimerie-gregoire.png';
 
 const Login = () => {
   const [selectedEmployeeId, setSelectedEmployeeId] = useState('');
@@ -111,6 +112,11 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
+          <img 
+            src={logoGregoire} 
+            alt="Imprimerie Grégoire" 
+            className="h-20 w-auto mx-auto mb-6"
+          />
           <h1 className="text-3xl font-bold text-foreground">
             Connexion Espace Employé
           </h1>
