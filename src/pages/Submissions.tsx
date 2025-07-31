@@ -121,7 +121,7 @@ const Submissions = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Soumissions</h1>
-        <Button onClick={() => navigate('/dashboard/submissions/create')}>
+        <Button onClick={() => navigate('/dashboard/submissions/new')}>
           <Plus className="w-4 h-4 mr-2" />
           Nouvelle Soumission
         </Button>
