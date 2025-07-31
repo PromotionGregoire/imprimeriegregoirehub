@@ -41,7 +41,7 @@ export function SubmissionStatusTimeline({
   const getCurrentStepIndex = () => {
     if (status === 'Brouillon') return 0
     if (status === 'Envoyée' || status === 'En révision') return 1
-    if (status === 'Acceptée' || status === 'Refusée') return 2
+    if (status === 'Acceptée' || status === 'Refusée') return 3 // Past the last step, so all are completed
     return 0
   }
 
@@ -49,7 +49,8 @@ export function SubmissionStatusTimeline({
   
   const getStepState = (stepIndex: number) => {
     if (stepIndex < currentStepIndex) return 'completed'
-    if (stepIndex === currentStepIndex) return 'current'
+    if (stepIndex === currentStepIndex && status !== 'Acceptée' && status !== 'Refusée') return 'current'
+    if ((status === 'Acceptée' || status === 'Refusée') && stepIndex === 2) return 'completed'
     return 'upcoming'
   }
 
@@ -120,10 +121,10 @@ export function SubmissionStatusTimeline({
                     'rounded-full flex items-center justify-center transition-all duration-300',
                     sizes.circle,
                     {
-                      'bg-primary text-primary-foreground shadow-lg': isCompleted,
-                      'bg-primary/20 text-primary ring-2 ring-primary/30': isCurrent && index !== 2,
-                      'bg-[hsl(var(--status-green))] text-white shadow-lg': isCurrent && index === 2 && status === 'Acceptée',
-                      'bg-[hsl(var(--status-red))] text-white shadow-lg': isCurrent && index === 2 && status === 'Refusée',
+                      'bg-primary text-primary-foreground shadow-lg': isCompleted && index !== 2,
+                      'bg-[hsl(var(--status-green))] text-white shadow-lg': isCompleted && index === 2 && status === 'Acceptée',
+                      'bg-[hsl(var(--status-red))] text-white shadow-lg': isCompleted && index === 2 && status === 'Refusée',
+                      'bg-primary/20 text-primary ring-2 ring-primary/30': isCurrent,
                       'bg-muted text-muted-foreground': stepState === 'upcoming'
                     }
                   )}
@@ -137,10 +138,10 @@ export function SubmissionStatusTimeline({
                     <div className={cn(
                       'transition-colors duration-300',
                       {
-                        'text-primary': isCompleted,
-                        'text-primary font-semibold': isCurrent && index !== 2,
-                        'text-[hsl(var(--status-green))] font-semibold': isCurrent && index === 2 && status === 'Acceptée',
-                        'text-[hsl(var(--status-red))] font-semibold': isCurrent && index === 2 && status === 'Refusée',
+                        'text-primary': isCompleted && index !== 2,
+                        'text-[hsl(var(--status-green))] font-semibold': isCompleted && index === 2 && status === 'Acceptée',
+                        'text-[hsl(var(--status-red))] font-semibold': isCompleted && index === 2 && status === 'Refusée',
+                        'text-primary font-semibold': isCurrent,
                         'text-muted-foreground': stepState === 'upcoming'
                       }
                     )}>
