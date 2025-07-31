@@ -164,37 +164,37 @@ const Submissions = () => {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 lg:gap-6">
         <Card className="bg-card border border-border">
-          <CardContent className="p-base-400">
-            <div className="text-base-300 text-muted-foreground font-medium">Total Soumissions</div>
-            <div className="text-base-750 font-semibold">{stats.total}</div>
+          <CardContent className="p-4 sm:p-5 lg:p-6">
+            <div className="text-sm text-muted-foreground font-medium mb-2">Total Soumissions</div>
+            <div className="text-2xl font-bold">{stats.total}</div>
           </CardContent>
         </Card>
         
         <Card className="bg-[hsl(var(--status-purple-light))] border border-[hsl(var(--status-purple))]">
-          <CardContent className="p-base-400">
-            <div className="text-base-300 text-[hsl(var(--status-purple))] font-medium">Complétées</div>
-            <div className="text-base-750 font-semibold text-[hsl(var(--status-purple))]">{stats.completed}</div>
+          <CardContent className="p-4 sm:p-5 lg:p-6">
+            <div className="text-sm text-muted-foreground font-medium mb-2">Complétées</div>
+            <div className="text-2xl font-bold text-[hsl(var(--status-purple))]">{stats.completed}</div>
           </CardContent>
         </Card>
         
         <Card className="bg-[hsl(var(--status-green-light))] border border-[hsl(var(--status-green))]">
-          <CardContent className="p-base-400">
-            <div className="text-base-300 text-[hsl(var(--status-green))] font-medium">Acceptées</div>
-            <div className="text-base-750 font-semibold text-[hsl(var(--status-green))]">{stats.accepted}</div>
+          <CardContent className="p-4 sm:p-5 lg:p-6">
+            <div className="text-sm text-muted-foreground font-medium mb-2">Acceptées</div>
+            <div className="text-2xl font-bold text-[hsl(var(--status-green))]">{stats.accepted}</div>
           </CardContent>
         </Card>
         
         <Card className="bg-[hsl(var(--status-orange-light))] border border-[hsl(var(--status-orange))]">
-          <CardContent className="p-base-400">
-            <div className="text-base-300 text-[hsl(var(--status-orange))] font-medium">Envoyées</div>
-            <div className="text-base-750 font-semibold text-[hsl(var(--status-orange))]">{stats.sent}</div>
+          <CardContent className="p-4 sm:p-5 lg:p-6">
+            <div className="text-sm text-muted-foreground font-medium mb-2">Envoyées</div>
+            <div className="text-2xl font-bold text-[hsl(var(--status-orange))]">{stats.sent}</div>
           </CardContent>
         </Card>
         
         <Card className="bg-[hsl(var(--status-blue-light))] border border-[hsl(var(--status-blue))]">
-          <CardContent className="p-base-400">
-            <div className="text-base-300 text-[hsl(var(--status-blue))] font-medium">Valeur Totale</div>
-            <div className="text-base-750 font-semibold text-[hsl(var(--status-blue))]">{formatPrice(stats.totalValue)}</div>
+          <CardContent className="p-4 sm:p-5 lg:p-6">
+            <div className="text-sm text-muted-foreground font-medium mb-2">Valeur Totale</div>
+            <div className="text-2xl font-bold text-[hsl(var(--status-blue))]">{formatPrice(stats.totalValue)}</div>
           </CardContent>
         </Card>
       </div>
