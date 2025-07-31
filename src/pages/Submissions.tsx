@@ -165,7 +165,7 @@ const Submissions = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 lg:gap-6">
         <Card className="bg-card border border-border">
           <CardContent className="p-4 sm:p-5 lg:p-6">
-            <div className="text-sm text-muted-foreground font-medium mb-2">Total Soumissions</div>
+            <div className="text-sm text-muted-foreground font-medium mb-2">Total</div>
             <div className="text-2xl font-bold">{stats.total}</div>
           </CardContent>
         </Card>
