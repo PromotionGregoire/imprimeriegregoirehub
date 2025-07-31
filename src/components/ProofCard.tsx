@@ -1,6 +1,8 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Eye } from 'lucide-react';
+import { Calendar } from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface ProofCardProps {
   proof: {
@@ -20,71 +22,66 @@ interface ProofCardProps {
 }
 
 const statusColors = {
-  'À préparer': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  'En préparation': 'bg-blue-100 text-blue-800 border-blue-200',
-  'Envoyée': 'bg-purple-100 text-purple-800 border-purple-200',
-  'En révision': 'bg-orange-100 text-orange-800 border-orange-200',
-  'Approuvée': 'bg-green-100 text-green-800 border-green-200',
+  'A preparer': 'bg-[hsl(var(--status-orange-light))] text-[hsl(var(--status-orange))] border-[hsl(var(--status-orange))]/20',
+  'En préparation': 'bg-blue-50 text-blue-700 border-blue-200',
+  'Envoyée': 'bg-[hsl(var(--status-purple-light))] text-[hsl(var(--status-purple))] border-[hsl(var(--status-purple))]/20',
+  'En révision': 'bg-amber-50 text-amber-700 border-amber-200',
+  'Approuvée': 'bg-[hsl(var(--status-green-light))] text-[hsl(var(--status-green))] border-[hsl(var(--status-green))]/20',
 };
 
 export const ProofCard = ({ proof }: ProofCardProps) => {
   const handleCardClick = () => {
-    // Future navigation to /dashboard/proofs/[id]
-    console.log(`Navigate to proof details: ${proof.id}`);
+    // TODO: Navigate to proof details page when implemented
+    console.log('Navigate to proof details:', proof.id);
   };
 
   return (
     <Card 
-      className="cursor-pointer hover:shadow-md transition-shadow duration-200 border border-border/50 hover:border-border"
+      className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 shadow-sm bg-gradient-to-br from-background to-background/80 hover:scale-[1.02]"
       onClick={handleCardClick}
     >
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <FileText className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg">
-                {proof.orders.order_number}
-              </h3>
-              <p className="text-muted-foreground text-sm">
-                {proof.orders.clients.business_name}
-              </p>
-            </div>
+      <CardContent className="p-6 space-y-4">
+        {/* Header avec nom entreprise proéminent */}
+        <div className="space-y-2">
+          <h3 className="font-bold text-lg text-foreground leading-tight group-hover:text-primary transition-colors">
+            {proof.orders?.clients?.business_name || 'Client inconnu'}
+          </h3>
+          <div className="flex items-center gap-2">
+            <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+            <p className="text-sm text-muted-foreground font-medium">
+              {proof.orders?.order_number || 'N° de commande manquant'}
+            </p>
           </div>
-          <Eye className="h-4 w-4 text-muted-foreground" />
         </div>
 
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Statut</span>
-            <Badge 
-              variant="outline" 
-              className={statusColors[proof.status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800 border-gray-200'}
-            >
-              {proof.status}
-            </Badge>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Version</span>
-            <span className="text-sm font-semibold bg-secondary/50 px-2 py-1 rounded">
+        {/* Version et statut avec design moderne */}
+        <div className="flex items-center justify-between pt-2">
+          <div className="px-3 py-1 bg-primary/5 rounded-full">
+            <span className="text-sm font-semibold text-primary">
               V{proof.version}
             </span>
           </div>
+          <Badge 
+            className={`text-xs font-semibold px-3 py-1 ${statusColors[proof.status as keyof typeof statusColors] || 'bg-muted text-muted-foreground border-muted'}`}
+          >
+            {proof.status === 'A preparer' ? 'À préparer' : proof.status}
+          </Badge>
+        </div>
 
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Contact</span>
-            <span className="text-sm text-muted-foreground">
-              {proof.orders.clients.contact_name}
-            </span>
-          </div>
-
-          <div className="pt-2 border-t border-border/50">
-            <span className="text-xs text-muted-foreground">
-              Créée le {new Date(proof.created_at).toLocaleDateString('fr-FR')}
-            </span>
+        {/* Footer avec date et contact */}
+        <div className="pt-3 border-t border-border/40">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              <span className="font-medium">
+                {format(new Date(proof.created_at), 'dd MMM yyyy', { locale: fr })}
+              </span>
+            </div>
+            {proof.orders?.clients?.contact_name && (
+              <span className="font-medium text-foreground/70 truncate max-w-24">
+                {proof.orders.clients.contact_name}
+              </span>
+            )}
           </div>
         </div>
       </CardContent>

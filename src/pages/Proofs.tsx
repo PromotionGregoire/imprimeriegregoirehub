@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { ProofCard } from '@/components/ProofCard';
-import { DashboardToolbar } from '@/components/DashboardToolbar';
+import { FlexibleDashboardToolbar } from '@/components/FlexibleDashboardToolbar';
 import { useFilteredProofs } from '@/hooks/useFilteredProofs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Clock, AlertCircle } from 'lucide-react';
+import { FileText, Clock, AlertCircle, Eye, CheckCircle2, CircleDot } from 'lucide-react';
 
 const Proofs = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -14,7 +14,7 @@ const Proofs = () => {
   const { proofs, isLoading, error } = useFilteredProofs(searchQuery, statusFilter, periodFilter);
 
   const proofStatusOptions = [
-    { value: 'À préparer', label: 'À préparer' },
+    { value: 'A preparer', label: 'À préparer' },
     { value: 'En préparation', label: 'En préparation' },
     { value: 'Envoyée', label: 'Envoyée' },
     { value: 'En révision', label: 'En révision' },
@@ -38,9 +38,10 @@ const Proofs = () => {
 
   const statistics = {
     total: proofs?.length || 0,
-    toPrepare: proofs?.filter(proof => proof.status === 'À préparer').length || 0,
+    toPrepare: proofs?.filter(proof => proof.status === 'A preparer').length || 0,
     inPreparation: proofs?.filter(proof => proof.status === 'En préparation').length || 0,
     sent: proofs?.filter(proof => proof.status === 'Envoyée').length || 0,
+    inRevision: proofs?.filter(proof => proof.status === 'En révision').length || 0,
   };
 
   return (
@@ -50,62 +51,101 @@ const Proofs = () => {
       </div>
 
       {/* Toolbar */}
-      <DashboardToolbar
+      <FlexibleDashboardToolbar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        statusFilter={statusFilter}
-        onStatusChange={setStatusFilter}
-        periodFilter={periodFilter}
-        onPeriodChange={setPeriodFilter}
-        statusOptions={proofStatusOptions}
         searchPlaceholder="Rechercher par numéro de commande ou client..."
+        filters={[
+          {
+            label: "Statut",
+            value: statusFilter,
+            onChange: setStatusFilter,
+            options: [
+              { value: "all", label: "Tous les statuts" },
+              ...proofStatusOptions
+            ]
+          },
+          {
+            label: "Période",
+            value: periodFilter,
+            onChange: setPeriodFilter,
+            options: [
+              { value: "all", label: "Toute période" },
+              { value: "7days", label: "7 derniers jours" },
+              { value: "30days", label: "30 derniers jours" },
+              { value: "90days", label: "90 derniers jours" }
+            ]
+          }
+        ]}
       />
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <Card className="bg-gradient-to-br from-background to-muted/30">
           <CardContent className="p-6">
-            <div className="flex items-center space-x-2">
-              <FileText className="h-5 w-5 text-primary" />
+            <div className="flex items-center space-x-3">
+              <div className="p-2 rounded-full bg-primary/10">
+                <FileText className="h-5 w-5 text-primary" />
+              </div>
               <div>
-                <p className="text-2xl font-bold">{statistics.total}</p>
-                <p className="text-sm text-muted-foreground">Total</p>
+                <p className="text-2xl font-bold text-primary">{statistics.total}</p>
+                <p className="text-sm text-muted-foreground font-medium">Total</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-background to-[hsl(var(--status-orange-light))]">
           <CardContent className="p-6">
-            <div className="flex items-center space-x-2">
-              <Clock className="h-5 w-5 text-yellow-600" />
+            <div className="flex items-center space-x-3">
+              <div className="p-2 rounded-full bg-[hsl(var(--status-orange))]/10">
+                <CircleDot className="h-5 w-5 text-[hsl(var(--status-orange))]" />
+              </div>
               <div>
-                <p className="text-2xl font-bold">{statistics.toPrepare}</p>
-                <p className="text-sm text-muted-foreground">À préparer</p>
+                <p className="text-2xl font-bold text-[hsl(var(--status-orange))]">{statistics.toPrepare}</p>
+                <p className="text-sm text-muted-foreground font-medium">À préparer</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-background to-blue-50">
           <CardContent className="p-6">
-            <div className="flex items-center space-x-2">
-              <div className="h-5 w-5 rounded-full bg-blue-600"></div>
+            <div className="flex items-center space-x-3">
+              <div className="p-2 rounded-full bg-blue-500/10">
+                <Clock className="h-5 w-5 text-blue-600" />
+              </div>
               <div>
-                <p className="text-2xl font-bold">{statistics.inPreparation}</p>
-                <p className="text-sm text-muted-foreground">En cours</p>
+                <p className="text-2xl font-bold text-blue-600">{statistics.inPreparation}</p>
+                <p className="text-sm text-muted-foreground font-medium">En cours</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-background to-[hsl(var(--status-purple-light))]">
           <CardContent className="p-6">
-            <div className="flex items-center space-x-2">
-              <div className="h-5 w-5 rounded-full bg-purple-600"></div>
+            <div className="flex items-center space-x-3">
+              <div className="p-2 rounded-full bg-[hsl(var(--status-purple))]/10">
+                <Eye className="h-5 w-5 text-[hsl(var(--status-purple))]" />
+              </div>
               <div>
-                <p className="text-2xl font-bold">{statistics.sent}</p>
-                <p className="text-sm text-muted-foreground">Envoyées</p>
+                <p className="text-2xl font-bold text-[hsl(var(--status-purple))]">{statistics.sent}</p>
+                <p className="text-sm text-muted-foreground font-medium">Envoyées</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-background to-amber-50">
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 rounded-full bg-amber-500/10">
+                <CheckCircle2 className="h-5 w-5 text-amber-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-amber-600">{statistics.inRevision}</p>
+                <p className="text-sm text-muted-foreground font-medium">En révision</p>
               </div>
             </div>
           </CardContent>
@@ -113,29 +153,35 @@ const Proofs = () => {
       </div>
 
       {/* Proofs List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Épreuves en attente</CardTitle>
+      <Card className="border-0 shadow-sm">
+        <CardHeader className="pb-6">
+          <CardTitle className="text-xl font-semibold text-primary">Épreuves en attente</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6 pt-0">
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {[...Array(6)].map((_, i) => (
-                <Skeleton key={i} className="h-[200px] w-full" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="space-y-3">
+                  <Skeleton className="h-32 w-full rounded-lg" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
               ))}
             </div>
           ) : proofs && proofs.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {proofs.map((proof) => (
                 <ProofCard key={proof.id} proof={proof} />
               ))}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">Aucune épreuve en attente</h3>
-              <p className="text-muted-foreground">
-                Les nouvelles épreuves apparaîtront ici dès qu'une commande sera acceptée.
+            <div className="text-center py-16">
+              <div className="p-4 rounded-full bg-muted/30 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <FileText className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2 text-foreground">Aucune épreuve en attente</h3>
+              <p className="text-muted-foreground max-w-sm mx-auto">
+                Les nouvelles épreuves apparaîtront ici dès qu'une commande sera acceptée et qu'une épreuve sera générée.
               </p>
             </div>
           )}

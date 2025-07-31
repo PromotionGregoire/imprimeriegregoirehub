@@ -48,11 +48,11 @@ const EpuredOrderCard = ({ order, onProofAccepted, onDelivered }: OrderCardProps
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'En attente de l\'épreuve':
-        return <Badge className="bg-orange-100 text-orange-700 border-orange-200">En attente d'épreuve</Badge>;
+        return <Badge className="bg-[hsl(var(--status-orange-light))] text-[hsl(var(--status-orange))] border-[hsl(var(--status-orange))]">En attente d'épreuve</Badge>;
       case 'En production':
-        return <Badge className="bg-blue-100 text-blue-700 border-blue-200">En production</Badge>;
+        return <Badge className="bg-[hsl(var(--status-green-light))] text-[hsl(var(--status-green))] border-[hsl(var(--status-green))]">En production</Badge>;
       case 'Complétée':
-        return <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">Complétée</Badge>;
+        return <Badge className="bg-[hsl(var(--status-purple-light))] text-[hsl(var(--status-purple))] border-[hsl(var(--status-purple))]">Complétée</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -61,13 +61,13 @@ const EpuredOrderCard = ({ order, onProofAccepted, onDelivered }: OrderCardProps
   const getBorderColor = (status: string) => {
     switch (status) {
       case 'En attente de l\'épreuve':
-        return 'border-l-orange-400';
+        return 'border-l-[hsl(var(--status-orange))]';
       case 'En production':
-        return 'border-l-blue-400';
+        return 'border-l-[hsl(var(--status-green))]';
       case 'Complétée':
-        return 'border-l-emerald-400';
+        return 'border-l-[hsl(var(--status-purple))]';
       default:
-        return 'border-l-gray-400';
+        return 'border-l-muted-foreground';
     }
   };
 

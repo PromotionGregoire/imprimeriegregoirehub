@@ -41,7 +41,10 @@ const ModernToggle = ({
         onCheckedChange={onCheckedChange}
         disabled={disabled}
         className={cn(
-          "data-[state=checked]:bg-primary data-[state=unchecked]:bg-input",
+          // Couleurs dynamiques selon le label du toggle
+          checked && label.includes("Épreuve") && "bg-[hsl(var(--status-green))] border-[hsl(var(--status-green))]",
+          checked && label.includes("Livré") && "bg-[hsl(var(--status-purple))] border-[hsl(var(--status-purple))]",
+          !checked && "bg-input",
           disabled && "opacity-50"
         )}
       />
