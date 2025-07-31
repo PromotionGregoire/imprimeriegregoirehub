@@ -1,4 +1,5 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 const Index = () => {
   return (
@@ -9,12 +10,11 @@ const Index = () => {
           Plateforme de gestion des clients, soumissions et commandes
         </p>
         <div>
-          <a 
-            href="/login" 
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-          >
-            Accéder à l'espace employé
-          </a>
+          <Button asChild>
+            <Link to="/login">
+              Accéder à l'espace employé
+            </Link>
+          </Button>
         </div>
       </div>
     </div>
