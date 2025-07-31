@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { useProduct } from '@/hooks/useProduct';
 import { useProductVariants } from '@/hooks/useProductVariants';
+import { useIsMobile } from '@/hooks/use-mobile';
 import ProductModal from '@/components/ProductModal';
 
 // Lazy load des composants lourds
@@ -19,6 +20,7 @@ const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   const [activeTab, setActiveTab] = useState('info');
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -67,6 +69,143 @@ const ProductDetails = () => {
       </Badge>
     );
   };
+
+  if (isMobile) {
+    return (
+      <>
+        <div className="p-4 space-y-4">
+          {/* Mobile Header */}
+          <div className="flex items-center gap-3 pb-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => navigate('/dashboard/products')}
+              className="p-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl font-bold truncate">{product.name}</h1>
+              <p className="text-sm text-muted-foreground">{product.product_code}</p>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setEditModalOpen(true)}
+              className="shrink-0"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Mobile Product Summary Card */}
+          <Card className="rounded-lg">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Package className="h-5 w-5 text-primary" />
+                  <span className="font-medium">{product.category}</span>
+                </div>
+                {getCategoryBadge(product.category)}
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-3 bg-muted/30 rounded-lg">
+                  <div className="text-2xl font-bold text-primary">
+                    ${Number(product.default_price).toFixed(2)}
+                  </div>
+                  <div className="text-xs text-muted-foreground">Prix par défaut</div>
+                </div>
+                <div className="text-center p-3 bg-muted/30 rounded-lg">
+                  <div className="text-2xl font-bold text-primary">
+                    {variantsLoading ? '...' : variants?.length || 0}
+                  </div>
+                  <div className="text-xs text-muted-foreground">Variantes</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Mobile Description */}
+          {product.description && (
+            <Card className="rounded-lg">
+              <CardContent className="p-4">
+                <h3 className="font-medium mb-2">Description</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {product.description}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Mobile Variants */}
+          {variants && variants.length > 0 && (
+            <Card className="rounded-lg">
+              <CardContent className="p-4">
+                <h3 className="font-medium mb-3">Variantes disponibles</h3>
+                <div className="space-y-3">
+                  {Object.entries(
+                    variants.reduce((groups, variant) => {
+                      const key = variant.attribute_name;
+                      if (!groups[key]) {
+                        groups[key] = [];
+                      }
+                      groups[key].push(variant);
+                      return groups;
+                    }, {} as Record<string, any[]>)
+                  ).map(([attributeName, attributeVariants]) => (
+                    <div key={attributeName}>
+                      <div className="text-sm font-medium text-muted-foreground mb-2">
+                        {attributeName}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {attributeVariants.map((variant) => (
+                          <Badge key={variant.id} variant="outline" className="text-xs">
+                            {variant.attribute_value}
+                            {variant.cost_price > 0 && (
+                              <span className="ml-1 text-muted-foreground">
+                                ${variant.cost_price}
+                              </span>
+                            )}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Mobile Quick Stats */}
+          <div className="grid grid-cols-2 gap-3">
+            <Card className="rounded-lg">
+              <CardContent className="p-3 text-center">
+                <Tag className="h-6 w-6 mx-auto mb-2 text-primary" />
+                <div className="text-sm font-medium">{product.category}</div>
+                <div className="text-xs text-muted-foreground">Catégorie</div>
+              </CardContent>
+            </Card>
+            <Card className="rounded-lg">
+              <CardContent className="p-3 text-center">
+                <Warehouse className="h-6 w-6 mx-auto mb-2 text-primary" />
+                <div className="text-sm font-medium">-</div>
+                <div className="text-xs text-muted-foreground">Fournisseurs</div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        <ProductModal
+          product={product}
+          onSave={() => {}}
+          isLoading={false}
+          isOpen={editModalOpen}
+          onOpenChange={setEditModalOpen}
+        />
+      </>
+    );
+  }
 
   return (
     <>
