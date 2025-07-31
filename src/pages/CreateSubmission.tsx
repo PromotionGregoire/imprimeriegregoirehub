@@ -42,6 +42,7 @@ const submissionSchema = z.object({
 type FormData = z.infer<typeof submissionSchema>;
 
 const CreateSubmission = () => {
+  console.log('CreateSubmission component rendering...');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { data: clients } = useClients();
@@ -49,6 +50,9 @@ const CreateSubmission = () => {
   const createSubmission = useCreateSubmission();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  console.log('Clients data:', clients);
+  console.log('Products data:', products);
   
   const prefilledClientId = searchParams.get('client_id');
 
