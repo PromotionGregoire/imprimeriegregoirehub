@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit, Package, DollarSign, Tag, Warehouse } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,24 +7,26 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { useProducts } from '@/hooks/useProducts';
+import { useProduct } from '@/hooks/useProduct';
 import { useProductVariants } from '@/hooks/useProductVariants';
 import ProductModal from '@/components/ProductModal';
-import ProductVariantManager from '@/components/ProductVariantManager';
-import ProductSuppliersManager from '@/components/ProductSuppliersManager';
+
+// Lazy load des composants lourds
+const ProductVariantManager = lazy(() => import('@/components/ProductVariantManager'));
+const ProductSuppliersManager = lazy(() => import('@/components/ProductSuppliersManager'));
 
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { data: products, isLoading: productsLoading } = useProducts();
+  
+  const [activeTab, setActiveTab] = useState('info');
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  
+  const { data: product, isLoading: productLoading } = useProduct(id);
   const { data: variants, isLoading: variantsLoading } = useProductVariants(id || '');
   
-  const [editModalOpen, setEditModalOpen] = useState(false);
-
-  const product = products?.find(p => p.id === id);
-  
-  if (productsLoading) {
+  if (productLoading) {
     return (
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-4">
@@ -140,7 +142,7 @@ const ProductDetails = () => {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="info" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList>
             <TabsTrigger value="info">Informations détaillées</TabsTrigger>
             <TabsTrigger value="variants">Variantes</TabsTrigger>
@@ -180,11 +182,15 @@ const ProductDetails = () => {
           </TabsContent>
 
           <TabsContent value="variants" className="space-y-6">
-            <ProductVariantManager productId={id!} />
+            <Suspense fallback={<Skeleton className="h-32" />}>
+              <ProductVariantManager productId={id!} />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="suppliers" className="space-y-6">
-            <ProductSuppliersManager productId={id!} />
+            <Suspense fallback={<Skeleton className="h-32" />}>
+              <ProductSuppliersManager productId={id!} />
+            </Suspense>
           </TabsContent>
         </Tabs>
       </div>
