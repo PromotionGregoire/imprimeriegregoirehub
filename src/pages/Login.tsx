@@ -16,12 +16,6 @@ const Login = () => {
   const { signIn, user } = useAuth();
   const { data: profiles, isLoading: profilesLoading, error: profilesError } = useProfiles();
   
-  // Debug logging
-  console.log('Login page rendered');
-  console.log('User:', user);
-  console.log('Profiles loading:', profilesLoading);
-  console.log('Profiles data:', profiles);
-  console.log('Profiles error:', profilesError);
   const navigate = useNavigate();
 
   // Redirect if already authenticated
@@ -68,6 +62,51 @@ const Login = () => {
     }
   };
 
+  // Handle loading and error states
+  if (profilesLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <div className="w-full max-w-md space-y-8 text-center">
+          <h1 className="text-3xl font-bold text-foreground">
+            Connexion Espace Employé
+          </h1>
+          <div className="space-y-4">
+            <div className="text-lg text-muted-foreground">Chargement des employés...</div>
+            <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle error state - profiles failed to load
+  if (profilesError || !profiles || profiles.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <div className="w-full max-w-md space-y-8 text-center">
+          <h1 className="text-3xl font-bold text-foreground">
+            Connexion Espace Employé
+          </h1>
+          <div className="space-y-4">
+            <div className="text-destructive text-lg">
+              Erreur : Impossible de charger la liste des employés
+            </div>
+            <div className="text-muted-foreground">
+              {profilesError?.message || "Aucun employé trouvé dans la base de données"}
+            </div>
+            <Button 
+              onClick={() => window.location.reload()} 
+              variant="outline"
+              className="mx-auto"
+            >
+              Rafraîchir la page
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-md space-y-8">
@@ -81,19 +120,15 @@ const Login = () => {
           <div className="space-y-2">
             <Label htmlFor="employee">Sélectionner un employé</Label>
             <Select value={selectedEmployeeId} onValueChange={setSelectedEmployeeId}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full bg-background">
                 <SelectValue placeholder="Choisir votre nom" />
               </SelectTrigger>
-              <SelectContent>
-                {profilesLoading ? (
-                  <SelectItem value="" disabled>Chargement...</SelectItem>
-                ) : (
-                  profiles?.map((profile) => (
-                    <SelectItem key={profile.id} value={profile.id}>
-                      {profile.full_name}
-                    </SelectItem>
-                  ))
-                )}
+              <SelectContent className="bg-background border border-border shadow-md">
+                {profiles.map((profile) => (
+                  <SelectItem key={profile.id} value={profile.id}>
+                    {profile.full_name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -114,7 +149,7 @@ const Login = () => {
           )}
 
           {error && (
-            <div className="text-destructive text-sm text-center py-2">
+            <div className="text-destructive text-sm text-center py-2 bg-destructive/10 rounded-md border border-destructive/20">
               {error}
             </div>
           )}
@@ -122,7 +157,7 @@ const Login = () => {
           <Button 
             type="submit" 
             className="w-full" 
-            disabled={loading}
+            disabled={loading || !selectedEmployeeId}
           >
             {loading ? 'Connexion...' : 'Se connecter'}
           </Button>
