@@ -59,28 +59,32 @@ export const EmployeeCard = ({ employee, onEdit, onDelete, onResetPassword }: Em
 
   return (
     <Card className="hover:shadow-md transition-shadow">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-4">
         <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <Avatar className="h-12 w-12">
-              <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+              <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
                 {initials}
               </AvatarFallback>
             </Avatar>
-            <div>
-              <h3 className="font-semibold text-foreground">{employee.full_name}</h3>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-foreground text-base leading-tight mb-1">
+                {employee.full_name}
+              </h3>
               {employee.job_title && (
-                <p className="text-sm text-muted-foreground">{employee.job_title}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {employee.job_title}
+                </p>
               )}
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-start gap-3 ml-4">
             <div className="flex flex-col gap-2 items-end">
-              <Badge variant={getRoleBadgeVariant(employee.role)}>
+              <Badge variant={getRoleBadgeVariant(employee.role)} className="text-xs font-medium">
                 {getRoleLabel(employee.role)}
               </Badge>
               {employee.password_reset_required && (
-                <Badge variant="outline" className="text-orange-600 border-orange-600">
+                <Badge variant="outline" className="text-orange-600 border-orange-600 text-xs">
                   <AlertCircle className="h-3 w-3 mr-1" />
                   Mot de passe temporaire
                 </Badge>
@@ -90,29 +94,29 @@ export const EmployeeCard = ({ employee, onEdit, onDelete, onResetPassword }: Em
             {/* Actions Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-muted">
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-background border z-50">
+              <DropdownMenuContent align="end" className="bg-background border z-50 min-w-[160px]">
                 {onEdit && (
-                  <DropdownMenuItem onClick={() => onEdit(employee)} className="cursor-pointer">
-                    <Edit className="h-4 w-4 mr-2" />
+                  <DropdownMenuItem onClick={() => onEdit(employee)} className="cursor-pointer py-2.5 px-3">
+                    <Edit className="h-4 w-4 mr-3" />
                     Modifier
                   </DropdownMenuItem>
                 )}
                 {onResetPassword && (
-                  <DropdownMenuItem onClick={() => onResetPassword(employee)} className="cursor-pointer">
-                    <Key className="h-4 w-4 mr-2" />
+                  <DropdownMenuItem onClick={() => onResetPassword(employee)} className="cursor-pointer py-2.5 px-3">
+                    <Key className="h-4 w-4 mr-3" />
                     Réinitialiser mot de passe
                   </DropdownMenuItem>
                 )}
                 {onDelete && (
                   <DropdownMenuItem 
                     onClick={() => onDelete(employee)} 
-                    className="cursor-pointer text-destructive focus:text-destructive"
+                    className="cursor-pointer text-destructive focus:text-destructive py-2.5 px-3"
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
+                    <Trash2 className="h-4 w-4 mr-3" />
                     Supprimer
                   </DropdownMenuItem>
                 )}
@@ -122,35 +126,43 @@ export const EmployeeCard = ({ employee, onEdit, onDelete, onResetPassword }: Em
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-4 pt-0">
         {employee.employment_status && (
-          <div className="flex items-center gap-2 text-sm">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span className="text-muted-foreground">Statut:</span>
-            <span className="font-medium">{employee.employment_status}</span>
+          <div className="flex items-center gap-3 text-sm">
+            <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">Statut:</span>
+              <span className="font-medium text-foreground">{employee.employment_status}</span>
+            </div>
           </div>
         )}
         
         {employee.hire_date && (
-          <div className="flex items-center gap-2 text-sm">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span className="text-muted-foreground">Embauché:</span>
-            <span className="font-medium">
-              {new Date(employee.hire_date).toLocaleDateString('fr-CA')}
-            </span>
+          <div className="flex items-center gap-3 text-sm">
+            <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">Embauché:</span>
+              <span className="font-medium text-foreground">
+                {new Date(employee.hire_date).toLocaleDateString('fr-CA')}
+              </span>
+            </div>
           </div>
         )}
 
         {employee.emergency_contact_name && (
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-sm">
-              <Phone className="h-4 w-4 text-muted-foreground" />
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 text-sm">
+              <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               <span className="text-muted-foreground">Contact d'urgence:</span>
             </div>
-            <div className="pl-6 text-sm">
-              <div className="font-medium">{employee.emergency_contact_name}</div>
+            <div className="ml-7 space-y-1">
+              <div className="font-medium text-foreground text-sm">
+                {employee.emergency_contact_name}
+              </div>
               {employee.emergency_contact_phone && (
-                <div className="text-muted-foreground">{employee.emergency_contact_phone}</div>
+                <div className="text-muted-foreground text-sm">
+                  {employee.emergency_contact_phone}
+                </div>
               )}
             </div>
           </div>
