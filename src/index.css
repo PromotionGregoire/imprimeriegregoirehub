@@ -8,6 +8,7 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
+    /* Base Colors - Inspired by Uber Base Design System */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
@@ -17,50 +18,77 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 106 31% 47%;
+    /* Primary - Imprimerie Grégoire Brand Green */
+    --primary: 106 31% 47%; /* #5a7a51 */
     --primary-foreground: 210 40% 98%;
 
+    /* Secondary - Uber Base inspired neutrals */
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
+    /* Muted - Subtle backgrounds and text */
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
+    /* Accent - Interactive elements */
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
 
+    /* Destructive - Error states */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
+    /* Border and Input - Consistent boundaries */
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 106 31% 47%; /* Focus ring uses primary */
 
+    /* Border Radius - Uber Base uses consistent rounding */
     --radius: 0.5rem;
 
-    /* Status colors - Design system tokens */
-    --status-orange: 25 100% 50%;
-    --status-orange-light: 25 100% 95%;
-    --status-green: 82 84% 47%;
-    --status-green-light: 82 84% 95%;
-    --status-purple: 262 70% 50%;
-    --status-purple-light: 262 70% 95%;
+    /* Semantic Status Colors - Base Web approach */
+    --status-positive: 82 84% 47%; /* Success green */
+    --status-positive-light: 82 84% 95%;
+    --status-warning: 25 100% 50%; /* Warning orange */
+    --status-warning-light: 25 100% 95%;
+    --status-negative: 0 84% 60%; /* Error red */
+    --status-negative-light: 0 84% 95%;
+    --status-info: 217 91% 60%; /* Info blue */
+    --status-info-light: 217 91% 95%;
 
+    /* Sidebar - Adapted to our green theme */
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 107 20% 40%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 106 31% 47%;
 
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Typography Scale - Uber Base inspired */
+    --font-size-100: 0.75rem;    /* 12px - Caption */
+    --font-size-200: 0.875rem;   /* 14px - Body Small */
+    --font-size-300: 1rem;       /* 16px - Body */
+    --font-size-400: 1.125rem;   /* 18px - Body Large */
+    --font-size-550: 1.25rem;    /* 20px - Heading Small */
+    --font-size-650: 1.5rem;     /* 24px - Heading Medium */
+    --font-size-750: 1.875rem;   /* 30px - Heading Large */
+    --font-size-950: 2.25rem;    /* 36px - Display Small */
+    --font-size-1050: 2.75rem;   /* 44px - Display Medium */
+    --font-size-1150: 3.25rem;   /* 52px - Display Large */
+
+    /* Spacing Scale - 8px base unit (Uber Base) */
+    --spacing-100: 0.25rem;   /* 4px */
+    --spacing-200: 0.5rem;    /* 8px */
+    --spacing-300: 0.75rem;   /* 12px */
+    --spacing-400: 1rem;      /* 16px */
+    --spacing-500: 1.25rem;   /* 20px */
+    --spacing-600: 1.5rem;    /* 24px */
+    --spacing-700: 2rem;      /* 32px */
+    --spacing-800: 2.5rem;    /* 40px */
+    --spacing-900: 3rem;      /* 48px */
+    --spacing-1000: 4rem;     /* 64px */
   }
 
   .dark {
