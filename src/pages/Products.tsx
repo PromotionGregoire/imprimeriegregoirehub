@@ -33,7 +33,24 @@ const Products = () => {
   }) || [];
 
   const handleCreateProduct = (data: any) => {
-    createProduct.mutate(data);
+    console.log('Creating product with data:', data);
+    createProduct.mutate(data, {
+      onSuccess: (result) => {
+        console.log('Product created successfully:', result);
+        toast({
+          title: '✅ Produit créé',
+          description: 'Le produit a été ajouté avec succès.',
+        });
+      },
+      onError: (error) => {
+        console.error('Error creating product:', error);
+        toast({
+          title: '❌ Erreur',
+          description: 'Impossible de créer le produit.',
+          variant: 'destructive',
+        });
+      }
+    });
   };
 
   const handleUpdateProduct = (data: any) => {
@@ -83,24 +100,13 @@ const Products = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Produits</h1>
-        <ProductModal onSave={handleCreateProduct} />
-      </div>
-      
-      {/* Modal d'édition contrôlé */}
-      <ProductModal
-        product={editingProduct}
-        onSave={handleUpdateProduct}
-        isLoading={updateProduct.isPending}
-        isOpen={editModalOpen}
-        onOpenChange={(open) => {
-          setEditModalOpen(open);
-          if (!open) setEditingProduct(null);
-        }}
-      />
+    <>
+      <div className="p-6 space-y-6">
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Produits</h1>
+          <ProductModal onSave={handleCreateProduct} />
+        </div>
 
       {/* Search and Filters */}
       <Card>
@@ -192,6 +198,19 @@ const Products = () => {
         )}
       </div>
     </div>
+    
+    {/* Modal d'édition contrôlé - en dehors du div principal */}
+    <ProductModal
+      product={editingProduct}
+      onSave={handleUpdateProduct}
+      isLoading={updateProduct.isPending}
+      isOpen={editModalOpen}
+      onOpenChange={(open) => {
+        setEditModalOpen(open);
+        if (!open) setEditingProduct(null);
+      }}
+    />
+  </>
   );
 };
 
