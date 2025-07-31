@@ -24,7 +24,7 @@ serve(async (req) => {
 
     // Send test email
     const emailResponse = await resend.emails.send({
-      from: 'Promotion Grégoire <info@promotiongregoire.com>',
+      from: 'Promotion Grégoire <onboarding@resend.dev>',
       to: [testEmail],
       subject: '✅ Test Email - Promotion Grégoire',
       html: `
