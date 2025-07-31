@@ -223,22 +223,40 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          employment_status: string | null
           full_name: string
+          hire_date: string | null
           id: string
+          job_title: string | null
+          password_reset_required: boolean | null
           role: string
           updated_at: string
         }
         Insert: {
           created_at?: string
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          employment_status?: string | null
           full_name: string
+          hire_date?: string | null
           id: string
+          job_title?: string | null
+          password_reset_required?: boolean | null
           role?: string
           updated_at?: string
         }
         Update: {
           created_at?: string
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          employment_status?: string | null
           full_name?: string
+          hire_date?: string | null
           id?: string
+          job_title?: string | null
+          password_reset_required?: boolean | null
           role?: string
           updated_at?: string
         }
@@ -395,6 +413,10 @@ export type Database = {
       generate_submission_number: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
       }
     }
     Enums: {

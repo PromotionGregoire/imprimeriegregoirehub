@@ -17,6 +17,8 @@ import Orders from "./pages/Orders";
 import EditSubmission from "./pages/EditSubmission";
 import Products from "./pages/Products";
 import Proofs from "./pages/Proofs";
+import AdminEmployees from "./pages/AdminEmployees";
+import ForcePasswordChange from "./pages/ForcePasswordChange";
 import DashboardLayout from "./components/DashboardLayout";
 
 const queryClient = new QueryClient();
@@ -31,6 +33,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/force-password-change" element={<ForcePasswordChange />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <DashboardLayout />
@@ -45,6 +48,7 @@ const App = () => (
               <Route path="products" element={<Products />} />
               <Route path="orders" element={<Orders />} />
               <Route path="proofs" element={<Proofs />} />
+              <Route path="admin/employees" element={<AdminEmployees />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

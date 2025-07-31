@@ -1,6 +1,8 @@
-import { Users, FileText, Package, LogOut, Tag } from "lucide-react"
+import { Users, FileText, Package, LogOut, Tag, UserCog } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import { useAuth } from "@/hooks/useAuth"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
 import {
   Sidebar,
   SidebarContent,
@@ -32,6 +34,23 @@ export function AppSidebar() {
   const { user, signOut } = useAuth()
   const currentPath = location.pathname
 
+  // Check if current user is admin
+  const { data: currentUserProfile } = useQuery({
+    queryKey: ['current-user-profile', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
   const isActive = (path: string) => {
     if (path === "/dashboard") {
       return currentPath === "/dashboard" || currentPath.startsWith("/dashboard/clients/")
@@ -43,6 +62,11 @@ export function AppSidebar() {
     active 
       ? "bg-primary text-primary-foreground font-medium" 
       : "hover:bg-muted/50 text-muted-foreground hover:text-foreground"
+
+  // Admin navigation items
+  const adminItems = currentUserProfile?.role === 'ADMIN' ? [
+    { title: "Gestion des Employés", url: "/dashboard/admin/employees", icon: UserCog },
+  ] : [];
 
   const handleSignOut = async () => {
     await signOut()
@@ -89,6 +113,32 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* Admin Section */}
+        {adminItems.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-slate-400 text-xs uppercase tracking-wider px-2">
+              {!collapsed && "Administration"}
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {adminItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <NavLink
+                        to={item.url}
+                        className={`${getNavClassName(isActive(item.url))} flex items-center gap-3 rounded-lg px-3 py-2 transition-colors`}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        {!collapsed && <span>{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-slate-800 p-4 bg-slate-900">
