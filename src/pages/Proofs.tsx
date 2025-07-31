@@ -96,7 +96,7 @@ const Proofs = () => {
       />
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-base-400">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 lg:gap-6">
         <Card className="bg-card border border-border">
           <CardContent className="p-base-600">
             <div className="flex items-center space-x-base-300">
