@@ -2,7 +2,13 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { ArrowRight, ExternalLink, Loader2, CheckCircle, FileText } from 'lucide-react';
+import { 
+  ArrowRight, 
+  ExternalLink, 
+  Loader2, 
+  CheckCircle, 
+  FileText 
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { SubmissionStatusTimeline } from './SubmissionStatusTimeline';
