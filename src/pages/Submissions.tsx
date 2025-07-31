@@ -130,7 +130,7 @@ const Submissions = () => {
 
       {/* Stats Cards with Period Filter */}
       <div className="space-y-4">
-        <div className="flex justify-end">
+        <div className="flex items-center justify-between">
           <Select value={periodFilter} onValueChange={setPeriodFilter}>
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Filtrer par période" />
