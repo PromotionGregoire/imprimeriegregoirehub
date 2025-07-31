@@ -89,17 +89,17 @@ const Suppliers = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Fournisseurs</h1>
         <CreateSupplierModal />
-        
-        {/* Modal d'édition contrôlé */}
-        <CreateSupplierModal
-          supplier={editingSupplier}
-          isOpen={editModalOpen}
-          onOpenChange={(open) => {
-            setEditModalOpen(open);
-            if (!open) setEditingSupplier(null);
-          }}
-        />
       </div>
+      
+      {/* Modal d'édition contrôlé */}
+      <CreateSupplierModal
+        supplier={editingSupplier}
+        isOpen={editModalOpen}
+        onOpenChange={(open) => {
+          setEditModalOpen(open);
+          if (!open) setEditingSupplier(null);
+        }}
+      />
       
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

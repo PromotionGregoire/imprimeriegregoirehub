@@ -87,22 +87,20 @@ const Products = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Produits</h1>
-        <div className="flex gap-2">
-          <ProductModal onSave={handleCreateProduct} />
-          
-          {/* Modal d'édition contrôlé */}
-          <ProductModal
-            product={editingProduct}
-            onSave={handleUpdateProduct}
-            isLoading={updateProduct.isPending}
-            isOpen={editModalOpen}
-            onOpenChange={(open) => {
-              setEditModalOpen(open);
-              if (!open) setEditingProduct(null);
-            }}
-          />
-        </div>
+        <ProductModal onSave={handleCreateProduct} />
       </div>
+      
+      {/* Modal d'édition contrôlé */}
+      <ProductModal
+        product={editingProduct}
+        onSave={handleUpdateProduct}
+        isLoading={updateProduct.isPending}
+        isOpen={editModalOpen}
+        onOpenChange={(open) => {
+          setEditModalOpen(open);
+          if (!open) setEditingProduct(null);
+        }}
+      />
 
       {/* Search and Filters */}
       <Card>

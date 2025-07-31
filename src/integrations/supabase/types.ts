@@ -480,18 +480,21 @@ export type Database = {
       supplier_categories: {
         Row: {
           category_name: string
+          category_type: string
           created_at: string
           id: string
           supplier_id: string
         }
         Insert: {
           category_name: string
+          category_type?: string
           created_at?: string
           id?: string
           supplier_id: string
         }
         Update: {
           category_name?: string
+          category_type?: string
           created_at?: string
           id?: string
           supplier_id?: string

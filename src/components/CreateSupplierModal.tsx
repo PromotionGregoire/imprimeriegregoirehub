@@ -30,7 +30,8 @@ const CreateSupplierModal = ({ trigger, supplier, isOpen: controlledOpen, onOpen
     website_2: '',
     notes: '',
   });
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedGoodsCategories, setSelectedGoodsCategories] = useState<string[]>([]);
+  const [selectedServiceCategories, setSelectedServiceCategories] = useState<string[]>([]);
 
   const { createSupplier, updateSupplier } = useSupplierMutations();
   
@@ -61,7 +62,8 @@ const CreateSupplierModal = ({ trigger, supplier, isOpen: controlledOpen, onOpen
         website_2: '',
         notes: '',
       });
-      setSelectedCategories([]);
+      setSelectedGoodsCategories([]);
+      setSelectedServiceCategories([]);
     }
   }, [supplier, isOpen]);
 
@@ -89,7 +91,8 @@ const CreateSupplierModal = ({ trigger, supplier, isOpen: controlledOpen, onOpen
           website_2: '',
           notes: '',
         });
-        setSelectedCategories([]);
+        setSelectedGoodsCategories([]);
+        setSelectedServiceCategories([]);
       },
     });
   };
@@ -98,10 +101,38 @@ const CreateSupplierModal = ({ trigger, supplier, isOpen: controlledOpen, onOpen
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const availableCategories = ['Vêtement', 'Imprimerie', 'Objet promotionnel', 'Packaging', 'Accessoires', 'Électronique'];
+  const availableGoodsCategories = [
+    'Vêtement & Textile',
+    'Objet promotionnel', 
+    'Imprimerie & Papier',
+    'Packaging & Emballage',
+    'Électronique',
+    'Signalisation & Affichage (Bannières, Coroplast)',
+    'Accessoires (Sacs, Casquettes, etc.)'
+  ];
 
-  const toggleCategory = (category: string) => {
-    setSelectedCategories(prev => 
+  const availableServiceCategories = [
+    'Sérigraphie',
+    'Broderie', 
+    'Gravure Laser',
+    'Impression Numérique (Grand Format)',
+    'Impression Offset',
+    'Découpe Vinyle',
+    'Finition & Reliure',
+    'Conception Graphique',
+    'Installation & Pose'
+  ];
+
+  const toggleGoodsCategory = (category: string) => {
+    setSelectedGoodsCategories(prev => 
+      prev.includes(category) 
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
+  const toggleServiceCategory = (category: string) => {
+    setSelectedServiceCategories(prev => 
       prev.includes(category) 
         ? prev.filter(c => c !== category)
         : [...prev, category]
@@ -163,21 +194,42 @@ const CreateSupplierModal = ({ trigger, supplier, isOpen: controlledOpen, onOpen
             </div>
           </div>
 
-          {/* Spécialités conditionnelles */}
+          {/* Spécialités conditionnelles pour les biens */}
           {formData.is_goods_supplier && (
             <div className="space-y-2">
               <Label>Spécialités (catégories de produits)</Label>
-              <div className="grid grid-cols-2 gap-2">
-                {availableCategories.map((category) => (
+              <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
+                {availableGoodsCategories.map((category) => (
                   <div key={category} className="flex items-center space-x-2">
                     <input
                       type="checkbox"
-                      id={`category-${category}`}
-                      checked={selectedCategories.includes(category)}
-                      onChange={() => toggleCategory(category)}
+                      id={`goods-${category}`}
+                      checked={selectedGoodsCategories.includes(category)}
+                      onChange={() => toggleGoodsCategory(category)}
                       className="rounded border-input"
                     />
-                    <Label htmlFor={`category-${category}`} className="text-sm">{category}</Label>
+                    <Label htmlFor={`goods-${category}`} className="text-sm">{category}</Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Spécialités conditionnelles pour les services */}
+          {formData.is_service_supplier && (
+            <div className="space-y-2">
+              <Label>Spécialités (catégories de services)</Label>
+              <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
+                {availableServiceCategories.map((category) => (
+                  <div key={category} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id={`service-${category}`}
+                      checked={selectedServiceCategories.includes(category)}
+                      onChange={() => toggleServiceCategory(category)}
+                      className="rounded border-input"
+                    />
+                    <Label htmlFor={`service-${category}`} className="text-sm">{category}</Label>
                   </div>
                 ))}
               </div>
