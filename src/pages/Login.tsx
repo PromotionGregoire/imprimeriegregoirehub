@@ -43,9 +43,18 @@ const Login = () => {
       return;
     }
 
-    // For now, we'll use the employee ID as email since we need to authenticate
-    // In a real scenario, you'd need to store email in profiles or have a different auth method
-    const { error: signInError } = await signIn(`${selectedEmployeeId}@company.com`, password);
+    // Use the actual email for ADMIN user
+    let email = '';
+    if (selectedProfile.role === 'ADMIN') {
+      email = 'info@promotiongregoire.ca';
+    } else {
+      // For other users, we'll need to add email to profiles table
+      setError('Email non trouvé pour cet employé.');
+      setLoading(false);
+      return;
+    }
+
+    const { error: signInError } = await signIn(email, password);
 
     if (signInError) {
       setError('Le mot de passe est incorrect.');

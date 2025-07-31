@@ -7,7 +7,7 @@ export const useProfiles = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, full_name')
+        .select('id, full_name, role')
         .order('full_name');
       
       if (error) {
