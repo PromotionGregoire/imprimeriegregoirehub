@@ -50,12 +50,9 @@ const Login = () => {
       return;
     }
 
-    // Use the actual email for ADMIN user
-    let email = '';
-    if (selectedProfile.role === 'ADMIN') {
-      email = 'info@promotiongregoire.ca';
-    } else {
-      // For other users, we'll need to add email to profiles table
+    // Use the email from the profile
+    const email = selectedProfile.email;
+    if (!email) {
       setError('Email non trouvé pour cet employé.');
       setLoading(false);
       return;
