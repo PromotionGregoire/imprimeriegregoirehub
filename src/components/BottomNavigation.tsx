@@ -1,4 +1,4 @@
-import { Users, FileText, Package, Menu } from "lucide-react"
+import { Users, FileText, Package, Menu, ShoppingBag, Tag } from "lucide-react"
 import { NavLink, useLocation, useNavigate } from "react-router-dom"
 import { cn } from "@/lib/utils"
 import { useState } from "react"
@@ -13,8 +13,8 @@ const navigationItems = [
 ]
 
 const menuItems = [
-  { title: "Produits", url: "/dashboard/products", icon: Package },
-  { title: "Fournisseurs", url: "/dashboard/suppliers", icon: Users },
+  { title: "Produits", url: "/dashboard/products", icon: Tag },
+  { title: "Fournisseurs", url: "/dashboard/suppliers", icon: ShoppingBag },
   { title: "Employés", url: "/dashboard/admin/employees", icon: Users },
 ]
 
@@ -43,19 +43,19 @@ export function BottomNavigation() {
                 key={item.title}
                 to={item.url}
                 className={cn(
-                  "flex flex-col items-center justify-center min-w-0 flex-1 px-3 py-2 rounded-2xl transition-all duration-300 min-h-[64px] active:scale-95",
+                  "flex flex-col items-center justify-center min-w-0 flex-1 px-2 py-3 rounded-2xl transition-all ease-uber min-h-[68px] active:scale-95",
                   active 
-                    ? "text-primary bg-primary/10" 
+                    ? "text-[#5a7a51] bg-[#5a7a51]/10" 
                     : "text-muted-foreground/70 hover:text-foreground hover:bg-muted/40"
                 )}
               >
                 <item.icon className={cn(
-                  "h-5 w-5 mb-1 transition-all duration-300", 
-                  active ? "text-primary scale-110 stroke-[2.5]" : "text-muted-foreground/70 stroke-[2]"
+                  "h-5 w-5 mb-1.5 transition-all ease-uber", 
+                  active ? "text-[#5a7a51] scale-110 stroke-[2.5]" : "text-muted-foreground/70 stroke-[2]"
                 )} />
                 <span className={cn(
-                  "text-[10px] font-medium leading-tight text-center max-w-full transition-all duration-300",
-                  active ? "text-primary font-semibold" : "text-muted-foreground/70"
+                  "text-[11px] font-medium leading-tight text-center max-w-full transition-all ease-uber whitespace-nowrap overflow-hidden",
+                  active ? "text-[#5a7a51] font-semibold" : "text-muted-foreground/70"
                 )}>
                   {item.title}
                 </span>
@@ -66,9 +66,9 @@ export function BottomNavigation() {
           {/* Menu Button */}
           <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
             <SheetTrigger asChild>
-              <div className="flex flex-col items-center justify-center min-w-0 flex-1 px-3 py-2 rounded-2xl transition-all duration-300 min-h-[64px] active:scale-95 cursor-pointer text-muted-foreground/70 hover:text-foreground hover:bg-muted/40">
-                <Menu className="h-5 w-5 mb-1 stroke-[2]" />
-                <span className="text-[10px] font-medium leading-tight text-center">Plus</span>
+              <div className="flex flex-col items-center justify-center min-w-0 flex-1 px-2 py-3 rounded-2xl transition-all ease-uber min-h-[68px] active:scale-95 cursor-pointer text-muted-foreground/70 hover:text-foreground hover:bg-muted/40">
+                <Menu className="h-5 w-5 mb-1.5 stroke-[2]" />
+                <span className="text-[11px] font-medium leading-tight text-center whitespace-nowrap">Plus</span>
               </div>
             </SheetTrigger>
             <SheetContent side="bottom" className="h-[50vh]">

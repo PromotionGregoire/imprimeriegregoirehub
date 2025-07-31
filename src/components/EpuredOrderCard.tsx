@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, FileText, User, ExternalLink } from 'lucide-react';
+import { Calendar, FileText, Package, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
@@ -78,20 +78,20 @@ const EpuredOrderCard = ({ order, onProofAccepted, onDelivered }: OrderCardProps
       onClick={handleCardClick}
     >
       <CardHeader className="pb-base-300">
-        {/* En-tête réorganisé : Numéro | Badge | Montant */}
+        {/* En-tête réorganisé : Nom d'entreprise | Badge | Montant */}
         <div className="flex items-center justify-between">
-          <h3 className="font-bold text-base-500 text-foreground">{order.order_number}</h3>
+          <h3 className="font-bold text-base-500 text-foreground">{order.clients?.business_name}</h3>
           {getStatusBadge(order.status)}
           <div className="text-right">
             <div className="font-bold text-base-650 text-primary">${Number(order.total_price).toFixed(2)}</div>
           </div>
         </div>
         
-        {/* Ligne d'Information : Client + Date */}
+        {/* Ligne d'Information : Numéro de commande + Date */}
         <div className="flex items-center justify-between text-base-300 text-muted-foreground">
           <div className="flex items-center gap-base-200">
-            <User className="h-base-400 w-base-400" />
-            <span className="font-medium">{order.clients?.business_name}</span>
+            <Package className="h-base-400 w-base-400" />
+            <span className="font-mono">{order.order_number}</span>
           </div>
           <div className="flex items-center gap-base-100">
             <Calendar className="h-base-300 w-base-300" />

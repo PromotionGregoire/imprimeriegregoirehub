@@ -50,7 +50,10 @@ const ClientCard = ({
             <h3 className="text-base-550 md:text-base-400 font-semibold text-foreground mb-base-200 leading-tight">
               {business_name}
             </h3>
-            <div className="space-y-base-100">
+            <p className="text-base-300 text-muted-foreground font-mono">
+              {client_number}
+            </p>
+            <div className="space-y-base-100 mt-base-200">
               <p className="text-base-300 md:text-base-300 text-foreground font-medium">
                 {contact_name}
               </p>
@@ -62,9 +65,6 @@ const ClientCard = ({
             </div>
           </div>
           <div className="text-right flex-shrink-0">
-            <span className="text-base-200 text-muted-foreground font-mono block mb-base-300">
-              {client_number}
-            </span>
             {status && (
               <Badge variant="outline" className={`${getStatusColor(status)} text-base-200 font-medium px-base-200 py-base-100`}>
                 {status}

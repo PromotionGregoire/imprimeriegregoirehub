@@ -53,7 +53,7 @@ export function AppSidebar() {
     enabled: !!user,
   });
 
-  const isActive = (path: string) => {
+  const isPathActive = (path: string) => {
     if (path === "/dashboard") {
       return currentPath === "/dashboard" || currentPath.startsWith("/dashboard/clients/")
     }
@@ -62,8 +62,8 @@ export function AppSidebar() {
 
   const getNavClassName = (active: boolean) =>
     active 
-      ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium" 
-      : "hover:bg-sidebar-accent text-sidebar-foreground hover:text-sidebar-accent-foreground"
+      ? "text-[#5a7a51] font-medium" 
+      : "hover:bg-[#1f2937] text-slate-300 hover:text-white"
 
   // Admin navigation items
   const adminItems = currentUserProfile?.role === 'ADMIN' ? [
@@ -76,10 +76,10 @@ export function AppSidebar() {
 
   return (
     <Sidebar
-      className={`${collapsed ? "w-14" : "w-60"} bg-sidebar-background border-sidebar-border`}
+      className={`${collapsed ? "w-14" : "w-60"} bg-[#111827] border-[#1f2937]`}
       collapsible="icon"
     >
-      <SidebarHeader className="border-b border-sidebar-border p-4">
+      <SidebarHeader className="border-b border-[#1f2937] p-4 bg-[#111827]">
         {!collapsed && (
           <img 
             src={logoGregoire} 
@@ -88,15 +88,15 @@ export function AppSidebar() {
           />
         )}
         {collapsed && (
-          <div className="text-sidebar-foreground font-bold text-center">
+          <div className="text-white font-bold text-center">
             PG
           </div>
         )}
       </SidebarHeader>
 
-      <SidebarContent className="bg-sidebar-background">
+      <SidebarContent className="bg-[#111827]">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/60 text-xs uppercase tracking-wider px-2">
+          <SidebarGroupLabel className="text-slate-400 text-xs uppercase tracking-wider px-2">
             {!collapsed && "Navigation"}
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -106,10 +106,14 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink
                       to={item.url}
-                      className={`${getNavClassName(isActive(item.url))} flex items-center gap-3 rounded-lg px-3 py-2 transition-colors`}
+                      className={({ isActive }) => `${getNavClassName(isActive || isPathActive(item.url))} flex items-center gap-3 rounded-lg px-3 py-2 transition-all ease-uber`}
                     >
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {({ isActive }) => (
+                        <>
+                          <item.icon className={`h-4 w-4 ${isActive || isPathActive(item.url) ? 'text-[#5a7a51]' : ''}`} />
+                          {!collapsed && <span>{item.title}</span>}
+                        </>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -121,7 +125,7 @@ export function AppSidebar() {
         {/* Admin Section */}
         {adminItems.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-sidebar-foreground/60 text-xs uppercase tracking-wider px-2">
+            <SidebarGroupLabel className="text-slate-400 text-xs uppercase tracking-wider px-2">
               {!collapsed && "Administration"}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -129,13 +133,17 @@ export function AppSidebar() {
                 {adminItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
-                      <NavLink
-                        to={item.url}
-                        className={`${getNavClassName(isActive(item.url))} flex items-center gap-3 rounded-lg px-3 py-2 transition-colors`}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        {!collapsed && <span>{item.title}</span>}
-                      </NavLink>
+                        <NavLink
+                          to={item.url}
+                          className={({ isActive }) => `${getNavClassName(isActive || isPathActive(item.url))} flex items-center gap-3 rounded-lg px-3 py-2 transition-all ease-uber`}
+                        >
+                          {({ isActive }) => (
+                            <>
+                              <item.icon className={`h-4 w-4 ${isActive || isPathActive(item.url) ? 'text-[#5a7a51]' : ''}`} />
+                              {!collapsed && <span>{item.title}</span>}
+                            </>
+                          )}
+                        </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
@@ -145,18 +153,18 @@ export function AppSidebar() {
         )}
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border p-4 bg-sidebar-background">
+      <SidebarFooter className="border-t border-[#1f2937] p-4 bg-[#111827]">
         {!collapsed && (
           <div className="space-y-3">
-            <div className="text-sm text-sidebar-foreground">
+            <div className="text-sm text-slate-200">
               <div className="font-medium">{user?.email}</div>
-              <div className="text-xs text-sidebar-foreground/60">Employé connecté</div>
+              <div className="text-xs text-slate-400">Employé connecté</div>
             </div>
-            <Separator className="bg-sidebar-border" />
+            <Separator className="bg-[#1f2937]" />
             <Button
               variant="ghost"
               onClick={handleSignOut}
-              className="w-full justify-start text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent"
+              className="w-full justify-start text-slate-300 hover:text-white hover:bg-[#1f2937]"
             >
               <LogOut className="mr-2 h-4 w-4" />
               Se déconnecter
@@ -167,7 +175,7 @@ export function AppSidebar() {
           <Button
             variant="ghost"
             onClick={handleSignOut}
-            className="w-full p-2 text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent"
+            className="w-full p-2 text-slate-300 hover:text-white hover:bg-[#1f2937]"
           >
             <LogOut className="h-4 w-4" />
           </Button>

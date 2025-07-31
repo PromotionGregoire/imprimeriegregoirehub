@@ -68,10 +68,10 @@ const ModernSubmissionCard = ({ submission, onClick }: ModernSubmissionCardProps
             </div>
             <div>
               <h3 className="font-semibold text-base-400 text-foreground">
-                {submission.submission_number}
-              </h3>
-              <p className="text-base-300 text-muted-foreground">
                 {submission.clients?.business_name}
+              </h3>
+              <p className="text-base-300 text-muted-foreground font-mono">
+                {submission.submission_number}
               </p>
             </div>
           </div>
