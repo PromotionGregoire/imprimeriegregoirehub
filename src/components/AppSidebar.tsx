@@ -1,4 +1,4 @@
-import { Users, FileText, Package, LogOut, Tag, UserCog } from "lucide-react"
+import { Users, FileText, Package, LogOut, Tag, UserCog, Building } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import { useAuth } from "@/hooks/useAuth"
 import { useQuery } from "@tanstack/react-query"
@@ -23,6 +23,7 @@ const navigationItems = [
   { title: "Clients", url: "/dashboard", icon: Users },
   { title: "Soumissions", url: "/dashboard/submissions", icon: FileText },
   { title: "Produits", url: "/dashboard/products", icon: Tag },
+  { title: "Fournisseurs", url: "/dashboard/suppliers", icon: Building },
   { title: "Commandes", url: "/dashboard/orders", icon: Package },
   { title: "Épreuves", url: "/dashboard/proofs", icon: FileText },
 ]

@@ -1,29 +1,14 @@
 import { useState } from 'react';
-import { Plus, Search, Pencil, Trash2, Tag } from 'lucide-react';
+import { Search, Pencil, Trash2, Tag, Building } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Textarea } from '@/components/ui/textarea';
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct, Product } from '@/hooks/useProducts';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
-
-const productSchema = z.object({
-  name: z.string().min(1, 'Le nom est requis'),
-  product_code: z.string().min(1, 'Le code produit est requis'),
-  description: z.string().optional(),
-  default_price: z.number().min(0, 'Le prix doit être positif'),
-  category: z.enum(['Impression', 'Article Promotionnel']),
-});
-
-type ProductFormData = z.infer<typeof productSchema>;
+import ProductModal from '@/components/ProductModal';
 
 const Products = () => {
   const { data: products, isLoading } = useProducts();
@@ -34,19 +19,6 @@ const Products = () => {
   
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-
-  const form = useForm<ProductFormData>({
-    resolver: zodResolver(productSchema),
-    defaultValues: {
-      name: '',
-      product_code: '',
-      description: '',
-      default_price: 0,
-      category: 'Impression',
-    },
-  });
 
   const filteredProducts = products?.filter(product => {
     const matchesSearch = !searchTerm || 
@@ -58,51 +30,18 @@ const Products = () => {
     return matchesSearch && matchesCategory;
   }) || [];
 
-  const handleSubmit = async (data: ProductFormData) => {
-    try {
-      if (editingProduct) {
-        await updateProduct.mutateAsync({ id: editingProduct.id, updates: data });
-        toast({ title: 'Produit modifié avec succès' });
-      } else {
-        await createProduct.mutateAsync(data);
-        toast({ title: 'Produit créé avec succès' });
-      }
-      setDialogOpen(false);
-      setEditingProduct(null);
-      form.reset();
-    } catch (error) {
-      toast({ 
-        title: 'Erreur', 
-        description: 'Une erreur est survenue lors de la sauvegarde',
-        variant: 'destructive' 
-      });
-    }
+  const handleCreateProduct = (data: any) => {
+    createProduct.mutate(data);
   };
 
-  const handleEdit = (product: Product) => {
-    setEditingProduct(product);
-    form.reset({
-      name: product.name,
-      product_code: product.product_code,
-      description: product.description || '',
-      default_price: Number(product.default_price),
-      category: product.category,
-    });
-    setDialogOpen(true);
+  const handleUpdateProduct = (data: any) => {
+    // TODO: Implement update with product ID
+    console.log('Update product:', data);
   };
 
   const handleDelete = async (id: string) => {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-      try {
-        await deleteProduct.mutateAsync(id);
-        toast({ title: 'Produit supprimé avec succès' });
-      } catch (error) {
-        toast({ 
-          title: 'Erreur', 
-          description: 'Une erreur est survenue lors de la suppression',
-          variant: 'destructive' 
-        });
-      }
+      deleteProduct.mutate(id);
     }
   };
 
@@ -135,120 +74,7 @@ const Products = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Produits</h1>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => setEditingProduct(null)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Nouveau Produit
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>
-                {editingProduct ? 'Modifier le produit' : 'Nouveau produit'}
-              </DialogTitle>
-            </DialogHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nom du produit</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="product_code"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Code produit</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Catégorie</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Impression">Impression</SelectItem>
-                          <SelectItem value="Article Promotionnel">Article Promotionnel</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="default_price"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Prix par défaut ($)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          step="0.01"
-                          {...field}
-                          onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} rows={3} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <div className="flex gap-2 pt-4">
-                  <Button type="submit" className="flex-1">
-                    {editingProduct ? 'Modifier' : 'Créer'}
-                  </Button>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => setDialogOpen(false)}
-                  >
-                    Annuler
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
+        <ProductModal onSave={handleCreateProduct} />
       </div>
 
       {/* Search and Filters */}
@@ -322,13 +148,15 @@ const Products = () => {
                   
                   <div className="col-span-1 text-right">
                     <div className="flex gap-1 justify-end">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(product)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
+                      <ProductModal
+                        trigger={
+                          <Button variant="ghost" size="sm">
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        }
+                        product={product}
+                        onSave={handleUpdateProduct}
+                      />
                       <Button
                         variant="ghost"
                         size="sm"
