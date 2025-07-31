@@ -244,6 +244,39 @@ export type Database = {
         }
         Relationships: []
       }
+      proofs: {
+        Row: {
+          approval_token: string | null
+          created_at: string
+          file_url: string | null
+          id: string
+          order_id: string
+          status: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          approval_token?: string | null
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          order_id: string
+          status?: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          approval_token?: string | null
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          order_id?: string
+          status?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
       submission_items: {
         Row: {
           created_at: string
