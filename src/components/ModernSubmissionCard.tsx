@@ -12,10 +12,10 @@ import { useForceAcceptSubmission } from '@/hooks/useForceAcceptSubmission';
 
 interface ModernSubmissionCardProps {
   submission: any;
-  onViewDetails: (id: string) => void;
+  onClick: () => void;
 }
 
-const ModernSubmissionCard = ({ submission, onViewDetails }: ModernSubmissionCardProps) => {
+const ModernSubmissionCard = ({ submission, onClick }: ModernSubmissionCardProps) => {
   // État pour l'acceptation manuelle (raccourci rapide)
   const [proofAccepted, setProofAccepted] = useState(submission.status === 'Acceptée');
   
@@ -112,7 +112,7 @@ const ModernSubmissionCard = ({ submission, onViewDetails }: ModernSubmissionCar
   return (
     <Card 
       className={getCardStyles()}
-      onClick={() => onViewDetails(submission.id)}
+      onClick={onClick}
     >
       <CardContent className="p-6">
         {/* Header */}
@@ -135,7 +135,7 @@ const ModernSubmissionCard = ({ submission, onViewDetails }: ModernSubmissionCar
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
-              onViewDetails(submission.id);
+              onClick();
             }}
             className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-100"
           >
