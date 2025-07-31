@@ -8,10 +8,14 @@ export const useProofs = () => {
       const { data, error } = await supabase
         .from('proofs')
         .select(`
-          *,
-          orders (
+          id,
+          order_id,
+          status,
+          version,
+          created_at,
+          orders!inner (
             order_number,
-            clients (
+            clients!inner (
               business_name,
               contact_name
             )
