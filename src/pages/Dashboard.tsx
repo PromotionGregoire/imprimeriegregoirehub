@@ -42,21 +42,17 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-4 md:space-y-6 pb-24 md:pb-6">
+    <div className="p-6 space-y-6 pb-24 md:pb-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Users className="h-7 w-7 md:h-6 md:w-6 text-primary" />
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Clients</h1>
+          <Users className="h-6 w-6 text-primary" />
+          <h1 className="text-3xl font-bold">Clients</h1>
         </div>
         <div className="flex items-center gap-4">
-          <Button 
-            className="gap-2 h-11 md:h-10 px-6 text-base md:text-sm font-medium shadow-sm" 
-            onClick={() => setIsCreateModalOpen(true)}
-          >
-            <Plus className="h-5 w-5 md:h-4 md:w-4" />
-            <span className="hidden sm:inline">Nouveau Client</span>
-            <span className="sm:hidden">Nouveau</span>
+          <Button className="gap-2" onClick={() => setIsCreateModalOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Nouveau Client
           </Button>
         </div>
       </div>
@@ -75,22 +71,19 @@ const Dashboard = () => {
 
       {/* Main Content */}
       {!clients || clients.length === 0 ? (
-        <div className="text-center py-16 md:py-12 px-4">
-          <Users className="h-16 w-16 md:h-12 md:w-12 text-muted-foreground mx-auto mb-6 md:mb-4" />
-          <h3 className="text-xl md:text-lg font-semibold mb-3 md:mb-2 text-foreground">Aucun client trouvé</h3>
-          <p className="text-muted-foreground mb-8 md:mb-6 text-base md:text-sm leading-relaxed max-w-sm mx-auto">
+        <div className="text-center py-12">
+          <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-medium mb-2">Aucun client trouvé</h3>
+          <p className="text-muted-foreground mb-6">
             Cliquez sur "Nouveau Client" pour en ajouter un.
           </p>
-          <Button 
-            className="gap-2 h-12 md:h-10 px-8 md:px-6 text-base md:text-sm font-medium shadow-sm" 
-            onClick={() => setIsCreateModalOpen(true)}
-          >
-            <Plus className="h-5 w-5 md:h-4 md:w-4" />
+          <Button className="gap-2" onClick={() => setIsCreateModalOpen(true)}>
+            <Plus className="h-4 w-4" />
             Nouveau Client
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {clients.map((client) => (
             <ClientCard
               key={client.id}
