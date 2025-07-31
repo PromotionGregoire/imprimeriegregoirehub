@@ -62,7 +62,9 @@ const ProofDetails = () => {
       
       const { error: uploadError } = await supabase.storage
         .from('proofs')
-        .upload(fileName, file);
+        .upload(fileName, file, {
+          upsert: true
+        });
 
       if (uploadError) throw uploadError;
 

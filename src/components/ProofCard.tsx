@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
 
 interface ProofCardProps {
   proof: {
@@ -30,9 +31,10 @@ const statusColors = {
 };
 
 export const ProofCard = ({ proof }: ProofCardProps) => {
+  const navigate = useNavigate();
+  
   const handleCardClick = () => {
-    // TODO: Navigate to proof details page when implemented
-    console.log('Navigate to proof details:', proof.id);
+    navigate(`/dashboard/proofs/${proof.id}`);
   };
 
   return (
