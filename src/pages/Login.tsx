@@ -14,7 +14,14 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   
   const { signIn, user } = useAuth();
-  const { data: profiles, isLoading: profilesLoading } = useProfiles();
+  const { data: profiles, isLoading: profilesLoading, error: profilesError } = useProfiles();
+  
+  // Debug logging
+  console.log('Login page rendered');
+  console.log('User:', user);
+  console.log('Profiles loading:', profilesLoading);
+  console.log('Profiles data:', profiles);
+  console.log('Profiles error:', profilesError);
   const navigate = useNavigate();
 
   // Redirect if already authenticated
