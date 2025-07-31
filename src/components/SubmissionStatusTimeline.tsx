@@ -113,7 +113,7 @@ export function SubmissionStatusTimeline({
                     sizes.circle,
                     {
                       'bg-primary text-primary-foreground shadow-lg': isCompleted,
-                      'bg-primary/20 text-primary ring-2 ring-primary/30 animate-pulse': isCurrent && index !== 2,
+                      'bg-primary/20 text-primary ring-2 ring-primary/30': isCurrent && index !== 2,
                       'bg-green-500 text-white shadow-lg': isCurrent && index === 2 && status === 'Acceptée',
                       'bg-red-500 text-white shadow-lg': isCurrent && index === 2 && status === 'Refusée',
                       'bg-muted text-muted-foreground': stepState === 'upcoming'
