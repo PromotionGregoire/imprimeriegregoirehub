@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import ModernToggle from './ModernToggle';
+import OrderStatusVisualTimeline from './OrderStatusVisualTimeline';
 
 interface OrderCardProps {
   order: {
@@ -73,36 +74,45 @@ const EpuredOrderCard = ({ order, onProofAccepted, onDelivered }: OrderCardProps
 
   return (
     <Card 
-      className={`hover:shadow-lg transition-all duration-300 border-l-4 cursor-pointer ${getBorderColor(order.status)}`}
+      className={`hover:shadow-lg transition-all ease-uber border-l-4 cursor-pointer touch-area ${getBorderColor(order.status)}`}
       onClick={handleCardClick}
     >
-      <CardHeader className="pb-3">
-        {/* En-tête : Numéro + Badge + Montant */}
+      <CardHeader className="pb-base-300">
+        {/* En-tête réorganisé : Numéro | Badge | Montant */}
         <div className="flex items-center justify-between">
-          <h3 className="font-bold text-lg text-foreground">{order.order_number}</h3>
+          <h3 className="font-bold text-base-500 text-foreground">{order.order_number}</h3>
           {getStatusBadge(order.status)}
           <div className="text-right">
-            <div className="font-bold text-xl text-primary">${Number(order.total_price).toFixed(2)}</div>
+            <div className="font-bold text-base-650 text-primary">${Number(order.total_price).toFixed(2)}</div>
           </div>
         </div>
         
         {/* Ligne d'Information : Client + Date */}
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4" />
+        <div className="flex items-center justify-between text-base-300 text-muted-foreground">
+          <div className="flex items-center gap-base-200">
+            <User className="h-base-400 w-base-400" />
             <span className="font-medium">{order.clients?.business_name}</span>
           </div>
-          <div className="flex items-center gap-1">
-            <Calendar className="h-3 w-3" />
+          <div className="flex items-center gap-base-100">
+            <Calendar className="h-base-300 w-base-300" />
             {format(new Date(order.created_at), 'dd MMM yyyy', { locale: fr })}
           </div>
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-base-400">
+        {/* Visual Timeline for Order Status */}
+        <div>
+          <OrderStatusVisualTimeline 
+            currentStatus={order.status} 
+            size="sm"
+            showLabels={true}
+          />
+        </div>
+
         {/* Zone d'Actions - Toggles Modernes */}
-        <div className="space-y-3">
-          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+        <div className="space-y-base-300 pt-base-300 border-t border-border">
+          <div className="text-base-200 font-semibold text-muted-foreground uppercase tracking-wide">
             Actions de Production
           </div>
           
@@ -124,23 +134,23 @@ const EpuredOrderCard = ({ order, onProofAccepted, onDelivered }: OrderCardProps
         </div>
 
         {/* Lien d'Origine */}
-        <div className="pt-3 border-t border-border">
+        <div className="pt-base-300 border-t border-border">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <FileText className="h-4 w-4" />
+            <div className="flex items-center gap-base-200 text-base-300 text-muted-foreground">
+              <FileText className="h-base-400 w-base-400" />
               <span>Soumission d'origine</span>
             </div>
             <Button 
               variant="link" 
               size="sm" 
-              className="p-0 h-auto text-primary font-semibold hover:underline"
+              className="p-0 h-auto text-primary font-semibold hover:underline touch-area"
               onClick={(e) => {
                 e.stopPropagation();
                 navigate(`/dashboard/submissions/${order.submission_id}`);
               }}
             >
               {formatSubmissionNumber(order.submissions?.submission_number || '')}
-              <ExternalLink className="h-3 w-3 ml-1" />
+              <ExternalLink className="h-base-300 w-base-300 ml-base-100" />
             </Button>
           </div>
         </div>

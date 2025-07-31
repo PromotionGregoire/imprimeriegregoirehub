@@ -60,8 +60,8 @@ export function SubmissionStatusTimeline({
   }
 
   const getResultColor = () => {
-    if (status === 'Acceptée') return 'text-green-600'
-    if (status === 'Refusée') return 'text-red-600'
+    if (status === 'Acceptée') return 'text-[hsl(var(--status-green))]'
+    if (status === 'Refusée') return 'text-[hsl(var(--status-red))]'
     return 'text-muted-foreground'
   }
 
@@ -114,8 +114,8 @@ export function SubmissionStatusTimeline({
                     {
                       'bg-primary text-primary-foreground shadow-lg': isCompleted,
                       'bg-primary/20 text-primary ring-2 ring-primary/30': isCurrent && index !== 2,
-                      'bg-green-500 text-white shadow-lg': isCurrent && index === 2 && status === 'Acceptée',
-                      'bg-red-500 text-white shadow-lg': isCurrent && index === 2 && status === 'Refusée',
+                      'bg-[hsl(var(--status-green))] text-white shadow-lg': isCurrent && index === 2 && status === 'Acceptée',
+                      'bg-[hsl(var(--status-red))] text-white shadow-lg': isCurrent && index === 2 && status === 'Refusée',
                       'bg-muted text-muted-foreground': stepState === 'upcoming'
                     }
                   )}
@@ -131,8 +131,8 @@ export function SubmissionStatusTimeline({
                       {
                         'text-primary': isCompleted,
                         'text-primary font-semibold': isCurrent && index !== 2,
-                        'text-green-600 font-semibold': isCurrent && index === 2 && status === 'Acceptée',
-                        'text-red-600 font-semibold': isCurrent && index === 2 && status === 'Refusée',
+                        'text-[hsl(var(--status-green))] font-semibold': isCurrent && index === 2 && status === 'Acceptée',
+                        'text-[hsl(var(--status-red))] font-semibold': isCurrent && index === 2 && status === 'Refusée',
                         'text-muted-foreground': stepState === 'upcoming'
                       }
                     )}>
@@ -163,15 +163,15 @@ export function SubmissionStatusTimeline({
         })}
       </div>
 
-      {/* Status badge */}
-      <div className="mt-4 flex justify-center">
+      {/* Status badge with semantic colors */}
+      <div className="mt-base-400 flex justify-center">
         <div className={cn(
-          'px-3 py-1 rounded-full text-xs font-medium transition-all duration-300',
+          'px-base-300 py-base-100 rounded-full text-base-200 font-medium transition-all ease-uber',
           {
-            'bg-blue-100 text-blue-800': status === 'Brouillon',
-            'bg-orange-100 text-orange-800': status === 'Envoyée' || status === 'En révision',
-            'bg-green-100 text-green-800': status === 'Acceptée',
-            'bg-red-100 text-red-800': status === 'Refusée'
+            'bg-[hsl(var(--status-blue-light))] text-[hsl(var(--status-blue))]': status === 'Brouillon',
+            'bg-[hsl(var(--status-orange-light))] text-[hsl(var(--status-orange))]': status === 'Envoyée' || status === 'En révision',
+            'bg-[hsl(var(--status-green-light))] text-[hsl(var(--status-green))]': status === 'Acceptée',
+            'bg-[hsl(var(--status-red-light))] text-[hsl(var(--status-red))]': status === 'Refusée'
           }
         )}>
           {status}

@@ -109,29 +109,29 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-background px-base-400">
+      <div className="w-full max-w-md space-y-base-800">
         <div className="text-center">
           <img 
             src={logoGregoire} 
             alt="Imprimerie Grégoire" 
-            className="h-20 w-auto mx-auto mb-6"
+            className="h-base-1000 w-auto mx-auto mb-base-600"
           />
-          <h1 className="text-3xl font-bold text-foreground">
-            Connexion Espace Employé
+          <h1 className="text-base-750 font-semibold text-foreground">
+            Accès Employé
           </h1>
         </div>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="employee">Sélectionner un employé</Label>
+        <form onSubmit={handleSubmit} className="space-y-base-600">
+          <div className="space-y-base-200">
+            <Label htmlFor="employee" className="text-base-300 font-medium">Sélectionner un employé</Label>
             <Select value={selectedEmployeeId} onValueChange={setSelectedEmployeeId}>
-              <SelectTrigger className="w-full bg-background">
+              <SelectTrigger className="w-full bg-background h-base-600 touch-area">
                 <SelectValue placeholder="Choisir votre nom" />
               </SelectTrigger>
               <SelectContent className="bg-background border border-border shadow-md">
                 {profiles.map((profile) => (
-                  <SelectItem key={profile.id} value={profile.id}>
+                  <SelectItem key={profile.id} value={profile.id} className="touch-area">
                     {profile.full_name}
                   </SelectItem>
                 ))}
@@ -140,15 +140,15 @@ const Login = () => {
           </div>
 
           {selectedEmployeeId && (
-            <div className="space-y-2">
-              <Label htmlFor="password">Mot de passe</Label>
+            <div className="space-y-base-200">
+              <Label htmlFor="password" className="text-base-300 font-medium">Mot de passe</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full"
+                className="w-full h-base-600 touch-area"
                 placeholder="••••••••"
               />
             </div>
@@ -162,7 +162,9 @@ const Login = () => {
 
           <Button 
             type="submit" 
-            className="w-full" 
+            variant="primary"
+            size="default"
+            className="w-full touch-area transition-all ease-uber" 
             disabled={loading || !selectedEmployeeId}
           >
             {loading ? 'Connexion...' : 'Se connecter'}

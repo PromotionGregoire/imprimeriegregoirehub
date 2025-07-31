@@ -166,14 +166,19 @@ const AdminEmployees = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="p-base-600 space-y-base-600 pb-24 md:pb-base-600">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Users className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold text-foreground">Gestion des Employés</h1>
+        <div className="flex items-center gap-base-300">
+          <Users className="h-base-600 w-base-600 text-primary" />
+          <h1 className="text-base-750 font-semibold">Gestion des Employés</h1>
         </div>
-        <Button onClick={() => setIsCreateModalOpen(true)} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
+        <Button 
+          variant="primary" 
+          size="default" 
+          className="gap-base-200 transition-all ease-uber" 
+          onClick={() => setIsCreateModalOpen(true)}
+        >
+          <Plus className="h-base-400 w-base-400" />
           Ajouter un employé
         </Button>
       </div>
@@ -235,9 +240,9 @@ const AdminEmployees = () => {
         </div>
       )}
 
-      {/* Liste des employés - seulement si pas d'erreur et pas en chargement */}
+      {/* Liste des employés - 4-3-1 Responsive Layout */}
       {!isLoading && !error && (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-base-400 md:gap-base-600 animate-fade-in">
           {filteredEmployees.map((employee) => (
             <EmployeeCard 
               key={employee.id} 

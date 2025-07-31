@@ -119,120 +119,98 @@ const Submissions = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-base-600 space-y-base-600 pb-24 md:pb-base-600">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Soumissions</h1>
-        <Button onClick={() => navigate('/dashboard/submissions/new')}>
-          <Plus className="w-4 h-4 mr-2" />
+        <div className="flex items-center gap-base-300">
+          <FileText className="h-base-600 w-base-600 text-primary" />
+          <h1 className="text-base-750 font-semibold">Soumissions</h1>
+        </div>
+        <Button 
+          variant="primary" 
+          size="default" 
+          className="gap-base-200 transition-all ease-uber" 
+          onClick={() => navigate('/dashboard/submissions/new')}
+        >
+          <Plus className="h-base-400 w-base-400" />
           Nouvelle Soumission
         </Button>
       </div>
 
-      {/* Stats Cards with Period Filter */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <Select value={periodFilter} onValueChange={setPeriodFilter}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Filtrer par période" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tous</SelectItem>
-              <SelectItem value="today">Aujourd'hui</SelectItem>
-              <SelectItem value="yesterday">Hier</SelectItem>
-              <SelectItem value="thisWeek">Cette semaine</SelectItem>
-              <SelectItem value="7days">Les 7 derniers jours</SelectItem>
-              <SelectItem value="14days">Les 14 derniers jours</SelectItem>
-              <SelectItem value="thisMonth">Ce mois-ci</SelectItem>
-              <SelectItem value="30days">Les 30 derniers jours</SelectItem>
-              <SelectItem value="3months">Les 3 derniers mois</SelectItem>
-              <SelectItem value="6months">Les 6 derniers mois</SelectItem>
-              <SelectItem value="thisYear">Cette année</SelectItem>
-              <SelectItem value="12months">Les 12 derniers mois</SelectItem>
-              <SelectItem value="lastYear">L'année dernière</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <Card className="bg-white">
-            <CardContent className="p-4">
-              <div className="text-sm text-gray-600">Total Soumissions</div>
-              <div className="text-2xl font-bold">{stats.total}</div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-purple-50 border-purple-200">
-            <CardContent className="p-4">
-              <div className="text-sm text-purple-600">Complétées</div>
-              <div className="text-2xl font-bold text-purple-700">{stats.completed}</div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-green-50 border-green-200">
-            <CardContent className="p-4">
-              <div className="text-sm text-green-600">Acceptées</div>
-              <div className="text-2xl font-bold text-green-700">{stats.accepted}</div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-orange-50 border-orange-200">
-            <CardContent className="p-4">
-              <div className="text-sm text-orange-600">Envoyées</div>
-              <div className="text-2xl font-bold text-orange-700">{stats.sent}</div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-blue-50 border-blue-200">
-            <CardContent className="p-4">
-              <div className="text-sm text-blue-600">Valeur Totale</div>
-              <div className="text-2xl font-bold text-blue-700">{formatPrice(stats.totalValue)}</div>
-            </CardContent>
-          </Card>
-        </div>
+      {/* Date Range Filter */}
+      <div className="flex items-center justify-between">
+        <Select value={periodFilter} onValueChange={setPeriodFilter}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Filtrer par période" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous</SelectItem>
+            <SelectItem value="today">Aujourd'hui</SelectItem>
+            <SelectItem value="yesterday">Hier</SelectItem>
+            <SelectItem value="thisWeek">Cette semaine</SelectItem>
+            <SelectItem value="7days">Les 7 derniers jours</SelectItem>
+            <SelectItem value="14days">Les 14 derniers jours</SelectItem>
+            <SelectItem value="thisMonth">Ce mois-ci</SelectItem>
+            <SelectItem value="30days">Les 30 derniers jours</SelectItem>
+            <SelectItem value="3months">Les 3 derniers mois</SelectItem>
+            <SelectItem value="6months">Les 6 derniers mois</SelectItem>
+            <SelectItem value="thisYear">Cette année</SelectItem>
+            <SelectItem value="12months">Les 12 derniers mois</SelectItem>
+            <SelectItem value="lastYear">L'année dernière</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      {/* Color Legend */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="text-sm font-medium mb-3">Légende des Couleurs de Cartes:</div>
-          <div className="flex flex-wrap gap-4 text-xs">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-purple-200 rounded"></div>
-              <span>Violet - Livrées</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-green-200 rounded"></div>
-              <span>Vert - Épreuves Acceptées</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-orange-200 rounded"></div>
-              <span>Orange - Échéance ≤ 4 jours</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-red-200 rounded"></div>
-              <span>Rouge - Échéance ≤ 1 jour</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-gray-200 rounded"></div>
-              <span>Défaut - Statut normal</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-base-400">
+        <Card className="bg-card border border-border">
+          <CardContent className="p-base-400">
+            <div className="text-base-300 text-muted-foreground font-medium">Total Soumissions</div>
+            <div className="text-base-750 font-semibold">{stats.total}</div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-[hsl(var(--status-purple-light))] border border-[hsl(var(--status-purple))]">
+          <CardContent className="p-base-400">
+            <div className="text-base-300 text-[hsl(var(--status-purple))] font-medium">Complétées</div>
+            <div className="text-base-750 font-semibold text-[hsl(var(--status-purple))]">{stats.completed}</div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-[hsl(var(--status-green-light))] border border-[hsl(var(--status-green))]">
+          <CardContent className="p-base-400">
+            <div className="text-base-300 text-[hsl(var(--status-green))] font-medium">Acceptées</div>
+            <div className="text-base-750 font-semibold text-[hsl(var(--status-green))]">{stats.accepted}</div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-[hsl(var(--status-orange-light))] border border-[hsl(var(--status-orange))]">
+          <CardContent className="p-base-400">
+            <div className="text-base-300 text-[hsl(var(--status-orange))] font-medium">Envoyées</div>
+            <div className="text-base-750 font-semibold text-[hsl(var(--status-orange))]">{stats.sent}</div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-[hsl(var(--status-blue-light))] border border-[hsl(var(--status-blue))]">
+          <CardContent className="p-base-400">
+            <div className="text-base-300 text-[hsl(var(--status-blue))] font-medium">Valeur Totale</div>
+            <div className="text-base-750 font-semibold text-[hsl(var(--status-blue))]">{formatPrice(stats.totalValue)}</div>
+          </CardContent>
+        </Card>
+      </div>
 
-      {/* Toolbar */}
+      {/* Search & Status Filter Bar */}
       <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4">
+        <CardContent className="p-base-400">
+          <div className="flex flex-col sm:flex-row gap-base-400">
             {/* Search Bar */}
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-base-300 top-1/2 transform -translate-y-1/2 h-base-400 w-base-400 text-muted-foreground" />
               <Input
                 placeholder="Rechercher par numéro de soumission ou client..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-base-600"
               />
             </div>
 
@@ -254,14 +232,15 @@ const Submissions = () => {
         </CardContent>
       </Card>
 
-      {/* Submissions Grid - Standardized Responsive Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {/* Submissions Grid - 4-3-1 Responsive Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-base-400 md:gap-base-600 animate-fade-in">
         {submissions.length === 0 ? (
           <div className="col-span-full">
             <Card>
-              <CardContent className="text-center py-12">
-                <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">
+              <CardContent className="text-center py-base-1000 md:py-base-800">
+                <FileText className="mx-auto h-base-800 w-base-800 md:h-base-600 md:w-base-600 text-muted-foreground mb-base-600 md:mb-base-400" />
+                <h3 className="text-base-550 md:text-base-400 font-semibold mb-base-300 md:mb-base-200 text-foreground">Aucune soumission trouvée</h3>
+                <p className="text-muted-foreground text-base-300 md:text-base-200 leading-relaxed max-w-sm mx-auto">
                   {searchQuery || statusFilter !== 'all' 
                     ? 'Aucune soumission trouvée avec ces critères'
                     : 'Aucune soumission pour le moment'

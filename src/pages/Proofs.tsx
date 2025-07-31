@@ -49,11 +49,19 @@ const Proofs = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-base-600 space-y-base-600 pb-24 md:pb-base-600">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Gestion des Épreuves</h1>
-        <Button onClick={() => navigate('/dashboard/orders')}>
-          <Plus className="h-4 w-4 mr-2" />
+        <div className="flex items-center gap-base-300">
+          <FileText className="h-base-600 w-base-600 text-primary" />
+          <h1 className="text-base-750 font-semibold">Gestion des Épreuves</h1>
+        </div>
+        <Button 
+          variant="primary" 
+          size="default" 
+          className="gap-base-200 transition-all ease-uber" 
+          onClick={() => navigate('/dashboard/orders')}
+        >
+          <Plus className="h-base-400 w-base-400" />
           Nouvelle Épreuve
         </Button>
       </div>
@@ -87,17 +95,17 @@ const Proofs = () => {
         ]}
       />
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <Card className="bg-gradient-to-br from-background to-muted/30">
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-full bg-primary/10">
-                <FileText className="h-5 w-5 text-primary" />
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-base-400">
+        <Card className="bg-card border border-border">
+          <CardContent className="p-base-600">
+            <div className="flex items-center space-x-base-300">
+              <div className="p-base-200 rounded-full bg-primary/10">
+                <FileText className="h-base-500 w-base-500 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-primary">{statistics.total}</p>
-                <p className="text-sm text-muted-foreground font-medium">Total</p>
+                <p className="text-base-750 font-semibold text-primary">{statistics.total}</p>
+                <p className="text-base-300 text-muted-foreground font-medium">Total</p>
               </div>
             </div>
           </CardContent>

@@ -106,11 +106,19 @@ const Orders = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-base-600 space-y-base-600 pb-24 md:pb-base-600">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Commandes</h1>
-        <Button onClick={() => window.alert('La création de commande se fait automatiquement à partir des soumissions acceptées.')}>
-          <Plus className="h-4 w-4 mr-2" />
+        <div className="flex items-center gap-base-300">
+          <Package className="h-base-600 w-base-600 text-primary" />
+          <h1 className="text-base-750 font-semibold">Commandes</h1>
+        </div>
+        <Button 
+          variant="primary" 
+          size="default" 
+          className="gap-base-200 transition-all ease-uber"
+          onClick={() => window.alert('La création de commande se fait automatiquement à partir des soumissions acceptées.')}
+        >
+          <Plus className="h-base-400 w-base-400" />
           Nouvelle Commande
         </Button>
       </div>
@@ -198,8 +206,8 @@ const Orders = () => {
         ]}
       />
 
-      {/* Orders Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {/* Orders Grid - 4-3-1 Responsive Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-base-400 md:gap-base-600 animate-fade-in">
         {orders.length === 0 ? (
           <div className="col-span-full">
             <Card>
