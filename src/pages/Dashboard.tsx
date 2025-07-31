@@ -4,6 +4,7 @@ import ClientCard from '@/components/ClientCard';
 import CreateClientModal from '@/components/CreateClientModal';
 import { ClientActivityToolbar } from '@/components/ClientActivityToolbar';
 import { useFilteredClientsByActivity } from '@/hooks/useFilteredClientsByActivity';
+import { EmailTester } from '@/components/EmailTester';
 import { Plus, Users } from 'lucide-react';
 
 const Dashboard = () => {
@@ -48,10 +49,13 @@ const Dashboard = () => {
           <Users className="h-6 w-6 text-primary" />
           <h1 className="text-3xl font-bold">Clients</h1>
         </div>
-        <Button className="gap-2" onClick={() => setIsCreateModalOpen(true)}>
-          <Plus className="h-4 w-4" />
-          Nouveau Client
-        </Button>
+        <div className="flex items-center gap-4">
+          <EmailTester />
+          <Button className="gap-2" onClick={() => setIsCreateModalOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Nouveau Client
+          </Button>
+        </div>
       </div>
       
       {/* Toolbar */}
