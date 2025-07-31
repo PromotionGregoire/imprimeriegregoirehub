@@ -139,6 +139,47 @@ export type Database = {
           },
         ]
       }
+      email_notifications: {
+        Row: {
+          created_at: string
+          email_type: string
+          error_message: string | null
+          id: string
+          proof_id: string | null
+          recipient_email: string
+          sent_at: string
+          success: boolean
+        }
+        Insert: {
+          created_at?: string
+          email_type: string
+          error_message?: string | null
+          id?: string
+          proof_id?: string | null
+          recipient_email: string
+          sent_at?: string
+          success?: boolean
+        }
+        Update: {
+          created_at?: string
+          email_type?: string
+          error_message?: string | null
+          id?: string
+          proof_id?: string | null
+          recipient_email?: string
+          sent_at?: string
+          success?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_notifications_proof_id_fkey"
+            columns: ["proof_id"]
+            isOneToOne: false
+            referencedRelation: "proofs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           client_id: string
