@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Package, DollarSign, TrendingUp } from 'lucide-react';
-import { DashboardToolbar } from '@/components/DashboardToolbar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { FlexibleDashboardToolbar } from '@/components/FlexibleDashboardToolbar';
 import { useFilteredOrders } from '@/hooks/useFilteredOrders';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -108,7 +109,21 @@ const Orders = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Commandes</h1>
       </div>
-
+      
+      {/* Period Filter */}
+      <div className="space-y-4">
+        <Select value={periodFilter} onValueChange={setPeriodFilter}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Toute période</SelectItem>
+            <SelectItem value="7days">7 derniers jours</SelectItem>
+            <SelectItem value="30days">30 derniers jours</SelectItem>
+            <SelectItem value="3months">3 derniers mois</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
@@ -161,15 +176,21 @@ const Orders = () => {
       </div>
 
       {/* Toolbar */}
-      <DashboardToolbar
+      <FlexibleDashboardToolbar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        statusFilter={statusFilter}
-        onStatusChange={setStatusFilter}
-        periodFilter={periodFilter}
-        onPeriodChange={setPeriodFilter}
-        statusOptions={orderStatusOptions}
         searchPlaceholder="Rechercher par numéro de commande, client ou soumission..."
+        filters={[
+          {
+            label: "Statut",
+            value: statusFilter,
+            onChange: setStatusFilter,
+            options: [
+              { value: "all", label: "Tous les statuts" },
+              ...orderStatusOptions
+            ]
+          }
+        ]}
       />
 
       {/* Orders Grid */}
