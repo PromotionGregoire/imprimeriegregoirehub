@@ -30,12 +30,61 @@ export const useFilteredSubmissions = (
     // Filter by period
     if (periodFilter !== 'all') {
       const now = new Date();
-      const days = parseInt(periodFilter.replace('days', ''));
-      const cutoffDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-      
-      filtered = filtered.filter(submission => 
-        new Date(submission.created_at) >= cutoffDate
-      );
+      let startDate: Date;
+      let endDate: Date = now;
+
+      switch (periodFilter) {
+        case 'today':
+          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          break;
+        case 'yesterday':
+          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+          endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 23, 59, 59);
+          break;
+        case 'thisWeek':
+          const dayOfWeek = now.getDay();
+          const daysToSunday = dayOfWeek === 0 ? 0 : dayOfWeek;
+          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysToSunday);
+          endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (6 - daysToSunday), 23, 59, 59);
+          break;
+        case 'thisMonth':
+          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+          endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+          break;
+        case 'thisYear':
+          startDate = new Date(now.getFullYear(), 0, 1);
+          endDate = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
+          break;
+        case 'lastYear':
+          startDate = new Date(now.getFullYear() - 1, 0, 1);
+          endDate = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59);
+          break;
+        case '7days':
+          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          break;
+        case '14days':
+          startDate = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+          break;
+        case '30days':
+          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          break;
+        case '3months':
+          startDate = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+          break;
+        case '6months':
+          startDate = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate());
+          break;
+        case '12months':
+          startDate = new Date(now.getFullYear(), now.getMonth() - 12, now.getDate());
+          break;
+        default:
+          startDate = new Date(0);
+      }
+
+      filtered = filtered.filter(submission => {
+        const submissionDate = new Date(submission.created_at);
+        return submissionDate >= startDate && submissionDate <= endDate;
+      });
     }
 
     return filtered;

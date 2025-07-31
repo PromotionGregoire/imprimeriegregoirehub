@@ -136,11 +136,19 @@ const Submissions = () => {
               <SelectValue placeholder="Filtrer par période" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Toute période</SelectItem>
-              <SelectItem value="7days">7 derniers jours</SelectItem>
-              <SelectItem value="30days">Dernier mois</SelectItem>
-              <SelectItem value="90days">3 derniers mois</SelectItem>
-              <SelectItem value="365days">Dernière année</SelectItem>
+              <SelectItem value="all">Tous</SelectItem>
+              <SelectItem value="today">Aujourd'hui</SelectItem>
+              <SelectItem value="yesterday">Hier</SelectItem>
+              <SelectItem value="thisWeek">Cette semaine</SelectItem>
+              <SelectItem value="7days">Les 7 derniers jours</SelectItem>
+              <SelectItem value="14days">Les 14 derniers jours</SelectItem>
+              <SelectItem value="thisMonth">Ce mois-ci</SelectItem>
+              <SelectItem value="30days">Les 30 derniers jours</SelectItem>
+              <SelectItem value="3months">Les 3 derniers mois</SelectItem>
+              <SelectItem value="6months">Les 6 derniers mois</SelectItem>
+              <SelectItem value="thisYear">Cette année</SelectItem>
+              <SelectItem value="12months">Les 12 derniers mois</SelectItem>
+              <SelectItem value="lastYear">L'année dernière</SelectItem>
             </SelectContent>
           </Select>
         </div>
