@@ -242,7 +242,7 @@ const AdminEmployees = () => {
 
       {/* Liste des employés - 4-3-1 Responsive Layout */}
       {!isLoading && !error && (
-        <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-base-400 md:gap-base-600 animate-fade-in">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 animate-fade-in">
           {filteredEmployees.map((employee) => (
             <EmployeeCard 
               key={employee.id} 
