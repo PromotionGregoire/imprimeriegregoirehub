@@ -37,7 +37,7 @@ const AdminEmployees = () => {
   });
 
   // Fetch all employees
-  const { data: employees, isLoading, refetch } = useQuery({
+  const { data: employees, isLoading, error, refetch } = useQuery({
     queryKey: ['employees'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -45,10 +45,14 @@ const AdminEmployees = () => {
         .select('*')
         .order('full_name');
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching employees:', error);
+        throw error;
+      }
       return data;
     },
     enabled: currentUserProfile?.role === 'ADMIN',
+    retry: 1,
   });
 
   if (profileLoading) {
@@ -120,19 +124,52 @@ const AdminEmployees = () => {
         ]}
       />
 
-      {isLoading ? (
-        <div className="text-center py-8">Chargement des employés...</div>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {/* État de chargement */}
+      {isLoading && (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <p className="mt-4 text-lg text-muted-foreground">Chargement des employés...</p>
+        </div>
+      )}
+
+      {/* État d'erreur */}
+      {error && (
+        <div className="text-center py-12 bg-destructive/10 border border-destructive/20 rounded-lg">
+          <div className="text-destructive text-6xl mb-4">❌</div>
+          <h3 className="text-xl font-semibold text-destructive mb-2">
+            Impossible de charger la liste des employés
+          </h3>
+          <p className="text-muted-foreground mb-4">
+            Un problème de permissions est suspecté. Les administrateurs doivent pouvoir accéder à toutes les données des employés.
+          </p>
+          <p className="text-sm text-muted-foreground mb-4">
+            Erreur technique: {error?.message || 'Erreur inconnue'}
+          </p>
+          <Button onClick={() => refetch()} variant="outline">
+            Réessayer
+          </Button>
+        </div>
+      )}
+
+      {/* Liste des employés - seulement si pas d'erreur et pas en chargement */}
+      {!isLoading && !error && (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredEmployees.map((employee) => (
             <EmployeeCard key={employee.id} employee={employee} />
           ))}
         </div>
       )}
 
-      {filteredEmployees.length === 0 && !isLoading && (
-        <div className="text-center py-8 text-muted-foreground">
-          Aucun employé trouvé.
+      {/* Message si aucun employé trouvé */}
+      {!isLoading && !error && filteredEmployees.length === 0 && (
+        <div className="text-center py-12 bg-muted/30 rounded-lg">
+          <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-medium mb-2">Aucun employé trouvé</h3>
+          <p className="text-muted-foreground">
+            {searchQuery || roleFilter || statusFilter 
+              ? 'Aucun employé ne correspond aux critères de recherche.' 
+              : 'Aucun employé dans le système.'}
+          </p>
         </div>
       )}
 
