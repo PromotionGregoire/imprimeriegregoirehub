@@ -8,10 +8,13 @@ interface SupplierCardProps {
   supplier: {
     id: string;
     name: string;
-    type: string;
+    is_goods_supplier: boolean;
+    is_service_supplier: boolean;
     contact_person?: string;
     email?: string;
     phone?: string;
+    website_1?: string;
+    website_2?: string;
     notes?: string;
   };
   onEdit: (supplier: any) => void;
@@ -19,8 +22,15 @@ interface SupplierCardProps {
 }
 
 const SupplierCard = ({ supplier, onEdit, onDelete }: SupplierCardProps) => {
-  const getTypeColor = (type: string) => {
-    return type === 'Fournisseur de biens' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800';
+  const getTypeBadges = () => {
+    const badges = [];
+    if (supplier.is_goods_supplier) {
+      badges.push(<Badge key="goods" className="bg-blue-100 text-blue-800">Fournisseur de biens</Badge>);
+    }
+    if (supplier.is_service_supplier) {
+      badges.push(<Badge key="services" className="bg-green-100 text-green-800">Fournisseur de services</Badge>);
+    }
+    return badges.length > 0 ? badges : [<Badge key="none" variant="secondary">Non spécifié</Badge>];
   };
 
   return (
@@ -33,9 +43,9 @@ const SupplierCard = ({ supplier, onEdit, onDelete }: SupplierCardProps) => {
             </div>
             <div>
               <CardTitle className="text-lg font-bold">{supplier.name}</CardTitle>
-              <Badge className={`mt-1 ${getTypeColor(supplier.type)}`}>
-                {supplier.type}
-              </Badge>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {getTypeBadges()}
+              </div>
             </div>
           </div>
           
@@ -80,6 +90,27 @@ const SupplierCard = ({ supplier, onEdit, onDelete }: SupplierCardProps) => {
           <div className="flex items-center gap-2 text-sm">
             <Phone className="h-4 w-4 text-muted-foreground" />
             <span>{supplier.phone}</span>
+          </div>
+        )}
+
+        {(supplier.website_1 || supplier.website_2) && (
+          <div className="space-y-2">
+            {supplier.website_1 && (
+              <div className="text-sm">
+                <span className="font-medium">Site web 1: </span>
+                <a href={supplier.website_1} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                  {supplier.website_1}
+                </a>
+              </div>
+            )}
+            {supplier.website_2 && (
+              <div className="text-sm">
+                <span className="font-medium">Site web 2: </span>
+                <a href={supplier.website_2} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                  {supplier.website_2}
+                </a>
+              </div>
+            )}
           </div>
         )}
 

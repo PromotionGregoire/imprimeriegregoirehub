@@ -16,19 +16,23 @@ const CreateSupplierModal = ({ trigger }: CreateSupplierModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    type: '',
+    is_goods_supplier: false,
+    is_service_supplier: false,
     contact_person: '',
     email: '',
     phone: '',
+    website_1: '',
+    website_2: '',
     notes: '',
   });
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   const { createSupplier } = useSupplierMutations();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.type) {
+    if (!formData.name || (!formData.is_goods_supplier && !formData.is_service_supplier)) {
       return;
     }
 
@@ -37,18 +41,32 @@ const CreateSupplierModal = ({ trigger }: CreateSupplierModalProps) => {
         setIsOpen(false);
         setFormData({
           name: '',
-          type: '',
+          is_goods_supplier: false,
+          is_service_supplier: false,
           contact_person: '',
           email: '',
           phone: '',
+          website_1: '',
+          website_2: '',
           notes: '',
         });
+        setSelectedCategories([]);
       },
     });
   };
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const availableCategories = ['Vêtement', 'Imprimerie', 'Objet promotionnel', 'Packaging', 'Accessoires', 'Électronique'];
+
+  const toggleCategory = (category: string) => {
+    setSelectedCategories(prev => 
+      prev.includes(category) 
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
   };
 
   return (
@@ -78,18 +96,52 @@ const CreateSupplierModal = ({ trigger }: CreateSupplierModalProps) => {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="type">Type *</Label>
-            <Select value={formData.type} onValueChange={(value) => handleChange('type', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionner le type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Fournisseur de biens">Fournisseur de biens</SelectItem>
-                <SelectItem value="Fournisseur de services">Fournisseur de services</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="space-y-3">
+            <Label>Type de fournisseur *</Label>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="is_goods_supplier"
+                  checked={formData.is_goods_supplier}
+                  onChange={(e) => handleChange('is_goods_supplier', e.target.checked)}
+                  className="rounded border-input"
+                />
+                <Label htmlFor="is_goods_supplier">Fournisseur de biens</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="is_service_supplier"
+                  checked={formData.is_service_supplier}
+                  onChange={(e) => handleChange('is_service_supplier', e.target.checked)}
+                  className="rounded border-input"
+                />
+                <Label htmlFor="is_service_supplier">Fournisseur de services</Label>
+              </div>
+            </div>
           </div>
+
+          {/* Spécialités conditionnelles */}
+          {formData.is_goods_supplier && (
+            <div className="space-y-2">
+              <Label>Spécialités (catégories de produits)</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {availableCategories.map((category) => (
+                  <div key={category} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id={`category-${category}`}
+                      checked={selectedCategories.includes(category)}
+                      onChange={() => toggleCategory(category)}
+                      className="rounded border-input"
+                    />
+                    <Label htmlFor={`category-${category}`} className="text-sm">{category}</Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="contact_person">Personne de contact</Label>
@@ -119,6 +171,26 @@ const CreateSupplierModal = ({ trigger }: CreateSupplierModalProps) => {
               value={formData.phone}
               onChange={(e) => handleChange('phone', e.target.value)}
               placeholder="+1 (555) 123-4567"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="website_1">Site web 1</Label>
+            <Input
+              id="website_1"
+              value={formData.website_1}
+              onChange={(e) => handleChange('website_1', e.target.value)}
+              placeholder="https://www.fournisseur.com"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="website_2">Site web 2</Label>
+            <Input
+              id="website_2"
+              value={formData.website_2}
+              onChange={(e) => handleChange('website_2', e.target.value)}
+              placeholder="https://www.catalogue.fournisseur.com"
             />
           </div>
 

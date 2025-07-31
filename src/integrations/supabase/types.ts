@@ -187,6 +187,42 @@ export type Database = {
           },
         ]
       }
+      product_suppliers: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          supplier_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          supplier_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          supplier_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_suppliers_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_suppliers_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_variants: {
         Row: {
           attribute_name: string
@@ -237,7 +273,6 @@ export type Database = {
           id: string
           name: string
           product_code: string
-          supplier_id: string | null
           updated_at: string
         }
         Insert: {
@@ -248,7 +283,6 @@ export type Database = {
           id?: string
           name: string
           product_code: string
-          supplier_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -259,18 +293,9 @@ export type Database = {
           id?: string
           name?: string
           product_code?: string
-          supplier_id?: string | null
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "products_supplier_id_fkey"
-            columns: ["supplier_id"]
-            isOneToOne: false
-            referencedRelation: "suppliers"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -452,39 +477,77 @@ export type Database = {
           },
         ]
       }
+      supplier_categories: {
+        Row: {
+          category_name: string
+          created_at: string
+          id: string
+          supplier_id: string
+        }
+        Insert: {
+          category_name: string
+          created_at?: string
+          id?: string
+          supplier_id: string
+        }
+        Update: {
+          category_name?: string
+          created_at?: string
+          id?: string
+          supplier_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_categories_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppliers: {
         Row: {
           contact_person: string | null
           created_at: string
           email: string | null
           id: string
+          is_goods_supplier: boolean | null
+          is_service_supplier: boolean | null
           name: string
           notes: string | null
           phone: string | null
-          type: string
           updated_at: string
+          website_1: string | null
+          website_2: string | null
         }
         Insert: {
           contact_person?: string | null
           created_at?: string
           email?: string | null
           id?: string
+          is_goods_supplier?: boolean | null
+          is_service_supplier?: boolean | null
           name: string
           notes?: string | null
           phone?: string | null
-          type: string
           updated_at?: string
+          website_1?: string | null
+          website_2?: string | null
         }
         Update: {
           contact_person?: string | null
           created_at?: string
           email?: string | null
           id?: string
+          is_goods_supplier?: boolean | null
+          is_service_supplier?: boolean | null
           name?: string
           notes?: string | null
           phone?: string | null
-          type?: string
           updated_at?: string
+          website_1?: string | null
+          website_2?: string | null
         }
         Relationships: []
       }

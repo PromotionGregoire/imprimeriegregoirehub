@@ -21,7 +21,9 @@ const Suppliers = () => {
       supplier.contact_person?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       supplier.email?.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesType = typeFilter === 'all' || supplier.type === typeFilter;
+    const matchesType = typeFilter === 'all' || 
+      (typeFilter === 'Fournisseur de biens' && supplier.is_goods_supplier) ||
+      (typeFilter === 'Fournisseur de services' && supplier.is_service_supplier);
     
     return matchesSearch && matchesType;
   }) || [];
@@ -29,8 +31,8 @@ const Suppliers = () => {
   // Calculate statistics
   const stats = {
     totalSuppliers: suppliers?.length || 0,
-    goodsSuppliers: suppliers?.filter(s => s.type === 'Fournisseur de biens').length || 0,
-    serviceSuppliers: suppliers?.filter(s => s.type === 'Fournisseur de services').length || 0,
+    goodsSuppliers: suppliers?.filter(s => s.is_goods_supplier).length || 0,
+    serviceSuppliers: suppliers?.filter(s => s.is_service_supplier).length || 0,
   };
 
   const handleEdit = (supplier: any) => {
