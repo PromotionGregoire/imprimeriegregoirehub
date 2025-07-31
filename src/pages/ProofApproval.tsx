@@ -248,93 +248,129 @@ const ProofApproval = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Approbation d'Épreuve
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Commande {proof.orders.order_number} - {proof.orders.clients.business_name}
-          </p>
-          <div className="mt-4">
-            {getStatusBadge(proof.status)}
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Professional Header */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-4xl mx-auto px-6 py-8">
+          <div className="text-center">
+            {/* Logo placeholder - can be customized */}
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-xl mb-4">
+              <FileText className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Révision de l'épreuve pour la commande {proof.orders.order_number}
+            </h1>
+            <p className="text-lg text-gray-600">
+              {proof.orders.clients.business_name}
+            </p>
+            <div className="mt-4">
+              {getStatusBadge(proof.status)}
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Proof Display */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Épreuve - Version {proof.version}</CardTitle>
-            <CardDescription>
-              Veuillez examiner attentivement cette épreuve avant de prendre votre décision
-            </CardDescription>
+      <div className="max-w-4xl mx-auto px-6 py-8 space-y-8">
+
+        {/* Professional Proof Viewer */}
+        <Card className="shadow-lg border-0">
+          <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 border-b">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-xl font-semibold">Épreuve - Version {proof.version}</CardTitle>
+                <CardDescription className="text-base mt-1">
+                  Veuillez examiner attentivement cette épreuve avant de prendre votre décision
+                </CardDescription>
+              </div>
+              <div className="text-right">
+                <div className="text-sm text-gray-500">Créée le</div>
+                <div className="font-medium">{new Date(proof.created_at).toLocaleDateString('fr-FR')}</div>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-8">
             {proof.file_url ? (
-              <div className="space-y-4">
-                {/* Preview for images */}
+              <div className="space-y-6">
+                {/* Enhanced Preview */}
                 {proof.file_url.toLowerCase().includes('.jpg') || 
                  proof.file_url.toLowerCase().includes('.jpeg') || 
                  proof.file_url.toLowerCase().includes('.png') ? (
-                  <div className="border rounded-lg overflow-hidden">
+                  <div className="border-2 border-gray-200 rounded-xl overflow-hidden shadow-md">
                     <img 
                       src={proof.file_url} 
-                      alt="Épreuve" 
-                      className="w-full h-auto max-h-96 object-contain"
+                      alt={`Épreuve ${proof.orders.order_number}`}
+                      className="w-full h-auto max-h-[600px] object-contain bg-white"
                     />
                   </div>
                 ) : (
-                  <div className="border rounded-lg p-8 text-center bg-muted/30">
-                    <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground mb-4">
-                      Fichier PDF - Cliquez sur le bouton ci-dessous pour télécharger et visualiser
+                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center bg-gradient-to-br from-gray-50 to-gray-100">
+                    <FileText className="h-20 w-20 text-gray-400 mx-auto mb-6" />
+                    <h3 className="text-xl font-semibold text-gray-700 mb-2">Fichier PDF Épreuve</h3>
+                    <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                      Cliquez sur le bouton de téléchargement ci-dessous pour visualiser votre épreuve en haute qualité
                     </p>
                   </div>
                 )}
 
+                {/* Enhanced Download Button */}
                 <div className="flex justify-center">
-                  <Button variant="outline" asChild>
+                  <Button 
+                    size="lg" 
+                    variant="outline" 
+                    className="h-14 px-8 text-base font-medium border-2 hover:bg-primary hover:text-white hover:border-primary transition-all duration-200"
+                    asChild
+                  >
                     <a href={proof.file_url} target="_blank" rel="noopener noreferrer">
-                      <Download className="w-4 h-4 mr-2" />
+                      <Download className="w-5 h-5 mr-3" />
                       Télécharger l'épreuve
                     </a>
                   </Button>
                 </div>
               </div>
             ) : (
-              <div className="text-center py-8">
-                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">
-                  Aucun fichier disponible pour cette épreuve.
+              <div className="text-center py-12">
+                <FileText className="h-16 w-16 text-gray-300 mx-auto mb-6" />
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">Aucun fichier disponible</h3>
+                <p className="text-gray-500">
+                  L'épreuve est en cours de préparation. Vous recevrez un nouvel email dès qu'elle sera prête.
                 </p>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Action Buttons */}
+        {/* Professional Action Buttons */}
         {!showModificationForm && !showApprovalForm && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button
-              size="lg"
-              className="h-16 text-lg bg-green-600 hover:bg-green-700"
-              onClick={() => setShowApprovalForm(true)}
-            >
-              <CheckCircle className="w-6 h-6 mr-3" />
-              ✅ Approuver l'épreuve
-            </Button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Approve Button */}
+            <Card className="group cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-green-200 hover:border-green-300">
+              <CardContent className="p-8" onClick={() => setShowApprovalForm(true)}>
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 text-green-600 rounded-full mb-4 group-hover:bg-green-600 group-hover:text-white transition-all duration-300">
+                    <CheckCircle className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">✅ Approuver l'épreuve</h3>
+                  <p className="text-gray-600">
+                    Confirmer que l'épreuve répond à vos attentes et lancer la production
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
             
-            <Button
-              size="lg"
-              variant="outline"
-              className="h-16 text-lg border-orange-300 hover:bg-orange-50"
-              onClick={() => setShowModificationForm(true)}
-            >
-              <MessageSquare className="w-6 h-6 mr-3" />
-              ✏️ Demander une modification
-            </Button>
+            {/* Request Modification Button */}
+            <Card className="group cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-orange-200 hover:border-orange-300">
+              <CardContent className="p-8" onClick={() => setShowModificationForm(true)}>
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-100 text-orange-600 rounded-full mb-4 group-hover:bg-orange-600 group-hover:text-white transition-all duration-300">
+                    <MessageSquare className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">✏️ Demander une modification</h3>
+                  <p className="text-gray-600">
+                    Demander des ajustements ou des changements sur cette épreuve
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
 
