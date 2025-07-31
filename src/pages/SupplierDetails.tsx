@@ -8,7 +8,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Badge } from '@/components/ui/badge';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import { useSupplierSpecialties } from '@/hooks/useSupplierSpecialties';
+import { useProductSuppliers } from '@/hooks/useSupplierRelations';
 import CreateSupplierModal from '@/components/CreateSupplierModal';
+import SupplierProductsManager from '@/components/SupplierProductsManager';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -20,6 +22,7 @@ const SupplierDetails = () => {
 
   const { data: suppliers, isLoading } = useSuppliers();
   const { data: specialties } = useSupplierSpecialties(id);
+  const { data: productSuppliers } = useProductSuppliers();
 
   const supplier = suppliers?.find(s => s.id === id);
 
@@ -72,9 +75,12 @@ const SupplierDetails = () => {
   const goodsSpecialties = specialties?.filter(s => s.category_type === 'Bien') || [];
   const serviceSpecialties = specialties?.filter(s => s.category_type === 'Service') || [];
 
-  // KPIs simulés pour les fournisseurs (à implémenter plus tard avec de vraies données)
+  // Calcul du nombre de produits associés
+  const supplierProductsCount = productSuppliers?.filter(ps => ps.supplier_id === id).length || 0;
+
+  // KPIs pour les fournisseurs
   const supplierKPIs = {
-    totalProducts: 0, // Nombre de produits associés
+    totalProducts: supplierProductsCount,
     totalOrders: 0, // Nombre de commandes passées avec ce fournisseur
     lastOrderDate: null, // Dernière commande
     reliability: 100 // Taux de fiabilité
@@ -306,6 +312,21 @@ const SupplierDetails = () => {
               </CardContent>
             </Card>
 
+            {/* Produits associés */}
+            {supplierProductsCount > 0 && (
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle>Produits Associés</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-sm text-muted-foreground">
+                    Ce fournisseur est associé à {supplierProductsCount} produit{supplierProductsCount > 1 ? 's' : ''}.
+                    Consultez l'onglet "Produits Associés" pour plus de détails.
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Notes */}
             <Card className="lg:col-span-2">
               <CardHeader>
@@ -323,19 +344,10 @@ const SupplierDetails = () => {
         </TabsContent>
 
         <TabsContent value="products">
-          <Card>
-            <CardHeader>
-              <CardTitle>Produits Associés</CardTitle>
-              <CardDescription>
-                Liste des produits fournis par ce fournisseur
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-500 text-center py-4">
-                Aucun produit associé pour le moment.
-              </p>
-            </CardContent>
-          </Card>
+          <SupplierProductsManager 
+            supplierId={id!} 
+            supplierName={supplier.name}
+          />
         </TabsContent>
 
         <TabsContent value="orders">
