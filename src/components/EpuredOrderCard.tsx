@@ -125,10 +125,20 @@ const EpuredOrderCard = ({ order, onProofAccepted, onDelivered }: OrderCardProps
 
         {/* Lien d'Origine */}
         <div className="pt-3 border-t border-border">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <FileText className="h-4 w-4" />
-            <span>Voir la soumission d'origine</span>
-            <Button variant="link" size="sm" className="p-0 h-auto text-primary font-semibold">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <FileText className="h-4 w-4" />
+              <span>Soumission d'origine</span>
+            </div>
+            <Button 
+              variant="link" 
+              size="sm" 
+              className="p-0 h-auto text-primary font-semibold hover:underline"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/dashboard/submissions/${order.submission_id}`);
+              }}
+            >
               {formatSubmissionNumber(order.submissions?.submission_number || '')}
               <ExternalLink className="h-3 w-3 ml-1" />
             </Button>
