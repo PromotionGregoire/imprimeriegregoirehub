@@ -185,7 +185,7 @@ const Proofs = () => {
               ))}
             </div>
           ) : proofs && proofs.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-base-400 md:gap-base-600">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
               {proofs.map((proof) => (
                 <ProofCard key={proof.id} proof={proof} />
               ))}
