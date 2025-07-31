@@ -1,1 +1,7 @@
 project_id = "ytcrplsistsxfaxkfqqp"
+
+[functions.approve-proof]
+verify_jwt = false
+
+[functions.request-proof-modification]
+verify_jwt = false

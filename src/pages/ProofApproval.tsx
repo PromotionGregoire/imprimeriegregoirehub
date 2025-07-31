@@ -21,6 +21,8 @@ const ProofApproval = () => {
   const [modificationComments, setModificationComments] = useState('');
   const [clientName, setClientName] = useState('');
   const [confirmationText, setConfirmationText] = useState('');
+  const [showThankYou, setShowThankYou] = useState(false);
+  const [actionType, setActionType] = useState<'approved' | 'modification' | null>(null);
 
   // Fetch proof details using approval token
   const { data: proof, isLoading, error } = useQuery({
@@ -54,26 +56,24 @@ const ProofApproval = () => {
   // Request modification mutation
   const requestModification = useMutation({
     mutationFn: async (comments: string) => {
-      if (!proof) throw new Error('Proof not found');
+      if (!proof || !clientName.trim()) throw new Error('Données manquantes');
       
-      const { error } = await supabase.functions.invoke('handle-proof-decision', {
+      const { error } = await supabase.functions.invoke('request-proof-modification', {
         body: {
-          proofId: proof.id,
-          action: 'request_modification',
-          comments: comments,
-          approvalToken: token
+          approvalToken: token,
+          clientComments: comments,
+          clientName: clientName
         }
       });
 
       if (error) throw error;
     },
     onSuccess: () => {
-      toast({
-        title: '✅ Demande envoyée',
-        description: 'Votre demande de modification a été envoyée avec succès.',
-      });
+      setActionType('modification');
+      setShowThankYou(true);
       setShowModificationForm(false);
       setModificationComments('');
+      setClientName('');
     },
     onError: (error) => {
       console.error('Request modification error:', error);
@@ -90,22 +90,19 @@ const ProofApproval = () => {
     mutationFn: async (approverName: string) => {
       if (!proof) throw new Error('Proof not found');
       
-      const { error } = await supabase.functions.invoke('handle-proof-decision', {
+      const { error } = await supabase.functions.invoke('approve-proof', {
         body: {
-          proofId: proof.id,
-          action: 'approve',
+          approvalToken: token,
           approverName: approverName,
-          approvalToken: token
+          confirmationWord: confirmationText
         }
       });
 
       if (error) throw error;
     },
     onSuccess: () => {
-      toast({
-        title: '✅ Épreuve approuvée',
-        description: 'L\'épreuve a été approuvée avec succès. Votre commande passera en production.',
-      });
+      setActionType('approved');
+      setShowThankYou(true);
       setShowApprovalForm(false);
       setClientName('');
       setConfirmationText('');
@@ -121,6 +118,14 @@ const ProofApproval = () => {
   });
 
   const handleRequestModification = () => {
+    if (!clientName.trim()) {
+      toast({
+        title: '❌ Nom requis',
+        description: 'Veuillez saisir votre nom complet.',
+        variant: 'destructive',
+      });
+      return;
+    }
     if (!modificationComments.trim()) {
       toast({
         title: '❌ Commentaires requis',
@@ -241,6 +246,109 @@ const ProofApproval = () => {
             <p className="text-sm text-muted-foreground">
               Vous recevrez une nouvelle épreuve dès que les modifications seront apportées.
             </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Thank you pages after actions
+  if (showThankYou && actionType === 'approved') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-6">
+        <Card className="max-w-2xl">
+          <CardHeader className="text-center">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 text-green-600 rounded-full mx-auto mb-4">
+              <CheckCircle className="w-10 h-10" />
+            </div>
+            <CardTitle className="text-3xl font-bold text-green-800">🎉 Épreuve Approuvée !</CardTitle>
+            <CardDescription className="text-lg text-green-700 mt-2">
+              Merci pour votre approbation - La production commence maintenant
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center space-y-6">
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Ce qui se passe maintenant :</h3>
+              <div className="space-y-3 text-left">
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <span>Votre épreuve a été officiellement approuvée</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <span>Votre commande {proof?.orders.order_number} est passée en production</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <span>Vous recevrez une notification dès la fin de production</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <span>Notre équipe vous contactera pour la livraison</span>
+                </div>
+              </div>
+            </div>
+            
+            <p className="text-gray-600">
+              Merci de votre confiance ! Si vous avez des questions, n'hésitez pas à nous contacter.
+            </p>
+            
+            <div className="bg-green-50 p-4 rounded-lg">
+              <p className="text-sm text-green-800">
+                📧 Un email de confirmation a été envoyé à votre adresse
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (showThankYou && actionType === 'modification') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center p-6">
+        <Card className="max-w-2xl">
+          <CardHeader className="text-center">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-orange-100 text-orange-600 rounded-full mx-auto mb-4">
+              <MessageSquare className="w-10 h-10" />
+            </div>
+            <CardTitle className="text-3xl font-bold text-orange-800">📝 Demande Envoyée !</CardTitle>
+            <CardDescription className="text-lg text-orange-700 mt-2">
+              Votre demande de modification a été transmise à notre équipe
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center space-y-6">
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Prochaines étapes :</h3>
+              <div className="space-y-3 text-left">
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="w-5 h-5 text-orange-600 flex-shrink-0" />
+                  <span>Notre équipe examine vos commentaires</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="w-5 h-5 text-orange-600 flex-shrink-0" />
+                  <span>Les modifications seront apportées rapidement</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="w-5 h-5 text-orange-600 flex-shrink-0" />
+                  <span>Vous recevrez une nouvelle épreuve par email</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="w-5 h-5 text-orange-600 flex-shrink-0" />
+                  <span>Vous pourrez alors approuver la version révisée</span>
+                </div>
+              </div>
+            </div>
+            
+            <p className="text-gray-600">
+              Nous nous efforçons de traiter toutes les demandes de modification dans les plus brefs délais.
+            </p>
+            
+            <div className="bg-orange-50 p-4 rounded-lg">
+              <p className="text-sm text-orange-800">
+                📧 Un accusé de réception a été envoyé à votre adresse
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -384,6 +492,17 @@ const ProofApproval = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="modification-client-name">Votre nom complet *</Label>
+                <Input
+                  id="modification-client-name"
+                  placeholder="Ex: Jean Dupont"
+                  value={clientName}
+                  onChange={(e) => setClientName(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              
               <div>
                 <Label htmlFor="comments">Commentaires *</Label>
                 <Textarea
