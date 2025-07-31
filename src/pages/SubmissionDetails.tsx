@@ -221,39 +221,41 @@ const SubmissionDetails = () => {
           </Card>
 
           {/* Product Lines */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Lignes de Produits</CardTitle>
+          <Card className="overflow-hidden">
+            <CardHeader className="p-4 sm:p-5 lg:p-6">
+              <CardTitle className="text-lg font-semibold">Lignes de Produits</CardTitle>
             </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Produit</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead className="text-center">Qté</TableHead>
-                    <TableHead className="text-right">Prix Unit.</TableHead>
-                    <TableHead className="text-right">Total</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {submission.submission_items?.map((item: any) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium">{item.product_name}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {item.description || 'Aucune description'}
-                      </TableCell>
-                      <TableCell className="text-center">{item.quantity}</TableCell>
-                      <TableCell className="text-right">
-                        ${Number(item.unit_price).toFixed(2)}
-                      </TableCell>
-                      <TableCell className="text-right font-medium">
-                        ${(item.quantity * Number(item.unit_price)).toFixed(2)}
-                      </TableCell>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="px-4 sm:px-6 py-3">Produit</TableHead>
+                      <TableHead className="px-4 sm:px-6 py-3 hidden sm:table-cell">Description</TableHead>
+                      <TableHead className="px-4 sm:px-6 py-3 text-center">Qté</TableHead>
+                      <TableHead className="px-4 sm:px-6 py-3 text-right">Prix Unit.</TableHead>
+                      <TableHead className="px-4 sm:px-6 py-3 text-right">Total</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {submission.submission_items?.map((item: any) => (
+                      <TableRow key={item.id} className="hover:bg-muted/50">
+                        <TableCell className="px-4 sm:px-6 py-4 font-medium">{item.product_name}</TableCell>
+                        <TableCell className="px-4 sm:px-6 py-4 text-muted-foreground hidden sm:table-cell">
+                          {item.description || 'Aucune description'}
+                        </TableCell>
+                        <TableCell className="px-4 sm:px-6 py-4 text-center">{item.quantity}</TableCell>
+                        <TableCell className="px-4 sm:px-6 py-4 text-right">
+                          ${Number(item.unit_price).toFixed(2)}
+                        </TableCell>
+                        <TableCell className="px-4 sm:px-6 py-4 text-right font-medium">
+                          ${(item.quantity * Number(item.unit_price)).toFixed(2)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
 
