@@ -179,6 +179,52 @@ const ProductDetails = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Variantes section */}
+            {variants && variants.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Variantes disponibles</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {Object.entries(
+                      variants.reduce((groups, variant) => {
+                        const key = variant.attribute_name;
+                        if (!groups[key]) {
+                          groups[key] = [];
+                        }
+                        groups[key].push(variant);
+                        return groups;
+                      }, {} as Record<string, any[]>)
+                    ).map(([attributeName, attributeVariants]) => (
+                      <div key={attributeName}>
+                        <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                          {attributeName}
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {attributeVariants.map((variant) => (
+                            <Badge key={variant.id} variant="outline">
+                              {variant.attribute_value}
+                              {variant.cost_price > 0 && (
+                                <span className="ml-1 text-xs text-muted-foreground">
+                                  (${variant.cost_price})
+                                </span>
+                              )}
+                              {variant.sku_variant && (
+                                <span className="ml-1 text-xs text-muted-foreground">
+                                  - {variant.sku_variant}
+                                </span>
+                              )}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="variants" className="space-y-6">

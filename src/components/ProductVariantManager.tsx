@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Plus, X, Tag, DollarSign } from 'lucide-react';
+import { Plus, X, Tag, DollarSign, Edit2 } from 'lucide-react';
 import { useProductVariants } from '@/hooks/useProductVariants';
 import { useProductVariantMutations } from '@/hooks/useProductVariantMutations';
 
@@ -25,9 +25,10 @@ interface AttributeGroup {
 const ProductVariantManager = ({ productId, onVariantsChange }: ProductVariantManagerProps) => {
   const [attributes, setAttributes] = useState<AttributeGroup[]>([]);
   const [newAttributeName, setNewAttributeName] = useState('');
+  const [editingVariant, setEditingVariant] = useState<any>(null);
   
   const { data: existingVariants } = useProductVariants(productId);
-  const { createMultipleVariants, deleteVariant } = useProductVariantMutations();
+  const { createMultipleVariants, deleteVariant, updateVariant } = useProductVariantMutations();
 
   // Group existing variants by attribute name
   const groupedVariants = existingVariants?.reduce((groups, variant) => {
@@ -115,6 +116,35 @@ const ProductVariantManager = ({ productId, onVariantsChange }: ProductVariantMa
     deleteVariant.mutate(variantId);
   };
 
+  const startEditingVariant = (variant: any) => {
+    setEditingVariant({
+      ...variant,
+      originalId: variant.id
+    });
+  };
+
+  const saveEditingVariant = () => {
+    if (!editingVariant) return;
+    
+    updateVariant.mutate({
+      variantId: editingVariant.originalId,
+      updates: {
+        attribute_name: editingVariant.attribute_name,
+        attribute_value: editingVariant.attribute_value,
+        sku_variant: editingVariant.sku_variant,
+        cost_price: editingVariant.cost_price || 0
+      }
+    }, {
+      onSuccess: () => {
+        setEditingVariant(null);
+      }
+    });
+  };
+
+  const cancelEditingVariant = () => {
+    setEditingVariant(null);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -131,20 +161,77 @@ const ProductVariantManager = ({ productId, onVariantsChange }: ProductVariantMa
             {Object.entries(groupedVariants).map(([attributeName, variants]) => (
               <div key={attributeName} className="space-y-2">
                 <Label className="font-medium">{attributeName}</Label>
-                <div className="flex flex-wrap gap-2">
+                <div className="space-y-2">
                   {variants.map((variant) => (
-                    <Badge key={variant.id} variant="secondary" className="flex items-center gap-1">
-                      {variant.attribute_value}
-                      {variant.cost_price > 0 && (
-                        <span className="text-xs">({variant.cost_price}$)</span>
+                    <div key={variant.id}>
+                      {editingVariant?.originalId === variant.id ? (
+                        <div className="flex items-center gap-2 p-2 border rounded">
+                          <Input
+                            placeholder="Nom attribut"
+                            value={editingVariant.attribute_name}
+                            onChange={(e) => setEditingVariant({...editingVariant, attribute_name: e.target.value})}
+                            className="flex-1"
+                          />
+                          <Input
+                            placeholder="Valeur"
+                            value={editingVariant.attribute_value}
+                            onChange={(e) => setEditingVariant({...editingVariant, attribute_value: e.target.value})}
+                            className="flex-1"
+                          />
+                          <Input
+                            placeholder="SKU"
+                            value={editingVariant.sku_variant || ''}
+                            onChange={(e) => setEditingVariant({...editingVariant, sku_variant: e.target.value})}
+                            className="flex-1"
+                          />
+                          <div className="relative">
+                            <DollarSign className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              type="number"
+                              placeholder="Coût"
+                              value={editingVariant.cost_price || 0}
+                              onChange={(e) => setEditingVariant({...editingVariant, cost_price: parseFloat(e.target.value) || 0})}
+                              className="pl-8 w-24"
+                              step="0.01"
+                            />
+                          </div>
+                          <Button size="sm" onClick={saveEditingVariant} disabled={updateVariant.isPending}>
+                            ✓
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={cancelEditingVariant}>
+                            ✕
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="flex items-center gap-1">
+                            {variant.attribute_value}
+                            {variant.cost_price > 0 && (
+                              <span className="text-xs">({variant.cost_price}$)</span>
+                            )}
+                            {variant.sku_variant && (
+                              <span className="text-xs">- {variant.sku_variant}</span>
+                            )}
+                          </Badge>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => startEditingVariant(variant)}
+                            className="h-6 w-6 p-0"
+                          >
+                            <Edit2 className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => deleteExistingVariant(variant.id)}
+                            className="h-6 w-6 p-0 hover:text-destructive"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
                       )}
-                      <button
-                        onClick={() => deleteExistingVariant(variant.id)}
-                        className="ml-1 hover:text-destructive"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </Badge>
+                    </div>
                   ))}
                 </div>
               </div>

@@ -34,6 +34,35 @@ export const useProductVariantMutations = () => {
     },
   });
 
+  const updateVariant = useMutation({
+    mutationFn: async ({ variantId, updates }: { variantId: string; updates: any }) => {
+      const { data, error } = await supabase
+        .from('product_variants')
+        .update(updates)
+        .eq('id', variantId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['product-variants'] });
+      toast({
+        title: '✅ Variante modifiée',
+        description: 'La variante a été mise à jour avec succès.',
+      });
+    },
+    onError: (error) => {
+      console.error('Error updating product variant:', error);
+      toast({
+        title: '❌ Erreur',
+        description: 'Impossible de modifier la variante.',
+        variant: 'destructive',
+      });
+    },
+  });
+
   const deleteVariant = useMutation({
     mutationFn: async (variantId: string) => {
       const { error } = await supabase
@@ -89,6 +118,7 @@ export const useProductVariantMutations = () => {
 
   return {
     createVariant,
+    updateVariant,
     deleteVariant,
     createMultipleVariants,
   };
