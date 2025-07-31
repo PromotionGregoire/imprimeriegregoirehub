@@ -76,7 +76,7 @@ const EpuredOrderCard = ({ order, onProofAccepted, onDelivered }: OrderCardProps
       className={`hover:shadow-lg transition-all ease-uber border-l-4 cursor-pointer touch-area ${getBorderColor(order.status)}`}
       onClick={handleCardClick}
     >
-      <CardContent className="p-base-600">
+      <CardContent className="p-4 sm:p-5 lg:p-6">
         {/* Header : Nom d'entreprise principal + Montant à droite */}
         <div className="flex items-start justify-between mb-base-300">
           <div className="flex-1">
