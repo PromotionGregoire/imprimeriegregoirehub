@@ -69,6 +69,9 @@ const CreateSubmission = () => {
     },
   });
 
+  // Set current date as default
+  const [currentDate, setCurrentDate] = useState(new Date());
+
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: 'items',
@@ -237,11 +240,26 @@ const CreateSubmission = () => {
               
               <div>
                 <Label>Date</Label>
-                <Input
-                  value={new Date().toLocaleDateString('fr-FR')}
-                  disabled
-                  className="bg-muted"
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left font-normal"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {format(currentDate, 'dd/MM/yyyy')}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={currentDate}
+                      onSelect={(date) => date && setCurrentDate(date)}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
               
               <div>
