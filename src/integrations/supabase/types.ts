@@ -345,6 +345,9 @@ export type Database = {
       proofs: {
         Row: {
           approval_token: string | null
+          approved_at: string | null
+          approved_by_name: string | null
+          client_comments: string | null
           created_at: string
           file_url: string | null
           id: string
@@ -355,6 +358,9 @@ export type Database = {
         }
         Insert: {
           approval_token?: string | null
+          approved_at?: string | null
+          approved_by_name?: string | null
+          client_comments?: string | null
           created_at?: string
           file_url?: string | null
           id?: string
@@ -365,6 +371,9 @@ export type Database = {
         }
         Update: {
           approval_token?: string | null
+          approved_at?: string | null
+          approved_by_name?: string | null
+          client_comments?: string | null
           created_at?: string
           file_url?: string | null
           id?: string
@@ -578,6 +587,10 @@ export type Database = {
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      update_proof_status_enum: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
     }
     Enums: {

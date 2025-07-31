@@ -1,9 +1,9 @@
-import ProtectedRoute from "@/components/ProtectedRoute";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import NotFound from "@/pages/NotFound";
 import Index from "./pages/Index";
@@ -17,11 +17,13 @@ import Orders from "./pages/Orders";
 import EditSubmission from "./pages/EditSubmission";
 import Products from "./pages/Products";
 import ProductDetails from "./pages/ProductDetails";
+import ProofDetails from "./pages/ProofDetails";
 import Proofs from "./pages/Proofs";
 import OrderDetails from "./pages/OrderDetails";
 import Suppliers from "./pages/Suppliers";
 import SupplierDetails from "./pages/SupplierDetails";
 import AdminEmployees from "./pages/AdminEmployees";
+import ProofApproval from "./pages/ProofApproval";
 import ForcePasswordChange from "./pages/ForcePasswordChange";
 import DashboardLayout from "./components/DashboardLayout";
 
@@ -37,7 +39,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/force-password-change" element={<ForcePasswordChange />} />
+            <Route path="/approve/proof/:token" element={<ProofApproval />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <DashboardLayout />
@@ -55,10 +57,12 @@ const App = () => (
               <Route path="suppliers/:id" element={<SupplierDetails />} />
               <Route path="orders" element={<Orders />} />
               <Route path="orders/:id" element={<OrderDetails />} />
+              <Route path="proofs/:id" element={<ProofDetails />} />
               <Route path="proofs" element={<Proofs />} />
               <Route path="admin/employees" element={<AdminEmployees />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/force-password-change" element={<ForcePasswordChange />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
