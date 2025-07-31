@@ -47,35 +47,53 @@ export const useForceAcceptSubmission = () => {
 
       if (orderError) throw orderError;
 
-      // Log submission acceptance
+      // Create proof automatically after order creation
+      const { data: proof, error: proofError } = await supabase
+        .from('proofs')
+        .insert([{
+          order_id: order.id,
+          status: 'À préparer',
+          version: 1
+        }])
+        .select()
+        .single();
+
+      if (proofError) throw proofError;
+
+      // Log submission acceptance, order creation, and proof creation
       if (user) {
         await supabase
           .from('activity_logs')
-          .insert([{
-            client_id: submission.client_id,
-            action_type: 'submission_accepted_manually',
-            description: `La soumission ${submission.submission_number} a été acceptée manuellement par ${user.email}. Personne autorisant: ${approvedBy}.`,
-            created_by: user.id
-          }]);
-
-        // Log order creation
-        await supabase
-          .from('activity_logs')
-          .insert([{
-            client_id: submission.client_id,
-            action_type: 'order_created',
-            description: `Commande ${order.order_number} créée à partir de la soumission ${submission.submission_number}.`,
-            created_by: user.id
-          }]);
+          .insert([
+            {
+              client_id: submission.client_id,
+              action_type: 'submission_accepted_manually',
+              description: `La soumission ${submission.submission_number} a été acceptée manuellement par ${user.email}. Personne autorisant: ${approvedBy}.`,
+              created_by: user.id
+            },
+            {
+              client_id: submission.client_id,
+              action_type: 'order_created',
+              description: `Commande ${order.order_number} créée à partir de la soumission ${submission.submission_number}.`,
+              created_by: user.id
+            },
+            {
+              client_id: submission.client_id,
+              action_type: 'proof_created',
+              description: `Tâche d'épreuve créée automatiquement pour la commande ${order.order_number} (Version 1).`,
+              created_by: user.id
+            }
+          ]);
       }
 
-      return { submission: updatedSubmission, order };
+      return { submission: updatedSubmission, order, proof };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['submission-details', data.submission.id] });
       queryClient.invalidateQueries({ queryKey: ['all-submissions'] });
       queryClient.invalidateQueries({ queryKey: ['client-submissions', data.submission.client_id] });
       queryClient.invalidateQueries({ queryKey: ['client-activity-logs', data.submission.client_id] });
+      queryClient.invalidateQueries({ queryKey: ['proofs'] });
     },
   });
 };
