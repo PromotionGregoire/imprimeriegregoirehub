@@ -18,7 +18,7 @@ function Calendar({
       showOutsideDays={showOutsideDays}
       captionLayout="dropdown-buttons"
       fromYear={1900}
-      toYear={2030}
+      toYear={2125}
       className={cn("p-3", className)}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",

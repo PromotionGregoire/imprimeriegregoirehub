@@ -258,7 +258,7 @@ const CreateSubmission = () => {
                       initialFocus
                       captionLayout="dropdown-buttons"
                       fromYear={1900}
-                      toYear={2030}
+                      toYear={2125}
                       className={cn("p-3 pointer-events-auto")}
                     />
                   </PopoverContent>
@@ -288,7 +288,7 @@ const CreateSubmission = () => {
                       initialFocus
                       captionLayout="dropdown-buttons"
                       fromYear={1900}
-                      toYear={2030}
+                      toYear={2125}
                       className={cn("p-3 pointer-events-auto")}
                     />
                   </PopoverContent>
