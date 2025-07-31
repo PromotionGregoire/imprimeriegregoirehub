@@ -399,6 +399,10 @@ const EditSubmission = () => {
                       selected={watch('deadline')}
                       onSelect={(date) => setValue('deadline', date)}
                       initialFocus
+                      captionLayout="dropdown-buttons"
+                      fromYear={1900}
+                      toYear={2030}
+                      className={cn("p-3 pointer-events-auto")}
                     />
                   </PopoverContent>
                 </Popover>
