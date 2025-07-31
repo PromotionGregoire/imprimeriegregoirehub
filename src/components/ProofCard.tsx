@@ -39,13 +39,13 @@ export const ProofCard = ({ proof }: ProofCardProps) => {
 
   return (
     <Card 
-      className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 shadow-sm bg-gradient-to-br from-background to-background/80 hover:scale-[1.02]"
+      className="group hover:shadow-lg transition-all duration-300 cursor-pointer active:scale-[0.98] bg-card border-border/50"
       onClick={handleCardClick}
     >
-      <CardContent className="p-6 space-y-4">
+      <CardContent className="p-5 md:p-6 space-y-4">
         {/* Header avec nom entreprise proéminent */}
         <div className="space-y-2">
-          <h3 className="font-bold text-lg text-foreground leading-tight group-hover:text-primary transition-colors">
+          <h3 className="font-semibold text-lg md:text-base text-foreground leading-tight group-hover:text-primary transition-colors">
             {proof.orders?.clients?.business_name || 'Client inconnu'}
           </h3>
           <div className="flex items-center gap-2">

@@ -34,16 +34,16 @@ export const ClientActivityToolbar = ({
   searchPlaceholder = "Rechercher...",
 }: ClientActivityToolbarProps) => {
   return (
-    <div className="space-y-4">
-      {/* Activity Filter - Top Left */}
+    <div className="space-y-4 md:space-y-4">
+      {/* Activity Filter - Mobile First */}
       <div className="flex items-center justify-start">
         <Select value={activityFilter} onValueChange={onActivityChange}>
-          <SelectTrigger className="w-[280px]">
+          <SelectTrigger className="w-full md:w-[280px] h-11 md:h-10">
             <SelectValue placeholder="Filtrer par activité" />
           </SelectTrigger>
           <SelectContent className="bg-background border shadow-lg z-50">
             {activityOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
+              <SelectItem key={option.value} value={option.value} className="text-sm md:text-sm">
                 {option.label}
               </SelectItem>
             ))}
@@ -52,29 +52,29 @@ export const ClientActivityToolbar = ({
       </div>
 
       {/* Main Toolbar */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4">
+      <Card className="shadow-sm">
+        <CardContent className="p-4 md:p-4">
+          <div className="flex flex-col gap-4 md:flex-row md:gap-4">
             {/* Search Bar */}
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <div className="relative flex-1 order-1">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 md:h-4 md:w-4 text-muted-foreground" />
               <Input
                 placeholder={searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                className="pl-10"
+                className="pl-12 md:pl-10 h-12 md:h-10 text-base md:text-sm border-border/50 focus:border-primary"
               />
             </div>
 
             {/* Status Filter */}
             <Select value={statusFilter} onValueChange={onStatusChange}>
-              <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectTrigger className="w-full md:w-[200px] h-12 md:h-10 order-2">
                 <SelectValue placeholder="Filtrer par statut" />
               </SelectTrigger>
               <SelectContent className="bg-background border shadow-lg z-50">
-                <SelectItem value="all">Tous les statuts</SelectItem>
+                <SelectItem value="all" className="text-base md:text-sm">Tous les statuts</SelectItem>
                 {statusOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
+                  <SelectItem key={option.value} value={option.value} className="text-base md:text-sm">
                     {option.label}
                   </SelectItem>
                 ))}

@@ -10,12 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 
 import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogFooter 
-} from '@/components/ui/dialog';
+  AdaptiveDialog, 
+  AdaptiveDialogContent, 
+  AdaptiveDialogHeader, 
+  AdaptiveDialogTitle, 
+  AdaptiveDialogFooter 
+} from '@/components/ui/adaptive-dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useCreateClient, useUpdateClient, useProfiles } from '@/hooks/useClientMutations';
 import { useToast } from '@/hooks/use-toast';
@@ -175,31 +175,33 @@ const CreateClientModal = ({ isOpen, onClose, client, mode = 'create' }: CreateC
   const provinces = ['QC', 'ON', 'BC', 'AB', 'MB', 'SK', 'NS', 'NB', 'PE', 'NL', 'YT', 'NT', 'NU'];
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {mode === 'edit' && client 
-              ? `Modification du client : ${client.business_name}`
-              : 'Nouveau Client'
-            }
-          </DialogTitle>
-        </DialogHeader>
-
+    <AdaptiveDialog 
+      open={isOpen} 
+      onOpenChange={onClose}
+      title={mode === 'edit' && client 
+        ? `Modification du client : ${client.business_name}`
+        : 'Nouveau Client'
+      }
+    >
+      <AdaptiveDialogContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 md:space-y-8">
             {/* Section 1: Informations Générales */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold border-b pb-2">Informations Générales</h3>
+            <div className="space-y-5 md:space-y-4">
+              <h3 className="text-xl md:text-lg font-semibold border-b pb-3 md:pb-2 text-foreground">Informations Générales</h3>
               
               <FormField
                 control={form.control}
                 name="business_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nom de l'entreprise *</FormLabel>
+                    <FormLabel className="text-base md:text-sm font-medium text-foreground">Nom de l'entreprise *</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Nom de l'entreprise" />
+                      <Input 
+                        {...field} 
+                        placeholder="Nom de l'entreprise" 
+                        className="h-12 md:h-10 text-base md:text-sm"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -258,8 +260,8 @@ const CreateClientModal = ({ isOpen, onClose, client, mode = 'create' }: CreateC
             </div>
 
             {/* Section 2: Contacts */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold border-b pb-2">Contacts</h3>
+            <div className="space-y-5 md:space-y-4">
+              <h3 className="text-xl md:text-lg font-semibold border-b pb-3 md:pb-2 text-foreground">Contacts</h3>
               
               <FormField
                 control={form.control}
@@ -642,24 +644,30 @@ const CreateClientModal = ({ isOpen, onClose, client, mode = 'create' }: CreateC
               />
             </div>
 
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>
+            <AdaptiveDialogFooter>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={onClose}
+                className="flex-1 md:flex-none h-12 md:h-10 text-base md:text-sm"
+              >
                 Annuler
               </Button>
               <Button 
                 type="submit" 
                 disabled={mode === 'edit' ? !hasChanges || updateClient.isPending : createClient.isPending}
+                className="flex-1 md:flex-none h-12 md:h-10 text-base md:text-sm font-medium"
               >
                 {mode === 'edit' 
                   ? (updateClient.isPending ? 'Sauvegarde...' : 'Sauvegarder les modifications')
                   : (createClient.isPending ? 'Enregistrement...' : 'Enregistrer')
                 }
               </Button>
-            </DialogFooter>
+            </AdaptiveDialogFooter>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+      </AdaptiveDialogContent>
+    </AdaptiveDialog>
   );
 };
 

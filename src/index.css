@@ -109,5 +109,35 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Mobile-first typography improvements */
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+  }
+
+  /* Better tap targets for mobile */
+  button, [role="button"], input, select, textarea {
+    @apply min-h-[44px] md:min-h-[40px];
+  }
+
+  /* Smooth safe area handling */
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Better touch feedback */
+  .touch-feedback {
+    @apply active:scale-95 transition-transform duration-150;
+  }
+
+  /* Improved focus states for accessibility */
+  input:focus, select:focus, textarea:focus, button:focus {
+    @apply ring-2 ring-primary ring-offset-2;
   }
 }
