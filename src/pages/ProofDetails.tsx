@@ -110,34 +110,16 @@ const ProofDetails = () => {
     mutationFn: async () => {
       if (!proof) throw new Error('Proof not found');
       
-      // Generate new approval token
-      const { data, error } = await supabase
-        .from('proofs')
-        .update({
-          status: 'Envoyée au client',
-          approval_token: crypto.randomUUID(),
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', proof.id)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Call edge function to send email
-      const { error: emailError } = await supabase.functions.invoke('send-proof-email', {
+      // Call the edge function to handle the entire send process
+      const { error } = await supabase.functions.invoke('send-proof-to-client', {
         body: {
-          proofId: proof.id,
-          clientEmail: proof.orders.clients.email,
-          clientName: proof.orders.clients.contact_name,
-          orderNumber: proof.orders.order_number,
-          approvalToken: data.approval_token
+          proofId: proof.id
         }
       });
 
-      if (emailError) throw emailError;
+      if (error) throw new Error(error.message);
 
-      return data;
+      return { success: true };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['proof-details', id] });
