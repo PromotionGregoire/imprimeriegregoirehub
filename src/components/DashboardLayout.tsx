@@ -23,7 +23,7 @@ const DashboardLayout = () => {
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <main className="flex-1 flex flex-col">
-          <header className="h-base-600 flex items-center border-b bg-background px-base-400">
+          <header className="h-12 sm:h-14 lg:h-16 flex items-center border-b bg-background px-4 sm:px-6 lg:px-8">
             <SidebarTrigger />
           </header>
           <div className="flex-1 bg-background">
