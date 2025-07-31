@@ -35,57 +35,57 @@ const ClientCard = ({
   const navigate = useNavigate();
   const getStatusColor = (status?: string) => {
     switch (status) {
-      case 'Actif': return 'bg-green-100 text-green-800 border-green-200';
-      case 'Prospect': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'Inactif': return 'bg-gray-100 text-gray-800 border-gray-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'Actif': return 'bg-positive-light text-positive border-positive/20';
+      case 'Prospect': return 'bg-info-light text-info border-info/20';
+      case 'Inactif': return 'bg-muted text-muted-foreground border-border';
+      default: return 'bg-muted text-muted-foreground border-border';
     }
   };
 
   return (
-    <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer active:scale-[0.98] bg-card border-border/50" onClick={() => navigate(`/dashboard/clients/${id}`)}>
-      <CardHeader className="pb-4 space-y-0">
-        <div className="flex items-start justify-between gap-3">
+    <Card className="group hover:shadow-lg transition-all duration-300 ease-uber cursor-pointer active:scale-[0.98] bg-card border-border/50 animate-fade-in" onClick={() => navigate(`/dashboard/clients/${id}`)}>
+      <CardHeader className="pb-base-400 space-y-0">
+        <div className="flex items-start justify-between gap-base-300">
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg md:text-base font-semibold text-foreground mb-2 leading-tight">
+            <h3 className="text-base-550 md:text-base-400 font-semibold text-foreground mb-base-200 leading-tight">
               {business_name}
             </h3>
-            <div className="space-y-1">
-              <p className="text-sm md:text-sm text-foreground font-medium">
+            <div className="space-y-base-100">
+              <p className="text-base-300 md:text-base-300 text-foreground font-medium">
                 {contact_name}
               </p>
               {main_contact_position && (
-                <p className="text-xs text-muted-foreground leading-relaxed">
+                <p className="text-base-200 text-muted-foreground leading-relaxed">
                   {main_contact_position}
                 </p>
               )}
             </div>
           </div>
           <div className="text-right flex-shrink-0">
-            <span className="text-xs text-muted-foreground font-mono block mb-3">
+            <span className="text-base-200 text-muted-foreground font-mono block mb-base-300">
               {client_number}
             </span>
             {status && (
-              <Badge variant="outline" className={`${getStatusColor(status)} text-xs font-medium px-2 py-1`}>
+              <Badge variant="outline" className={`${getStatusColor(status)} text-base-200 font-medium px-base-200 py-base-100`}>
                 {status}
               </Badge>
             )}
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4 pt-0">
-        <div className="space-y-3">
-          <div className="flex items-start gap-3 text-sm">
-            <Mail className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+      <CardContent className="space-y-base-400 pt-0">
+        <div className="space-y-base-300">
+          <div className="flex items-start gap-base-300 text-base-300">
+            <Mail className="h-base-400 w-base-400 text-muted-foreground mt-0.5 flex-shrink-0" />
             <span className="text-foreground leading-relaxed break-all">{email}</span>
           </div>
-          <div className="flex items-center gap-3 text-sm">
-            <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+          <div className="flex items-center gap-base-300 text-base-300">
+            <Phone className="h-base-400 w-base-400 text-muted-foreground flex-shrink-0" />
             <span className="text-foreground font-medium">{phone_number}</span>
           </div>
           {(billing_city || billing_province) && (
-            <div className="flex items-start gap-3 text-sm">
-              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+            <div className="flex items-start gap-base-300 text-base-300">
+              <MapPin className="h-base-400 w-base-400 text-muted-foreground mt-0.5 flex-shrink-0" />
               <span className="text-foreground leading-relaxed">
                 {[billing_city, billing_province].filter(Boolean).join(', ')}
               </span>
@@ -94,14 +94,14 @@ const ClientCard = ({
         </div>
         
         {(client_type || industry) && (
-          <div className="flex gap-2 flex-wrap pt-3 border-t border-border/50">
+          <div className="flex gap-base-200 flex-wrap pt-base-300 border-t border-border/50">
             {client_type && (
-              <Badge variant="secondary" className="text-xs font-medium px-2 py-1">
+              <Badge variant="secondary" className="text-base-200 font-medium px-base-200 py-base-100">
                 {client_type}
               </Badge>
             )}
             {industry && (
-              <Badge variant="outline" className="text-xs font-medium px-2 py-1">
+              <Badge variant="outline" className="text-base-200 font-medium px-base-200 py-base-100">
                 {industry}
               </Badge>
             )}

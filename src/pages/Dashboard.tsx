@@ -23,9 +23,12 @@ const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="p-6">
-        <div className="text-center">
-          <p className="text-muted-foreground">Chargement des clients...</p>
+      <div className="p-base-600 pb-24 md:pb-base-600">
+        <div className="text-center py-base-1000">
+          <div className="animate-uber-pulse">
+            <Users className="h-base-800 w-base-800 text-muted-foreground mx-auto mb-base-400" />
+          </div>
+          <p className="text-base-300 text-muted-foreground">Chargement des clients...</p>
         </div>
       </div>
     );
@@ -33,25 +36,39 @@ const Dashboard = () => {
 
   if (error) {
     return (
-      <div className="p-6">
-        <div className="text-center">
-          <p className="text-destructive">Erreur lors du chargement des clients</p>
+      <div className="p-base-600 pb-24 md:pb-base-600">
+        <div className="text-center py-base-1000">
+          <Users className="h-base-800 w-base-800 text-negative mx-auto mb-base-400" />
+          <h3 className="text-base-550 font-semibold text-foreground mb-base-200">Erreur de chargement</h3>
+          <p className="text-base-300 text-negative mb-base-600">Erreur lors du chargement des clients</p>
+          <Button 
+            variant="secondary" 
+            onClick={() => window.location.reload()}
+            className="transition-all ease-uber"
+          >
+            Réessayer
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6 pb-24 md:pb-6">
+    <div className="p-base-600 space-y-base-600 pb-24 md:pb-base-600">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Users className="h-6 w-6 text-primary" />
-          <h1 className="text-3xl font-bold">Clients</h1>
+        <div className="flex items-center gap-base-300">
+          <Users className="h-base-600 w-base-600 text-primary" />
+          <h1 className="text-base-750 font-semibold">Clients</h1>
         </div>
-        <div className="flex items-center gap-4">
-          <Button className="gap-2" onClick={() => setIsCreateModalOpen(true)}>
-            <Plus className="h-4 w-4" />
+        <div className="flex items-center gap-base-400">
+          <Button 
+            variant="primary" 
+            size="default" 
+            className="gap-base-200 transition-all ease-uber" 
+            onClick={() => setIsCreateModalOpen(true)}
+          >
+            <Plus className="h-base-400 w-base-400" />
             Nouveau Client
           </Button>
         </div>
@@ -71,19 +88,24 @@ const Dashboard = () => {
 
       {/* Main Content */}
       {!clients || clients.length === 0 ? (
-        <div className="text-center py-12">
-          <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-medium mb-2">Aucun client trouvé</h3>
-          <p className="text-muted-foreground mb-6">
+        <div className="text-center py-base-1000 md:py-base-800">
+          <Users className="h-base-800 w-base-800 md:h-base-600 md:w-base-600 text-muted-foreground mx-auto mb-base-600 md:mb-base-400" />
+          <h3 className="text-base-550 md:text-base-400 font-semibold mb-base-300 md:mb-base-200 text-foreground">Aucun client trouvé</h3>
+          <p className="text-muted-foreground mb-base-600 md:mb-base-600 text-base-300 md:text-base-200 leading-relaxed max-w-sm mx-auto">
             Cliquez sur "Nouveau Client" pour en ajouter un.
           </p>
-          <Button className="gap-2" onClick={() => setIsCreateModalOpen(true)}>
-            <Plus className="h-4 w-4" />
+          <Button 
+            variant="primary" 
+            size="default" 
+            className="gap-base-200 transition-all ease-uber" 
+            onClick={() => setIsCreateModalOpen(true)}
+          >
+            <Plus className="h-base-400 w-base-400" />
             Nouveau Client
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-base-400 md:gap-base-600 animate-fade-in">
           {clients.map((client) => (
             <ClientCard
               key={client.id}
