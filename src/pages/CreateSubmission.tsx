@@ -495,7 +495,16 @@ const CreateSubmission = () => {
           </Card>
 
           {/* Actions */}
-          <div className="flex gap-4 justify-end">
+          <div className="flex gap-4 justify-between">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => navigate('/dashboard/submissions')}
+              disabled={isSubmitting}
+            >
+              Annuler
+            </Button>
+            <div className="flex gap-4">
             <Button
               type="button"
               variant="outline"
@@ -524,6 +533,7 @@ const CreateSubmission = () => {
                 'Enregistrer et Envoyer par Courriel'
               )}
             </Button>
+            </div>
           </div>
         </form>
       </Form>
