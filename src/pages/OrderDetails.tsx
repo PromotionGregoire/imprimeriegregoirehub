@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -81,16 +82,7 @@ const OrderDetails = () => {
   };
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'En attente de l\'épreuve':
-        return <Badge className="bg-orange-100 text-orange-700 border-orange-200">En attente d'épreuve</Badge>;
-      case 'En production':
-        return <Badge className="bg-blue-100 text-blue-700 border-blue-200">En production</Badge>;
-      case 'Complétée':
-        return <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">Complétée</Badge>;
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
-    }
+    return <StatusBadge status={status} type="order" size="medium" />;
   };
 
   if (isLoading) {

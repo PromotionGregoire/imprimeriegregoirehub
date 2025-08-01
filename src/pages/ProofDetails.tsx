@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const ProofDetails = () => {
@@ -174,68 +175,7 @@ const ProofDetails = () => {
   };
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'A preparer':
-        return (
-          <Badge 
-            className="bg-warning-light text-warning border-warning/20 font-medium text-base-200 px-base-400 py-base-200 min-h-[32px] flex items-center"
-            aria-label={`Statut: À préparer`}
-          >
-            À préparer
-          </Badge>
-        );
-      case 'En préparation':
-        return (
-          <Badge 
-            className="bg-info-light text-info border-info/20 font-medium text-base-200 px-base-400 py-base-200 min-h-[32px] flex items-center"
-            aria-label={`Statut: En préparation`}
-          >
-            En préparation
-          </Badge>
-        );
-      case 'Envoyée au client':
-        return (
-          <Badge 
-            className="bg-info-light text-info border-info/30 font-semibold text-base-200 px-base-500 py-base-300 min-h-[36px] flex items-center rounded-base-300 transition-colors duration-200 hover:bg-info/10 focus-visible:ring-2 focus-visible:ring-info focus-visible:ring-offset-2"
-            aria-label={`Statut: Envoyé au client`}
-            role="status"
-            tabIndex={0}
-          >
-            <div className="flex items-center gap-base-200">
-              <div className="w-2 h-2 bg-info rounded-full flex-shrink-0" aria-hidden="true" />
-              <span className="whitespace-nowrap">Envoyé</span>
-            </div>
-          </Badge>
-        );
-      case 'Modification demandée':
-        return (
-          <Badge 
-            className="bg-warning-light text-warning border-warning/20 font-medium text-base-200 px-base-400 py-base-200 min-h-[32px] flex items-center"
-            aria-label={`Statut: Modification demandée`}
-          >
-            Modification demandée
-          </Badge>
-        );
-      case 'Approuvée':
-        return (
-          <Badge 
-            className="bg-positive-light text-positive border-positive/20 font-medium text-base-200 px-base-400 py-base-200 min-h-[32px] flex items-center"
-            aria-label={`Statut: Approuvée`}
-          >
-            Approuvée
-          </Badge>
-        );
-      default:
-        return (
-          <Badge 
-            variant="secondary" 
-            className="font-medium text-base-200 px-base-400 py-base-200 min-h-[32px] flex items-center"
-            aria-label={`Statut: ${status}`}
-          >
-            {status}
-          </Badge>
-        );
-    }
+    return <StatusBadge status={status} type="proof" size="medium" />;
   };
 
   if (isLoading) {

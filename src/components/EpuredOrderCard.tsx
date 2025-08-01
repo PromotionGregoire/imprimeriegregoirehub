@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { Button } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
@@ -46,16 +46,7 @@ const EpuredOrderCard = ({ order, onProofAccepted, onDelivered }: OrderCardProps
   };
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'En attente de l\'épreuve':
-        return <Badge className="bg-[hsl(var(--status-orange-light))] text-[hsl(var(--status-orange))] border-[hsl(var(--status-orange))]">En attente d'épreuve</Badge>;
-      case 'En production':
-        return <Badge className="bg-[hsl(var(--status-green-light))] text-[hsl(var(--status-green))] border-[hsl(var(--status-green))]">En production</Badge>;
-      case 'Complétée':
-        return <Badge className="bg-[hsl(var(--status-purple-light))] text-[hsl(var(--status-purple))] border-[hsl(var(--status-purple))]">Complétée</Badge>;
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
-    }
+    return <StatusBadge status={status} type="order" size="medium" />;
   };
 
   const getBorderColor = (status: string) => {

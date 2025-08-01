@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import StatusManager from '@/components/StatusManager';
 import EmployeeAssignManager from '@/components/EmployeeAssignManager';
+import { StatusBadge } from '@/components/ui/status-badge';
 
 
 const SubmissionDetails = () => {
@@ -54,19 +55,7 @@ const SubmissionDetails = () => {
   }
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-      'Brouillon': 'outline',
-      'Envoyée': 'default',
-      'Acceptée': 'secondary',
-      'Modification Demandée': 'destructive',
-      'Refusée': 'destructive',
-    };
-    
-    return (
-      <Badge variant={variants[status] || 'outline'} className="text-lg px-3 py-1">
-        {status}
-      </Badge>
-    );
+    return <StatusBadge status={status} type="submission" size="large" />;
   };
 
   const subtotal = submission.submission_items?.reduce((sum: number, item: any) => {

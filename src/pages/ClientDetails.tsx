@@ -6,9 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useClientDetails, useClientKPIs, useClientSubmissions, useClientOrders, useClientActivityLogs } from '@/hooks/useClientDetails';
 import CreateClientModal from '@/components/CreateClientModal';
-import { Skeleton } from '@/components/ui/skeleton';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -49,32 +50,15 @@ const ClientDetails = () => {
   }
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-      'Actif': 'default',
-      'Prospect': 'secondary',
-      'Inactif': 'destructive',
-    };
-    return <Badge variant={variants[status] || 'outline'}>{status}</Badge>;
+    return <StatusBadge status={status} type="client" size="medium" />;
   };
 
   const getSubmissionStatusBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-      'Brouillon': 'outline',
-      'Envoyée': 'secondary',
-      'Acceptée': 'default',
-      'Refusée': 'destructive',
-    };
-    return <Badge variant={variants[status] || 'outline'}>{status}</Badge>;
+    return <StatusBadge status={status} type="submission" size="medium" />;
   };
 
   const getOrderStatusBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-      'En attente de l\'épreuve': 'secondary',
-      'En production': 'default',
-      'Terminée': 'default',
-      'Annulée': 'destructive',
-    };
-    return <Badge variant={variants[status] || 'outline'}>{status}</Badge>;
+    return <StatusBadge status={status} type="order" size="medium" />;
   };
 
   return (
