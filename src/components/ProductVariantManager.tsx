@@ -19,6 +19,7 @@ interface AttributeGroup {
     value: string;
     sku: string;
     cost: number;
+    price: number;
   }>;
 }
 
@@ -45,7 +46,7 @@ const ProductVariantManager = ({ productId, onVariantsChange }: ProductVariantMa
     
     const newAttribute: AttributeGroup = {
       name: newAttributeName,
-      values: [{ value: '', sku: '', cost: 0 }]
+      values: [{ value: '', sku: '', cost: 0, price: 0 }]
     };
     
     setAttributes([...attributes, newAttribute]);
@@ -58,13 +59,13 @@ const ProductVariantManager = ({ productId, onVariantsChange }: ProductVariantMa
 
   const addValueToAttribute = (attributeIndex: number) => {
     const updated = [...attributes];
-    updated[attributeIndex].values.push({ value: '', sku: '', cost: 0 });
+    updated[attributeIndex].values.push({ value: '', sku: '', cost: 0, price: 0 });
     setAttributes(updated);
   };
 
-  const updateValue = (attributeIndex: number, valueIndex: number, field: 'value' | 'sku' | 'cost', newValue: string | number) => {
+  const updateValue = (attributeIndex: number, valueIndex: number, field: 'value' | 'sku' | 'cost' | 'price', newValue: string | number) => {
     const updated = [...attributes];
-    if (field === 'cost') {
+    if (field === 'cost' || field === 'price') {
       updated[attributeIndex].values[valueIndex][field] = newValue as number;
     } else {
       updated[attributeIndex].values[valueIndex][field] = newValue as string;
@@ -77,7 +78,8 @@ const ProductVariantManager = ({ productId, onVariantsChange }: ProductVariantMa
           attribute_name: attr.name,
           attribute_value: val.value,
           sku_variant: val.sku,
-          cost_price: val.cost
+          cost_price: val.cost,
+          price: val.price
         }))
       );
       onVariantsChange(allVariants);
@@ -88,7 +90,7 @@ const ProductVariantManager = ({ productId, onVariantsChange }: ProductVariantMa
     const updated = [...attributes];
     updated[attributeIndex].values.splice(valueIndex, 1);
     if (updated[attributeIndex].values.length === 0) {
-      updated[attributeIndex].values.push({ value: '', sku: '', cost: 0 });
+      updated[attributeIndex].values.push({ value: '', sku: '', cost: 0, price: 0 });
     }
     setAttributes(updated);
   };
@@ -103,7 +105,8 @@ const ProductVariantManager = ({ productId, onVariantsChange }: ProductVariantMa
           attribute_name: attr.name,
           attribute_value: val.value,
           sku_variant: val.sku,
-          cost_price: val.cost || 0
+          cost_price: val.cost || 0,
+          price: val.price || 0
         }))
     );
 
@@ -132,7 +135,8 @@ const ProductVariantManager = ({ productId, onVariantsChange }: ProductVariantMa
         attribute_name: editingVariant.attribute_name,
         attribute_value: editingVariant.attribute_value,
         sku_variant: editingVariant.sku_variant,
-        cost_price: editingVariant.cost_price || 0
+        cost_price: editingVariant.cost_price || 0,
+        price: editingVariant.price || 0
       }
     }, {
       onSuccess: () => {
@@ -195,6 +199,17 @@ const ProductVariantManager = ({ productId, onVariantsChange }: ProductVariantMa
                               step="0.01"
                             />
                           </div>
+                          <div className="relative">
+                            <DollarSign className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              type="number"
+                              placeholder="Prix"
+                              value={editingVariant.price || 0}
+                              onChange={(e) => setEditingVariant({...editingVariant, price: parseFloat(e.target.value) || 0})}
+                              className="pl-8 w-24"
+                              step="0.01"
+                            />
+                          </div>
                           <Button size="sm" onClick={saveEditingVariant} disabled={updateVariant.isPending}>
                             ✓
                           </Button>
@@ -207,7 +222,10 @@ const ProductVariantManager = ({ productId, onVariantsChange }: ProductVariantMa
                           <Badge variant="secondary" className="flex items-center gap-1">
                             {variant.attribute_value}
                             {variant.cost_price > 0 && (
-                              <span className="text-xs">({variant.cost_price}$)</span>
+                              <span className="text-xs">(Coût: {variant.cost_price}$)</span>
+                            )}
+                            {variant.price > 0 && (
+                              <span className="text-xs">(Prix: {variant.price}$)</span>
                             )}
                             {variant.sku_variant && (
                               <span className="text-xs">- {variant.sku_variant}</span>
@@ -270,22 +288,22 @@ const ProductVariantManager = ({ productId, onVariantsChange }: ProductVariantMa
             </div>
             
             {attribute.values.map((value, valueIndex) => (
-              <div key={valueIndex} className="grid grid-cols-12 gap-2 items-center">
-                <div className="col-span-4">
+              <div key={valueIndex} className="flex gap-2 items-center">
+                <div className="flex-1">
                   <Input
                     placeholder="Valeur"
                     value={value.value}
                     onChange={(e) => updateValue(attrIndex, valueIndex, 'value', e.target.value)}
                   />
                 </div>
-                <div className="col-span-3">
+                <div className="w-24">
                   <Input
                     placeholder="SKU"
                     value={value.sku}
                     onChange={(e) => updateValue(attrIndex, valueIndex, 'sku', e.target.value)}
                   />
                 </div>
-                <div className="col-span-4">
+                <div className="w-28">
                   <div className="relative">
                     <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -298,16 +316,27 @@ const ProductVariantManager = ({ productId, onVariantsChange }: ProductVariantMa
                     />
                   </div>
                 </div>
-                <div className="col-span-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeValue(attrIndex, valueIndex)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+                <div className="w-28">
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="number"
+                      placeholder="Prix"
+                      value={value.price}
+                      onChange={(e) => updateValue(attrIndex, valueIndex, 'price', parseFloat(e.target.value) || 0)}
+                      className="pl-10"
+                      step="0.01"
+                    />
+                  </div>
                 </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeValue(attrIndex, valueIndex)}
+                  className="text-destructive hover:text-destructive shrink-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
             ))}
             

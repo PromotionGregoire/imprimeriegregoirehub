@@ -8,9 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct, Product } from '@/hooks/useProducts';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
-import ProductModal from '@/components/ProductModal';
-import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import ProductModal from '@/components/ProductModal';
 
 const Products = () => {
   const { data: products, isLoading } = useProducts();
@@ -33,6 +33,22 @@ const Products = () => {
     
     return matchesSearch && matchesCategory;
   }) || [];
+
+  const handleCreateBulkProducts = async () => {
+    try {
+      const result = await createBusinessCardsProducts();
+      toast({
+        title: '✅ Succès',
+        description: `${result.details.createdProducts} produits créés avec ${result.details.createdVariants} variantes!`,
+      });
+    } catch (error) {
+      toast({
+        title: '❌ Erreur',
+        description: 'Impossible de créer les produits en lot.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const handleCreateProduct = (data: any) => {
     console.log('Creating product with data:', data);
@@ -155,23 +171,27 @@ const Products = () => {
               Produits
             </h1>
           </div>
-          {/* BaseWeb Button with 48px touch target */}
-          <Button 
-            variant="primary"
-            size="default"
-            className={cn(
-              "min-h-[48px] px-4 gap-2",
-              "bg-primary hover:bg-primary/90 text-primary-foreground",
-              "transition-all duration-200 ease-out",
-              "shadow-sm hover:shadow-md",
-              "whitespace-nowrap"
-            )}
-            onClick={() => setEditModalOpen(true)}
-          >
-            <Plus className="h-4 w-4 flex-shrink-0" />
-            <span className="hidden sm:inline">Nouveau Produit</span>
-            <span className="sm:hidden">Nouveau</span>
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={handleCreateBulkProducts} variant="outline">
+              Créer cartes d'affaires
+            </Button>
+            <Button 
+              variant="primary"
+              size="default"
+              className={cn(
+                "min-h-[48px] px-4 gap-2",
+                "bg-primary hover:bg-primary/90 text-primary-foreground",
+                "transition-all duration-200 ease-out",
+                "shadow-sm hover:shadow-md",
+                "whitespace-nowrap"
+              )}
+              onClick={() => setEditModalOpen(true)}
+            >
+              <Plus className="h-4 w-4 flex-shrink-0" />
+              <span className="hidden sm:inline">Nouveau Produit</span>
+              <span className="sm:hidden">Nouveau</span>
+            </Button>
+          </div>
         </div>
 
         {/* Search and Filters - BaseWeb Form Pattern */}
@@ -188,21 +208,21 @@ const Products = () => {
                     "pl-10 min-h-[48px] text-[16px] leading-relaxed",
                     "focus:ring-2 focus:ring-primary focus:border-primary"
                   )}
-                />
-              </div>
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className={cn(
-                  "w-full sm:w-[240px] min-h-[48px] text-[16px] leading-relaxed",
-                  "focus:ring-2 focus:ring-primary focus:border-primary"
-                )}>
-                  <SelectValue placeholder="Filtrer par catégorie" />
-                </SelectTrigger>
-                <SelectContent className="bg-background border-border shadow-lg z-50">
-                  <SelectItem value="all">Toutes les catégories</SelectItem>
-                  <SelectItem value="Impression">Impression</SelectItem>
-                  <SelectItem value="Article Promotionnel">Article Promotionnel</SelectItem>
-                </SelectContent>
-              </Select>
+                  />
+                </div>
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                  <SelectTrigger className={cn(
+                    "w-full sm:w-[240px] min-h-[48px] text-[16px] leading-relaxed",
+                    "focus:ring-2 focus:ring-primary focus:border-primary"
+                  )}>
+                    <SelectValue placeholder="Filtrer par catégorie" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border-border shadow-lg z-50">
+                    <SelectItem value="all">Toutes les catégories</SelectItem>
+                    <SelectItem value="Impression">Impression</SelectItem>
+                    <SelectItem value="Article Promotionnel">Article Promotionnel</SelectItem>
+                  </SelectContent>
+                </Select>
             </div>
           </CardContent>
         </Card>
