@@ -4,6 +4,7 @@ import { ArrowLeft, Plus, Edit, MoreHorizontal, DollarSign, FileText, ShoppingCa
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -17,6 +18,7 @@ const ClientDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('details');
 
   const { data: client, isLoading: clientLoading } = useClientDetails(id!);
   const { data: kpis, isLoading: kpisLoading } = useClientKPIs(id!);
@@ -64,21 +66,34 @@ const ClientDetails = () => {
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" onClick={() => navigate('/dashboard')}>
-            <ArrowLeft className="w-4 h-4" />
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4 min-w-0 flex-1">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate('/dashboard')}
+            className="min-h-[44px] min-w-[44px] p-3 flex-shrink-0"
+            aria-label="Retour au tableau de bord"
+          >
+            <ArrowLeft className="w-5 h-5" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">{client.business_name}</h1>
-            <p className="text-gray-600">{client.client_number}</p>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-[36px] font-semibold leading-tight text-foreground truncate">
+              {client.business_name}
+            </h1>
+            <p className="text-[16px] text-muted-foreground mt-1">{client.client_number}</p>
           </div>
         </div>
         
-        <div className="flex items-center space-x-2">
-          <Button size="sm" onClick={() => navigate(`/dashboard/submissions/new?client_id=${id}`)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Nouvelle Soumission
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Button 
+            variant="primary" 
+            size="default"
+            className="min-h-[48px] px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 ease-out shadow-sm hover:shadow-md whitespace-nowrap"
+            onClick={() => navigate(`/dashboard/submissions/new?client_id=${id}`)}
+          >
+            <Plus className="w-4 h-4 flex-shrink-0" />
+            <span className="hidden sm:inline">Nouvelle Soumission</span>
+            <span className="sm:hidden">Nouvelle</span>
           </Button>
           <Button variant="outline" size="sm" onClick={() => setIsEditModalOpen(true)}>
             <Edit className="w-4 h-4 mr-2" />
@@ -148,14 +163,51 @@ const ClientDetails = () => {
         </Card>
       </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="details" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="details">Informations Détaillées</TabsTrigger>
-          <TabsTrigger value="submissions">Historique des Soumissions</TabsTrigger>
-          <TabsTrigger value="orders">Historique des Commandes</TabsTrigger>
-          <TabsTrigger value="activity">Activités Récentes</TabsTrigger>
-        </TabsList>
+      {/* Responsive Tabs */}
+      <div className="space-y-4">
+        {/* Mobile Select - Hidden on desktop */}
+        <div className="md:hidden">
+          <Select value={activeTab} onValueChange={setActiveTab}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Sélectionner une section" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="details">Informations Détaillées</SelectItem>
+              <SelectItem value="submissions">Historique des Soumissions</SelectItem>
+              <SelectItem value="orders">Historique des Commandes</SelectItem>
+              <SelectItem value="activity">Activités Récentes</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Desktop Tabs - Hidden on mobile */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList className="hidden md:flex w-full bg-background border border-border rounded-md p-1">
+            <TabsTrigger 
+              value="details" 
+              className="flex-1 text-sm font-medium px-3 py-2.5 min-h-[40px] transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm hover:bg-muted/80 rounded-sm"
+            >
+              Informations Détaillées
+            </TabsTrigger>
+            <TabsTrigger 
+              value="submissions" 
+              className="flex-1 text-sm font-medium px-3 py-2.5 min-h-[40px] transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm hover:bg-muted/80 rounded-sm"
+            >
+              Historique des Soumissions
+            </TabsTrigger>
+            <TabsTrigger 
+              value="orders" 
+              className="flex-1 text-sm font-medium px-3 py-2.5 min-h-[40px] transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm hover:bg-muted/80 rounded-sm"
+            >
+              Historique des Commandes
+            </TabsTrigger>
+            <TabsTrigger 
+              value="activity" 
+              className="flex-1 text-sm font-medium px-3 py-2.5 min-h-[40px] transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm hover:bg-muted/80 rounded-sm"
+            >
+              Activités Récentes
+            </TabsTrigger>
+          </TabsList>
 
         <TabsContent value="details">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -416,7 +468,8 @@ const ClientDetails = () => {
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs>
+        </Tabs>
+      </div>
 
       {/* Edit Modal */}
       <CreateClientModal
