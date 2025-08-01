@@ -1,606 +1,545 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { CheckCircle, XCircle, Download, FileText, MessageSquare, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Check, MessageCircle, FileText, Building, Calendar, DollarSign, AlertCircle, ZoomIn, ZoomOut, RotateCcw, Download } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+
+interface ProofData {
+  id: string;
+  status: string;
+  file_url: string;
+  version: number;
+  client_comments?: string;
+  approved_at?: string;
+  approved_by_name?: string;
+  created_at: string;
+  orders: {
+    order_number: string;
+    total_price: number;
+    submissions: {
+      submission_number: string;
+      clients: {
+        business_name: string;
+        contact_name: string;
+        contact_email: string;
+      };
+    };
+  };
+}
 
 const ProofApproval = () => {
   const { token } = useParams<{ token: string }>();
-  const { toast } = useToast();
-  const [showModificationForm, setShowModificationForm] = useState(false);
-  const [showApprovalForm, setShowApprovalForm] = useState(false);
-  const [modificationComments, setModificationComments] = useState('');
+  const [proof, setProof] = useState<ProofData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>('');
+  const [action, setAction] = useState<'view' | 'approve' | 'modify'>('view');
   const [clientName, setClientName] = useState('');
-  const [confirmationText, setConfirmationText] = useState('');
-  const [showThankYou, setShowThankYou] = useState(false);
-  const [actionType, setActionType] = useState<'approved' | 'modification' | null>(null);
+  const [modificationComments, setModificationComments] = useState('');
+  const [processing, setProcessing] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [showConfirmApproval, setShowConfirmApproval] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
 
-  // Fetch proof details using approval token
-  const { data: proof, isLoading, error } = useQuery({
-    queryKey: ['proof-approval', token],
-    queryFn: async () => {
-      if (!token) throw new Error('Token required');
-      
-      const { data, error } = await supabase
-        .from('proofs')
-        .select(`
-          *,
-          orders!inner (
-            order_number,
-            clients (
-              business_name,
-              contact_name
-            )
-          )
-        `)
-        .eq('approval_token', token)
-        .maybeSingle();
-
-      if (error) throw error;
-      if (!data) throw new Error('Épreuve non trouvée');
-      
-      return data;
-    },
-    enabled: !!token,
-  });
-
-  // Request modification mutation
-  const requestModification = useMutation({
-    mutationFn: async (comments: string) => {
-      if (!proof || !clientName.trim()) throw new Error('Données manquantes');
-      
-      const { error } = await supabase.functions.invoke('request-proof-modification', {
-        body: {
-          approvalToken: token,
-          clientComments: comments,
-          clientName: clientName
-        }
-      });
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      setActionType('modification');
-      setShowThankYou(true);
-      setShowModificationForm(false);
-      setModificationComments('');
-      setClientName('');
-    },
-    onError: (error) => {
-      console.error('Request modification error:', error);
-      toast({
-        title: '❌ Erreur',
-        description: 'Impossible d\'envoyer votre demande de modification.',
-        variant: 'destructive',
-      });
-    },
-  });
-
-  // Approve proof mutation
-  const approveProof = useMutation({
-    mutationFn: async (approverName: string) => {
-      if (!proof) throw new Error('Proof not found');
-      
-      const { error } = await supabase.functions.invoke('approve-proof', {
-        body: {
-          approvalToken: token,
-          approverName: approverName,
-          confirmationWord: confirmationText
-        }
-      });
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      setActionType('approved');
-      setShowThankYou(true);
-      setShowApprovalForm(false);
-      setClientName('');
-      setConfirmationText('');
-    },
-    onError: (error) => {
-      console.error('Approve proof error:', error);
-      toast({
-        title: '❌ Erreur',
-        description: 'Impossible d\'approuver l\'épreuve.',
-        variant: 'destructive',
-      });
-    },
-  });
-
-  const handleRequestModification = () => {
-    if (!clientName.trim()) {
-      toast({
-        title: '❌ Nom requis',
-        description: 'Veuillez saisir votre nom complet.',
-        variant: 'destructive',
-      });
-      return;
+  useEffect(() => {
+    if (token) {
+      fetchProofData();
     }
-    if (!modificationComments.trim()) {
-      toast({
-        title: '❌ Commentaires requis',
-        description: 'Veuillez décrire les modifications souhaitées.',
-        variant: 'destructive',
-      });
-      return;
+  }, [token]);
+
+  const fetchProofData = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`https://ytcrplsistsxfaxkfqqp.supabase.co/functions/v1/get-proof-by-token?token=${token}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erreur lors du chargement de l\'épreuve');
+      }
+
+      setProof(data.proof);
+      setClientName(data.proof.orders.submissions.clients.contact_name || '');
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-    requestModification.mutate(modificationComments);
   };
 
-  const handleApprove = () => {
+  const handleApprove = async () => {
     if (!clientName.trim()) {
-      toast({
-        title: '❌ Nom requis',
-        description: 'Veuillez saisir votre nom complet.',
-        variant: 'destructive',
-      });
+      setError('Veuillez entrer votre nom pour confirmer l\'approbation');
       return;
     }
-    if (confirmationText.toUpperCase() !== 'ACCEPTER') {
-      toast({
-        title: '❌ Confirmation requise',
-        description: 'Veuillez taper "ACCEPTER" pour confirmer.',
-        variant: 'destructive',
+
+    try {
+      setProcessing(true);
+      const response = await fetch('https://ytcrplsistsxfaxkfqqp.supabase.co/functions/v1/approve-proof', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          approvalToken: token,
+          approverName: clientName.trim(),
+          confirmationWord: 'ACCEPTER'
+        }),
       });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erreur lors de l\'approbation');
+      }
+
+      setSuccess(true);
+      setAction('view');
+      setShowConfirmApproval(false);
+      
+      // Refresh proof data to show updated status
+      await fetchProofData();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleRequestModification = async () => {
+    if (!clientName.trim() || !modificationComments.trim()) {
+      setError('Veuillez entrer votre nom et vos commentaires');
       return;
     }
-    approveProof.mutate(clientName);
+
+    try {
+      setProcessing(true);
+      const response = await fetch('https://ytcrplsistsxfaxkfqqp.supabase.co/functions/v1/request-proof-modification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          approvalToken: token,
+          clientComments: modificationComments.trim(),
+          clientName: clientName.trim()
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erreur lors de l\'envoi des modifications');
+      }
+
+      setSuccess(true);
+      setAction('view');
+      
+      // Refresh proof data to show updated status
+      await fetchProofData();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'Envoyée au client':
-        return <Badge className="bg-blue-100 text-blue-800">En attente de votre décision</Badge>;
-      case 'Modification demandée':
-        return <Badge className="bg-orange-100 text-orange-800">Modification demandée</Badge>;
       case 'Approuvée':
-        return <Badge className="bg-green-100 text-green-800">Approuvée</Badge>;
+        return <Badge className="bg-green-500 text-white">✅ Approuvée</Badge>;
+      case 'Modification demandée':
+        return <Badge className="bg-orange-500 text-white">✍️ Modification demandée</Badge>;
+      case 'Envoyée au client':
+        return <Badge className="bg-blue-500 text-white">📧 En attente de validation</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
   };
 
-  if (isLoading) {
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('fr-CA', {
+      style: 'currency',
+      currency: 'CAD',
+    }).format(price);
+  };
+
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <Skeleton className="h-12 w-96" />
-          <Skeleton className="h-64" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Skeleton className="h-32" />
-            <Skeleton className="h-32" />
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="space-y-6">
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-32 w-full" />
           </div>
         </div>
       </div>
     );
   }
 
-  if (error || !proof) {
+  if (error && !proof) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-        <Card className="max-w-md">
-          <CardHeader>
-            <CardTitle className="text-center text-red-600">Épreuve non trouvée</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center">
-            <p className="text-muted-foreground mb-4">
-              Le lien que vous avez utilisé n'est plus valide ou l'épreuve n'existe pas.
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Veuillez contacter votre fournisseur pour obtenir un nouveau lien.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // If already decided
-  if (proof.status === 'Approuvée') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-        <Card className="max-w-md">
-          <CardHeader>
-            <CardTitle className="text-center text-green-600 flex items-center justify-center gap-2">
-              <CheckCircle className="h-6 w-6" />
-              Épreuve Approuvée
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-center">
-            <p className="text-muted-foreground mb-4">
-              Cette épreuve a déjà été approuvée.
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Votre commande est maintenant en production.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (proof.status === 'Modification demandée') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-        <Card className="max-w-md">
-          <CardHeader>
-            <CardTitle className="text-center text-orange-600 flex items-center justify-center gap-2">
-              <MessageSquare className="h-6 w-6" />
-              Modification Demandée
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-center">
-            <p className="text-muted-foreground mb-4">
-              Votre demande de modification a été envoyée.
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Vous recevrez une nouvelle épreuve dès que les modifications seront apportées.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // Thank you pages after actions
-  if (showThankYou && actionType === 'approved') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-6">
-        <Card className="max-w-2xl">
-          <CardHeader className="text-center">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 text-green-600 rounded-full mx-auto mb-4">
-              <CheckCircle className="w-10 h-10" />
-            </div>
-            <CardTitle className="text-3xl font-bold text-green-800">🎉 Épreuve Approuvée !</CardTitle>
-            <CardDescription className="text-lg text-green-700 mt-2">
-              Merci pour votre approbation - La production commence maintenant
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-center space-y-6">
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Ce qui se passe maintenant :</h3>
-              <div className="space-y-3 text-left">
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span>Votre épreuve a été officiellement approuvée</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span>Votre commande {proof?.orders.order_number} est passée en production</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span>Vous recevrez une notification dès la fin de production</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span>Notre équipe vous contactera pour la livraison</span>
-                </div>
-              </div>
-            </div>
-            
-            <p className="text-gray-600">
-              Merci de votre confiance ! Si vous avez des questions, n'hésitez pas à nous contacter.
-            </p>
-            
-            <div className="bg-green-50 p-4 rounded-lg">
-              <p className="text-sm text-green-800">
-                📧 Un email de confirmation a été envoyé à votre adresse
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-2xl mx-auto px-4">
+          <Card className="border-red-200">
+            <CardContent className="p-8 text-center">
+              <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Épreuve non trouvée</h1>
+              <p className="text-gray-600 mb-4">{error}</p>
+              <p className="text-sm text-gray-500">
+                Veuillez vérifier que le lien est correct ou contactez notre équipe si le problème persiste.
               </p>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
 
-  if (showThankYou && actionType === 'modification') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center p-6">
-        <Card className="max-w-2xl">
-          <CardHeader className="text-center">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-orange-100 text-orange-600 rounded-full mx-auto mb-4">
-              <MessageSquare className="w-10 h-10" />
-            </div>
-            <CardTitle className="text-3xl font-bold text-orange-800">📝 Demande Envoyée !</CardTitle>
-            <CardDescription className="text-lg text-orange-700 mt-2">
-              Votre demande de modification a été transmise à notre équipe
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-center space-y-6">
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Prochaines étapes :</h3>
-              <div className="space-y-3 text-left">
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-orange-600 flex-shrink-0" />
-                  <span>Notre équipe examine vos commentaires</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-orange-600 flex-shrink-0" />
-                  <span>Les modifications seront apportées rapidement</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-orange-600 flex-shrink-0" />
-                  <span>Vous recevrez une nouvelle épreuve par email</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-orange-600 flex-shrink-0" />
-                  <span>Vous pourrez alors approuver la version révisée</span>
-                </div>
-              </div>
-            </div>
-            
-            <p className="text-gray-600">
-              Nous nous efforçons de traiter toutes les demandes de modification dans les plus brefs délais.
-            </p>
-            
-            <div className="bg-orange-50 p-4 rounded-lg">
-              <p className="text-sm text-orange-800">
-                📧 Un accusé de réception a été envoyé à votre adresse
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  if (!proof) return null;
+
+  const isActionDisabled = proof.status === 'Approuvée' || proof.status === 'Modification demandée';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Professional Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-6 py-8">
-          <div className="text-center">
-            {/* Logo placeholder - can be customized */}
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-xl mb-4">
-              <FileText className="w-8 h-8 text-white" />
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 py-6">
+          <div className="flex items-center gap-4 mb-4">
+            <img 
+              src="/logo-imprimerie-gregoire.png" 
+              alt="Imprimerie Grégoire" 
+              className="h-12 w-auto"
+            />
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold text-gray-900">Validation de votre épreuve</h1>
+              <p className="text-gray-600 mt-1">
+                Épreuve pour la commande #{proof.orders.order_number}
+              </p>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Révision de l'épreuve pour la commande {proof.orders.order_number}
-            </h1>
-            <p className="text-lg text-gray-600">
-              {proof.orders.clients.business_name}
-            </p>
-            <div className="mt-4">
-              {getStatusBadge(proof.status)}
+          </div>
+          
+          {/* Status and Info */}
+          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+            <div className="flex items-center gap-2">
+              <Building className="h-4 w-4" />
+              {proof.orders.submissions.clients.business_name}
             </div>
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Version {proof.version}
+            </div>
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              {format(new Date(proof.created_at), 'dd MMMM yyyy', { locale: fr })}
+            </div>
+            <div className="flex items-center gap-2">
+              <DollarSign className="h-4 w-4" />
+              {formatPrice(proof.orders.total_price)}
+            </div>
+            {getStatusBadge(proof.status)}
           </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-8 space-y-8">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Success Message */}
+        {success && (
+          <Alert className="mb-6 border-green-200 bg-green-50">
+            <Check className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800">
+              {proof.status === 'Approuvée' 
+                ? 'Merci ! Votre épreuve a été approuvée. La production va maintenant commencer.'
+                : 'Vos commentaires ont bien été transmis à notre équipe. Nous vous enverrons une nouvelle épreuve sous peu.'
+              }
+            </AlertDescription>
+          </Alert>
+        )}
 
-        {/* Professional Proof Viewer */}
-        <Card className="shadow-lg border-0">
-          <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 border-b">
+        {/* Error Message */}
+        {error && (
+          <Alert className="mb-6 border-red-200 bg-red-50">
+            <AlertCircle className="h-4 w-4 text-red-600" />
+            <AlertDescription className="text-red-800">{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {/* Instructions */}
+        {!isActionDisabled && (
+          <Card className="mb-6 border-blue-200 bg-blue-50">
+            <CardContent className="p-4">
+              <p className="text-blue-800 font-medium">
+                📋 Veuillez examiner attentivement l'épreuve ci-dessous. Votre approbation est nécessaire pour lancer la production.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Proof Viewer */}
+        <Card className="mb-6">
+          <CardHeader>
             <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-xl font-semibold">Épreuve - Version {proof.version}</CardTitle>
-                <CardDescription className="text-base mt-1">
-                  Veuillez examiner attentivement cette épreuve avant de prendre votre décision
-                </CardDescription>
-              </div>
-              <div className="text-right">
-                <div className="text-sm text-gray-500">Créée le</div>
-                <div className="font-medium">{new Date(proof.created_at).toLocaleDateString('fr-FR')}</div>
+              <CardTitle>Aperçu de l'épreuve</CardTitle>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setZoomLevel(Math.max(0.5, zoomLevel - 0.25))}
+                  disabled={zoomLevel <= 0.5}
+                >
+                  <ZoomOut className="h-4 w-4" />
+                </Button>
+                <span className="text-sm text-gray-600 min-w-[60px] text-center">
+                  {Math.round(zoomLevel * 100)}%
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setZoomLevel(Math.min(2, zoomLevel + 0.25))}
+                  disabled={zoomLevel >= 2}
+                >
+                  <ZoomIn className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setZoomLevel(1)}
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-8">
-            {proof.file_url ? (
-              <div className="space-y-6">
-                {/* Enhanced Preview */}
-                {proof.file_url.toLowerCase().includes('.jpg') || 
-                 proof.file_url.toLowerCase().includes('.jpeg') || 
-                 proof.file_url.toLowerCase().includes('.png') ? (
-                  <div className="border-2 border-gray-200 rounded-xl overflow-hidden shadow-md">
-                    <img 
-                      src={proof.file_url} 
-                      alt={`Épreuve ${proof.orders.order_number}`}
-                      className="w-full h-auto max-h-[600px] object-contain bg-white"
-                    />
-                  </div>
-                ) : (
-                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center bg-gradient-to-br from-gray-50 to-gray-100">
-                    <FileText className="h-20 w-20 text-gray-400 mx-auto mb-6" />
-                    <h3 className="text-xl font-semibold text-gray-700 mb-2">Fichier PDF Épreuve</h3>
-                    <p className="text-gray-500 mb-6 max-w-md mx-auto">
-                      Cliquez sur le bouton de téléchargement ci-dessous pour visualiser votre épreuve en haute qualité
-                    </p>
-                  </div>
-                )}
-
-                {/* Enhanced Download Button */}
-                <div className="flex justify-center">
-                  <Button 
-                    size="lg" 
-                    variant="outline" 
-                    className="h-14 px-8 text-base font-medium border-2 hover:bg-primary hover:text-white hover:border-primary transition-all duration-200"
-                    asChild
-                  >
-                    <a href={proof.file_url} target="_blank" rel="noopener noreferrer">
-                      <Download className="w-5 h-5 mr-3" />
-                      Télécharger l'épreuve
-                    </a>
-                  </Button>
+          <CardContent>
+            <div className="border rounded-lg overflow-auto bg-white" style={{ maxHeight: '70vh' }}>
+              {proof.file_url ? (
+                <div className="flex justify-center p-4">
+                  <img
+                    src={proof.file_url}
+                    alt="Épreuve"
+                    className="max-w-full"
+                    style={{ 
+                      transform: `scale(${zoomLevel})`,
+                      transformOrigin: 'top center',
+                      transition: 'transform 0.2s ease'
+                    }}
+                  />
                 </div>
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <FileText className="h-16 w-16 text-gray-300 mx-auto mb-6" />
-                <h3 className="text-xl font-semibold text-gray-700 mb-2">Aucun fichier disponible</h3>
-                <p className="text-gray-500">
-                  L'épreuve est en cours de préparation. Vous recevrez un nouvel email dès qu'elle sera prête.
-                </p>
+              ) : (
+                <div className="flex items-center justify-center h-64 text-gray-500">
+                  <div className="text-center">
+                    <FileText className="h-12 w-12 mx-auto mb-2" />
+                    <p>Aucun fichier d'épreuve disponible</p>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Download Button */}
+            {proof.file_url && (
+              <div className="flex justify-center mt-4">
+                <Button variant="outline" asChild>
+                  <a href={proof.file_url} target="_blank" rel="noopener noreferrer">
+                    <Download className="h-4 w-4 mr-2" />
+                    Télécharger l'épreuve
+                  </a>
+                </Button>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Professional Action Buttons */}
-        {!showModificationForm && !showApprovalForm && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Approve Button */}
-            <Card className="group cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-green-200 hover:border-green-300">
-              <CardContent className="p-8" onClick={() => setShowApprovalForm(true)}>
-                <div className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 text-green-600 rounded-full mb-4 group-hover:bg-green-600 group-hover:text-white transition-all duration-300">
-                    <CheckCircle className="w-8 h-8" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">✅ Approuver l'épreuve</h3>
-                  <p className="text-gray-600">
-                    Confirmer que l'épreuve répond à vos attentes et lancer la production
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-            
-            {/* Request Modification Button */}
-            <Card className="group cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-orange-200 hover:border-orange-300">
-              <CardContent className="p-8" onClick={() => setShowModificationForm(true)}>
-                <div className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-100 text-orange-600 rounded-full mb-4 group-hover:bg-orange-600 group-hover:text-white transition-all duration-300">
-                    <MessageSquare className="w-8 h-8" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">✏️ Demander une modification</h3>
-                  <p className="text-gray-600">
-                    Demander des ajustements ou des changements sur cette épreuve
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Modification Form */}
-        {showModificationForm && (
+        {/* Action Buttons */}
+        {!isActionDisabled && (
           <Card>
             <CardHeader>
-              <CardTitle>Demander une modification</CardTitle>
-              <CardDescription>
-                Décrivez précisément les modifications que vous souhaitez apporter
-              </CardDescription>
+              <CardTitle>Votre décision</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="modification-client-name">Votre nom complet *</Label>
-                <Input
-                  id="modification-client-name"
-                  placeholder="Ex: Jean Dupont"
-                  value={clientName}
-                  onChange={(e) => setClientName(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="comments">Commentaires *</Label>
-                <Textarea
-                  id="comments"
-                  placeholder="Décrivez les modifications souhaitées..."
-                  value={modificationComments}
-                  onChange={(e) => setModificationComments(e.target.value)}
-                  rows={5}
-                  className="mt-1"
-                />
-              </div>
-              
-              <div className="flex gap-2">
-                <Button 
-                  onClick={handleRequestModification}
-                  disabled={requestModification.isPending}
-                  className="bg-orange-600 hover:bg-orange-700"
-                >
-                  {requestModification.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  Envoyer la demande
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    setShowModificationForm(false);
-                    setModificationComments('');
-                  }}
-                >
-                  Annuler
-                </Button>
-              </div>
+              {action === 'view' && (
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button
+                    onClick={() => setShowConfirmApproval(true)}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                    size="lg"
+                  >
+                    <Check className="h-5 w-5 mr-2" />
+                    ✅ Approuver et Lancer la Production
+                  </Button>
+                  
+                  <Button
+                    onClick={() => setAction('modify')}
+                    variant="outline"
+                    className="flex-1"
+                    size="lg"
+                  >
+                    <MessageCircle className="h-5 w-5 mr-2" />
+                    ✍️ Demander des modifications
+                  </Button>
+                </div>
+              )}
+
+              {/* Approval Confirmation */}
+              {showConfirmApproval && (
+                <Card className="border-green-200 bg-green-50">
+                  <CardContent className="p-4 space-y-4">
+                    <h3 className="font-semibold text-green-800">Confirmation d'approbation</h3>
+                    <p className="text-green-700">
+                      Êtes-vous certain de vouloir approuver cette épreuve ? Aucune modification ne sera possible après cette étape.
+                    </p>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-green-800 mb-2">
+                        Votre nom (pour confirmation)
+                      </label>
+                      <input
+                        type="text"
+                        value={clientName}
+                        onChange={(e) => setClientName(e.target.value)}
+                        className="w-full px-3 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                        placeholder="Entrez votre nom"
+                      />
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={handleApprove}
+                        disabled={processing || !clientName.trim()}
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        {processing ? 'Approbation...' : 'Confirmer l\'approbation'}
+                      </Button>
+                      <Button
+                        onClick={() => setShowConfirmApproval(false)}
+                        variant="outline"
+                      >
+                        Annuler
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Modification Request Form */}
+              {action === 'modify' && (
+                <Card className="border-orange-200 bg-orange-50">
+                  <CardContent className="p-4 space-y-4">
+                    <h3 className="font-semibold text-orange-800">Demande de modifications</h3>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-orange-800 mb-2">
+                        Votre nom
+                      </label>
+                      <input
+                        type="text"
+                        value={clientName}
+                        onChange={(e) => setClientName(e.target.value)}
+                        className="w-full px-3 py-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        placeholder="Entrez votre nom"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-orange-800 mb-2">
+                        Vos commentaires ou corrections
+                      </label>
+                      <Textarea
+                        value={modificationComments}
+                        onChange={(e) => setModificationComments(e.target.value)}
+                        placeholder="Décrivez les modifications souhaitées..."
+                        className="min-h-[120px] border-orange-300 focus:ring-orange-500"
+                      />
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={handleRequestModification}
+                        disabled={processing || !modificationComments.trim() || !clientName.trim()}
+                        className="bg-orange-600 hover:bg-orange-700 text-white"
+                      >
+                        {processing ? 'Envoi...' : 'Envoyer les modifications'}
+                      </Button>
+                      <Button
+                        onClick={() => setAction('view')}
+                        variant="outline"
+                      >
+                        Retour
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </CardContent>
           </Card>
         )}
 
-        {/* Approval Form */}
-        {showApprovalForm && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Confirmer l'approbation</CardTitle>
-              <CardDescription>
-                Cette action est définitive et lancera la production
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Alert>
-                <CheckCircle className="h-4 w-4" />
-                <AlertDescription>
-                  En approuvant cette épreuve, vous confirmez que le design répond à vos attentes 
-                  et autorisez le lancement de la production.
-                </AlertDescription>
-              </Alert>
-
-              <div>
-                <Label htmlFor="client-name">Votre nom complet * (signature numérique)</Label>
-                <Input
-                  id="client-name"
-                  placeholder="Ex: Jean Dupont"
-                  value={clientName}
-                  onChange={(e) => setClientName(e.target.value)}
-                  className="mt-1"
-                />
+        {/* Already Processed Status */}
+        {isActionDisabled && (
+          <Card className={cn(
+            "border-2",
+            proof.status === 'Approuvée' ? "border-green-200 bg-green-50" : "border-orange-200 bg-orange-50"
+          )}>
+            <CardContent className="p-6 text-center">
+              <div className={cn(
+                "text-6xl mb-4",
+                proof.status === 'Approuvée' ? "text-green-600" : "text-orange-600"
+              )}>
+                {proof.status === 'Approuvée' ? '✅' : '✍️'}
               </div>
-
-              <div>
-                <Label htmlFor="confirmation">Tapez "ACCEPTER" pour confirmer *</Label>
-                <Input
-                  id="confirmation"
-                  placeholder="ACCEPTER"
-                  value={confirmationText}
-                  onChange={(e) => setConfirmationText(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
+              <h2 className={cn(
+                "text-2xl font-bold mb-2",
+                proof.status === 'Approuvée' ? "text-green-800" : "text-orange-800"
+              )}>
+                {proof.status === 'Approuvée' 
+                  ? 'Épreuve approuvée !' 
+                  : 'Modification demandée'
+                }
+              </h2>
+              <p className={cn(
+                "text-lg",
+                proof.status === 'Approuvée' ? "text-green-700" : "text-orange-700"
+              )}>
+                {proof.status === 'Approuvée' 
+                  ? 'La production a commencé. Nous vous tiendrons informé de l\'avancement.'
+                  : 'Nos équipes préparent une nouvelle version selon vos commentaires.'
+                }
+              </p>
               
-              <div className="flex gap-2">
-                <Button 
-                  onClick={handleApprove}
-                  disabled={approveProof.isPending}
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  {approveProof.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  Confirmer l'approbation
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    setShowApprovalForm(false);
-                    setClientName('');
-                    setConfirmationText('');
-                  }}
-                >
-                  Annuler
-                </Button>
-              </div>
+              {proof.approved_by_name && (
+                <div className="mt-4 text-sm text-gray-600">
+                  <p>
+                    {proof.status === 'Approuvée' ? 'Approuvé' : 'Demandé'} par {proof.approved_by_name}
+                    {proof.approved_at && proof.status === 'Approuvée' && (
+                      <> le {format(new Date(proof.approved_at), 'dd MMMM yyyy à HH:mm', { locale: fr })}</>
+                    )}
+                  </p>
+                </div>
+              )}
+
+              {proof.client_comments && proof.status === 'Modification demandée' && (
+                <div className="mt-4 p-4 bg-white rounded-lg border">
+                  <h4 className="font-semibold text-gray-800 mb-2">Vos commentaires :</h4>
+                  <p className="text-gray-700 text-left whitespace-pre-wrap">{proof.client_comments}</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
+
+        {/* Footer */}
+        <div className="mt-8 text-center text-sm text-gray-500">
+          <p>
+            Cette page est sécurisée et accessible uniquement via le lien que vous avez reçu.
+            <br />
+            Pour toute question, contactez-nous : <strong>info@promotiongregoire.ca</strong>
+          </p>
+        </div>
       </div>
     </div>
   );

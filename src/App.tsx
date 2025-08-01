@@ -39,6 +39,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/epreuve/:token" element={<ProofApproval />} />
             <Route path="/approve/proof/:token" element={<ProofApproval />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>

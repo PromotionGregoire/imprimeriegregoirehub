@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.request-proof-modification]
 verify_jwt = false
+
+[functions.get-proof-by-token]
+verify_jwt = false
