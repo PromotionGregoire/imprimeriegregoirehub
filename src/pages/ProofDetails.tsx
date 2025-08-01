@@ -321,7 +321,9 @@ const ProofDetails = () => {
         <TabsList>
           <TabsTrigger value="manage">Gestion des Fichiers</TabsTrigger>
           <TabsTrigger value="history">Historique</TabsTrigger>
-          <TabsTrigger value="comments">Commentaires Client</TabsTrigger>
+          <TabsTrigger value="comments" className="text-sm sm:text-base truncate px-3 sm:px-4 lg:px-6">
+            <span className="truncate">Commentaires Client</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="manage">
