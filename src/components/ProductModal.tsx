@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Plus, Edit } from 'lucide-react';
+import { Plus, Edit, Upload, X, Image as ImageIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -22,6 +22,7 @@ const productSchema = z.object({
   default_price: z.number().min(0, 'Le prix doit être positif'),
   category: z.enum(['Impression', 'Article Promotionnel']),
   supplier_ids: z.array(z.string()).optional(),
+  image_url: z.string().optional(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -41,6 +42,8 @@ const ProductModal = ({ trigger, product, onSave, isLoading, isOpen: controlledO
   const setIsOpen = onOpenChange || setInternalOpen;
   const [variants, setVariants] = useState<any[]>([]);
   const [selectedSuppliers, setSelectedSuppliers] = useState<string[]>([]);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
   
   const { data: suppliers } = useSuppliers();
   
@@ -53,6 +56,7 @@ const ProductModal = ({ trigger, product, onSave, isLoading, isOpen: controlledO
       default_price: 0,
       category: 'Impression',
       supplier_ids: [],
+      image_url: '',
     },
   });
 
@@ -65,7 +69,9 @@ const ProductModal = ({ trigger, product, onSave, isLoading, isOpen: controlledO
         default_price: product.default_price || 0,
         category: product.category || 'Impression',
         supplier_ids: [],
+        image_url: (product as any).image_url || '',
       });
+      setImagePreview((product as any).image_url || '');
     } else if (!product && isOpen) {
       form.reset({
         name: '',
@@ -74,10 +80,33 @@ const ProductModal = ({ trigger, product, onSave, isLoading, isOpen: controlledO
         default_price: 0,
         category: 'Impression',
         supplier_ids: [],
+        image_url: '',
       });
       setSelectedSuppliers([]);
+      setSelectedImage(null);
+      setImagePreview('');
     }
   }, [product, isOpen, form]);
+
+  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setImagePreview(result);
+        form.setValue('image_url', result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview('');
+    form.setValue('image_url', '');
+  };
 
   const handleSubmit = (data: ProductFormData) => {
     const submitData = {
@@ -182,6 +211,68 @@ const ProductModal = ({ trigger, product, onSave, isLoading, isOpen: controlledO
                   </FormItem>
                 )}
               />
+            </div>
+
+            {/* Image Upload Section */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Image du produit</Label>
+              <div className="flex items-start gap-4">
+                {/* Image Preview */}
+                {imagePreview ? (
+                  <div className="relative w-32 h-24 border rounded-lg overflow-hidden bg-muted">
+                    <img 
+                      src={imagePreview} 
+                      alt="Aperçu"
+                      className="w-full h-full object-cover"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-1 right-1 h-6 w-6 p-0"
+                      onClick={handleRemoveImage}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="w-32 h-24 border-2 border-dashed border-muted-foreground/25 rounded-lg flex items-center justify-center bg-muted/30">
+                    <ImageIcon className="h-8 w-8 text-muted-foreground/50" />
+                  </div>
+                )}
+
+                {/* Upload Button */}
+                <div className="flex-1 space-y-2">
+                  <div className="flex gap-2">
+                    <Button type="button" variant="outline" size="sm" asChild>
+                      <label htmlFor="image-upload" className="cursor-pointer">
+                        <Upload className="h-4 w-4 mr-2" />
+                        Choisir une image
+                      </label>
+                    </Button>
+                    {imagePreview && (
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={handleRemoveImage}
+                      >
+                        Supprimer
+                      </Button>
+                    )}
+                  </div>
+                  <input
+                    id="image-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                    className="hidden"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Formats acceptés: JPG, PNG, GIF (max 5MB)
+                  </p>
+                </div>
+              </div>
             </div>
 
             <FormField

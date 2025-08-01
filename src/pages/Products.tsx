@@ -174,8 +174,8 @@ const Products = () => {
           </CardContent>
         </Card>
 
-        {/* Products List - BaseWeb Layout Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Products List - Visual Card Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.length === 0 ? (
             <div className="col-span-full">
               <Card className="bg-background border-border">
@@ -201,70 +201,101 @@ const Products = () => {
                 key={product.id} 
                 className={cn(
                   "bg-background border-border shadow-sm hover:shadow-lg transition-all duration-200",
-                  "cursor-pointer overflow-hidden group hover:border-primary/20"
+                  "cursor-pointer overflow-hidden group hover:border-primary/20",
+                  "aspect-[3/4] max-w-[280px] mx-auto"
                 )}
                 onClick={() => window.location.href = `/dashboard/products/${product.id}`}
               >
-                <CardContent className="p-6">
-                  <div className="flex flex-col space-y-4">
-                    {/* Header with Code and Actions */}
-                    <div className="flex items-start justify-between">
-                      <div className="text-sm font-mono text-muted-foreground bg-muted/30 px-2 py-1 rounded">
-                        {product.product_code}
-                      </div>
-                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => handleEdit(product)}
-                          className="h-8 w-8 p-0 hover:bg-muted/50"
-                          aria-label="Modifier le produit"
-                        >
-                          <Pencil className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(product.id)}
-                          className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
-                          aria-label="Supprimer le produit"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Product Name */}
-                    <div>
-                      <h3 className="text-lg font-semibold text-foreground line-clamp-2 leading-tight">
-                        {product.name}
-                      </h3>
-                      {product.description && (
-                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
-                          {product.description}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Price */}
-                    <div className="text-2xl font-bold text-foreground">
-                      ${Number(product.default_price).toFixed(2)}
-                    </div>
-
-                    {/* Category Badge */}
-                    <div className="flex justify-start">
-                      <Badge 
-                        variant={product.category === 'Impression' ? 'default' : 'secondary'}
-                        className={cn(
-                          "px-3 py-1 text-xs font-medium rounded-full",
+                {/* Image Section */}
+                <div className="relative h-48 bg-gradient-to-br from-primary/5 to-primary/10 overflow-hidden">
+                  {(product as any).image_url ? (
+                    <img 
+                      src={(product as any).image_url} 
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      {/* Placeholder pattern based on product category */}
+                      <img 
+                        src={`https://images.unsplash.com/${
                           product.category === 'Impression' 
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
-                            : "bg-blue-50 text-blue-700 border-blue-200"
-                        )}
-                      >
-                        {product.category}
-                      </Badge>
+                            ? 'photo-1461749280684-dccba630e2f6' // monitor showing code
+                            : 'photo-1465146344425-f00d5f5c8f07' // orange flowers
+                        }?w=400&h=300&fit=crop`}
+                        alt={`${product.category} placeholder`}
+                        className="w-full h-full object-cover opacity-60"
+                      />
+                      <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
+                        <div className="text-center">
+                          <Tag className="h-8 w-8 text-primary/60 mx-auto mb-1" />
+                          <div className="text-xs text-primary/80 font-medium">
+                            {product.category}
+                          </div>
+                        </div>
+                      </div>
                     </div>
+                  )}
+                  
+                  {/* Actions Overlay */}
+                  <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                    <Button 
+                      variant="secondary" 
+                      size="sm" 
+                      onClick={() => handleEdit(product)}
+                      className="h-8 w-8 p-0 bg-white/90 hover:bg-white shadow-sm"
+                      aria-label="Modifier le produit"
+                    >
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => handleDelete(product.id)}
+                      className="h-8 w-8 p-0 bg-white/90 hover:bg-white hover:text-destructive shadow-sm"
+                      aria-label="Supprimer le produit"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+
+                  {/* Category Badge */}
+                  <div className="absolute bottom-2 left-2">
+                    <Badge 
+                      className={cn(
+                        "px-2 py-1 text-xs font-medium rounded-full shadow-sm",
+                        product.category === 'Impression' 
+                          ? "bg-emerald-100 text-emerald-800 border-emerald-200" 
+                          : "bg-blue-100 text-blue-800 border-blue-200"
+                      )}
+                    >
+                      {product.category}
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Content Section */}
+                <CardContent className="p-4 flex-1 flex flex-col">
+                  {/* Product Code */}
+                  <div className="text-xs font-mono text-muted-foreground mb-2 truncate">
+                    {product.product_code}
+                  </div>
+
+                  {/* Product Name */}
+                  <h3 className="font-semibold text-foreground line-clamp-2 leading-tight mb-2 flex-1">
+                    {product.name}
+                  </h3>
+
+                  {/* Description */}
+                  {product.description && (
+                    <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed mb-3">
+                      {product.description}
+                    </p>
+                  )}
+
+                  {/* Price */}
+                  <div className="text-lg font-bold text-foreground mt-auto">
+                    ${Number(product.default_price).toFixed(2)}
                   </div>
                 </CardContent>
               </Card>
