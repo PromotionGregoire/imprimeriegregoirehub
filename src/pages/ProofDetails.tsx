@@ -196,10 +196,15 @@ const ProofDetails = () => {
       case 'Envoyée au client':
         return (
           <Badge 
-            className="bg-primary/10 text-primary border-primary/20 font-medium text-base-200 px-base-400 py-base-200 min-h-[32px] flex items-center"
-            aria-label={`Statut: Envoyé`}
+            className="bg-info-light text-info border-info/30 font-semibold text-base-200 px-base-500 py-base-300 min-h-[36px] flex items-center rounded-base-300 transition-colors duration-200 hover:bg-info/10 focus-visible:ring-2 focus-visible:ring-info focus-visible:ring-offset-2"
+            aria-label={`Statut: Envoyé au client`}
+            role="status"
+            tabIndex={0}
           >
-            Envoyé
+            <div className="flex items-center gap-base-200">
+              <div className="w-2 h-2 bg-info rounded-full flex-shrink-0" aria-hidden="true" />
+              <span className="whitespace-nowrap">Envoyé</span>
+            </div>
           </Badge>
         );
       case 'Modification demandée':
