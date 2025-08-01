@@ -179,8 +179,8 @@ const ProofDetails = () => {
         return <Badge variant="secondary">À préparer</Badge>;
       case 'En préparation':
         return <Badge className="bg-blue-100 text-blue-800">En préparation</Badge>;
-      case 'Envoyé':
-        return <Badge className="bg-purple-100 text-purple-800">Envoyé</Badge>;
+      case 'Envoyée au client':
+        return <Badge className="bg-purple-100 text-purple-800">Envoyée au client</Badge>;
       case 'Modification demandée':
         return <Badge className="bg-orange-100 text-orange-800">Modification demandée</Badge>;
       case 'Approuvée':
@@ -414,7 +414,7 @@ const ProofDetails = () => {
                       </Button>
                     )}
 
-                    {proof.status === 'Envoyé' && (
+                    {proof.status === 'Envoyée au client' && (
                       <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                         <p className="text-sm text-blue-800">
                           ✅ Épreuve envoyée au client. En attente de leur réponse.

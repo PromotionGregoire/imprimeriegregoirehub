@@ -25,7 +25,7 @@ interface ProofCardProps {
 const statusColors = {
   'A preparer': 'bg-[hsl(var(--status-orange-light))] text-[hsl(var(--status-orange))] border-[hsl(var(--status-orange))]/20',
   'En préparation': 'bg-blue-50 text-blue-700 border-blue-200',
-  'Envoyé': 'bg-[hsl(var(--status-purple-light))] text-[hsl(var(--status-purple))] border-[hsl(var(--status-purple))]/20',
+  'Envoyée': 'bg-[hsl(var(--status-purple-light))] text-[hsl(var(--status-purple))] border-[hsl(var(--status-purple))]/20',
   'En révision': 'bg-amber-50 text-amber-700 border-amber-200',
   'Approuvée': 'bg-[hsl(var(--status-green-light))] text-[hsl(var(--status-green))] border-[hsl(var(--status-green))]/20',
 };
