@@ -221,10 +221,9 @@ const ProductModal = ({ trigger, product, onSave, isLoading, isOpen: controlledO
       setSelectedImage(null);
     }
     
-    // Only close modal if not loading (for creating new products)
+    // Close modal for new products only (edit modal closure is handled by parent)
     if (!isLoading && !product) {
       setIsOpen(false);
-      // Reset form state completely for new products
       setSelectedImage(null);
       setImagePreview('');
     }
