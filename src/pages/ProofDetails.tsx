@@ -220,7 +220,7 @@ const ProofDetails = () => {
     <div className="space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center gap-3 sm:gap-4 lg:gap-6 min-w-0">
           <Button variant="ghost" onClick={() => navigate('/dashboard/proofs')}>
             <ArrowLeft className="w-4 h-4" />
           </Button>
