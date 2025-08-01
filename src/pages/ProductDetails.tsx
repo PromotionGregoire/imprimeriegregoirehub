@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { useProduct } from '@/hooks/useProduct';
+import { useUpdateProduct } from '@/hooks/useProducts';
 import { useProductVariants } from '@/hooks/useProductVariants';
 import { useIsMobile } from '@/hooks/use-mobile';
 import ProductModal from '@/components/ProductModal';
@@ -27,6 +28,29 @@ const ProductDetails = () => {
   
   const { data: product, isLoading: productLoading } = useProduct(id);
   const { data: variants, isLoading: variantsLoading } = useProductVariants(id || '');
+  const updateProduct = useUpdateProduct();
+  
+  const handleSaveProduct = (data: any) => {
+    if (!product?.id) return;
+    
+    updateProduct.mutate({ id: product.id, updates: data }, {
+      onSuccess: () => {
+        toast({
+          title: '✅ Succès',
+          description: 'Produit mis à jour avec succès.',
+        });
+        setEditModalOpen(false);
+      },
+      onError: (error) => {
+        console.error('Error updating product:', error);
+        toast({
+          title: '❌ Erreur',
+          description: 'Impossible de mettre à jour le produit.',
+          variant: 'destructive',
+        });
+      }
+    });
+  };
   
   if (productLoading) {
     return (
@@ -181,8 +205,8 @@ const ProductDetails = () => {
 
         <ProductModal
           product={product}
-          onSave={() => {}}
-          isLoading={false}
+          onSave={handleSaveProduct}
+          isLoading={updateProduct.isPending}
           isOpen={editModalOpen}
           onOpenChange={setEditModalOpen}
         />
@@ -365,8 +389,8 @@ const ProductDetails = () => {
 
       <ProductModal
         product={product}
-        onSave={() => {}}
-        isLoading={false}
+        onSave={handleSaveProduct}
+        isLoading={updateProduct.isPending}
         isOpen={editModalOpen}
         onOpenChange={setEditModalOpen}
       />
