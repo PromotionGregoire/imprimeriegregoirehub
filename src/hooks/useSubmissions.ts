@@ -55,6 +55,43 @@ export const useCreateSubmission = () => {
 
       if (itemsError) throw itemsError;
 
+      // Send email notification if status is 'Envoyée'
+      if (status === 'Envoyée') {
+        // Get client information for email
+        const { data: client, error: clientError } = await supabase
+          .from('clients')
+          .select('email, business_name, contact_name')
+          .eq('id', submissionData.client_id)
+          .single();
+
+        if (clientError) {
+          console.error('Error fetching client for email:', clientError);
+          throw new Error('Impossible de récupérer les informations du client pour l\'envoi de l\'email');
+        }
+
+        if (!client.email) {
+          throw new Error('Le client n\'a pas d\'adresse email configurée');
+        }
+
+        // Send email notification
+        const { error: emailError } = await supabase.functions.invoke('send-submission-notification', {
+          body: {
+            clientEmail: client.email,
+            clientName: client.contact_name || client.business_name,
+            businessName: client.business_name,
+            submissionId: submission.id,
+            submissionNumber: submission.submission_number,
+            totalPrice: submissionData.total_price,
+            items: submissionData.items,
+          },
+        });
+
+        if (emailError) {
+          console.error('Error sending submission email:', emailError);
+          throw new Error('Erreur lors de l\'envoi de l\'email de soumission');
+        }
+      }
+
       // Log the activity
       if (user) {
         const description = status === 'Brouillon' 
