@@ -351,20 +351,20 @@ const Products = () => {
                     {product.product_code}
                   </div>
 
-                  {/* Product Name - Reduced height */}
-                  <h3 className="font-semibold text-foreground line-clamp-1 sm:line-clamp-2 leading-tight mb-2 text-sm sm:text-base min-h-[1.25rem] sm:min-h-[2.5rem]">
+                  {/* Product Name - More compact */}
+                  <h3 className="font-semibold text-foreground line-clamp-2 leading-tight mb-3 text-sm sm:text-base min-h-[2.5rem]">
                     {product.name}
                   </h3>
 
-                  {/* Description - More compact */}
-                  {product.description && (
+                  {/* Description - Hidden to keep cards compact */}
+                  {false && product.description && (
                     <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1 sm:line-clamp-2 leading-relaxed mb-2 flex-1">
                       {product.description}
                     </p>
                   )}
 
-                  {/* Price - More compact */}
-                  <div className="text-base sm:text-lg font-bold text-foreground mt-auto pt-1 sm:pt-2">
+                  {/* Price - Compact */}
+                  <div className="text-base sm:text-lg font-bold text-foreground mt-auto">
                     ${Number(product.default_price).toFixed(2)}
                   </div>
                 </CardContent>
