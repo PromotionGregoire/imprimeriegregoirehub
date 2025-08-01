@@ -318,11 +318,15 @@ const ProofDetails = () => {
 
       {/* Tabs */}
       <Tabs defaultValue="manage" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="manage">Gestion des Fichiers</TabsTrigger>
-          <TabsTrigger value="history">Historique</TabsTrigger>
-          <TabsTrigger value="comments" className="text-sm sm:text-base truncate px-3 sm:px-4 lg:px-6">
-            <span className="truncate">Commentaires Client</span>
+        <TabsList className="flex overflow-x-auto scrollbar-hide w-full">
+          <TabsTrigger value="manage" className="text-xs sm:text-sm truncate px-2 sm:px-3 lg:px-4 whitespace-nowrap">
+            Gestion des Fichiers
+          </TabsTrigger>
+          <TabsTrigger value="history" className="text-xs sm:text-sm truncate px-2 sm:px-3 lg:px-4 whitespace-nowrap">
+            Historique
+          </TabsTrigger>
+          <TabsTrigger value="comments" className="text-xs sm:text-sm truncate px-2 sm:px-3 lg:px-4 whitespace-nowrap">
+            Commentaires Client
           </TabsTrigger>
         </TabsList>
 
