@@ -150,8 +150,8 @@ export function AdvancedDatePicker({
           {formatDisplayValue()}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
-        <div className="bg-background border rounded-lg shadow-lg">
+      <PopoverContent className="w-auto p-0 pointer-events-auto max-w-[95vw] sm:max-w-none" align="start">
+        <div className="bg-background border rounded-lg shadow-lg max-w-full overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between p-3 border-b">
             <Button
