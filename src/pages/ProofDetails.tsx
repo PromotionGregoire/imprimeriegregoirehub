@@ -197,9 +197,9 @@ const ProofDetails = () => {
         return (
           <Badge 
             className="bg-primary/10 text-primary border-primary/20 font-medium text-base-200 px-base-400 py-base-200 min-h-[32px] flex items-center"
-            aria-label={`Statut: Envoyée au client`}
+            aria-label={`Statut: Envoyé`}
           >
-            Envoyée au client
+            Envoyé
           </Badge>
         );
       case 'Modification demandée':
