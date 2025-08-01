@@ -93,75 +93,96 @@ export function ProductLineItem({
   }, [currentItem?.product_id]);
 
   return (
-    <div className="grid grid-cols-12 gap-4 items-start p-4 border rounded-lg">
-      {/* Product Type Selection */}
-      <div className="col-span-12 md:col-span-2">
-        <Label>Type de produit</Label>
-        <Select
-          value={currentItem?.product_type || ''}
-          onValueChange={(value) => onProductTypeChange(index, value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Type..." />
-          </SelectTrigger>
-          <SelectContent className="bg-background border-border shadow-lg z-50">
-            <SelectItem value="Impression">Impression</SelectItem>
-            <SelectItem value="Article Promotionnel">Article Promotionnel</SelectItem>
-          </SelectContent>
-        </Select>
+    <div className="bg-background border border-border rounded-lg overflow-hidden">
+      {/* Header Section */}
+      <div className="bg-mono-200 px-4 py-3 border-b border-border">
+        <div className="flex flex-col sm:flex-row gap-4">
+          {/* Product Type */}
+          <div className="flex-1 min-w-0">
+            <Label className="text-sm font-medium text-mono-700">Type de produit</Label>
+            <Select
+              value={currentItem?.product_type || ''}
+              onValueChange={(value) => onProductTypeChange(index, value)}
+            >
+              <SelectTrigger className="h-9 mt-1">
+                <SelectValue placeholder="Type..." />
+              </SelectTrigger>
+              <SelectContent className="bg-background border-border shadow-lg z-50">
+                <SelectItem value="Impression">Impression</SelectItem>
+                <SelectItem value="Article Promotionnel">Article Promotionnel</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Product Selection */}
+          <div className="flex-[2] min-w-0">
+            <Label className="text-sm font-medium text-mono-700">Produit</Label>
+            {currentItem?.product_type && !productsLoading ? (
+              <Select
+                value={currentItem?.product_id || ''}
+                onValueChange={(value) => onProductSelection(index, value)}
+              >
+                <SelectTrigger className="h-9 mt-1">
+                  <SelectValue placeholder="Sélectionner un produit..." />
+                </SelectTrigger>
+                <SelectContent className="bg-background border-border shadow-lg z-50">
+                  {products
+                    ?.filter(p => p.category === currentItem.product_type)
+                    .map(product => (
+                      <SelectItem key={product.id} value={product.id}>
+                        {product.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input
+                {...register(`items.${index}.product_name`)}
+                placeholder="Nom du produit"
+                className="h-9 mt-1"
+              />
+            )}
+          </div>
+
+          {/* Remove Button */}
+          <div className="flex-shrink-0 self-end">
+            {onRemove && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={onRemove}
+                className="h-9"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Product Selection */}
-      <div className="col-span-12 md:col-span-3">
-        <Label>Produit</Label>
-        {currentItem?.product_type && !productsLoading ? (
-          <Select
-            value={currentItem?.product_id || ''}
-            onValueChange={(value) => onProductSelection(index, value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Sélectionner un produit..." />
-            </SelectTrigger>
-            <SelectContent className="bg-background border-border shadow-lg z-50">
-              {products
-                ?.filter(p => p.category === currentItem.product_type)
-                .map(product => (
-                  <SelectItem key={product.id} value={product.id}>
-                    {product.name}
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
-        ) : (
-          <Input
-            {...register(`items.${index}.product_name`)}
-            placeholder="Nom du produit"
-          />
-        )}
-      </div>
-
-      {/* Variants Selection - Show independent selectors for each attribute */}
+      {/* Configuration Section */}
       {currentItem?.product_id && variants && variants.length > 0 && (
-        <div className="col-span-12 md:col-span-7 space-y-3">
-          <Label>Configuration</Label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="px-4 py-4 bg-mono-100 border-b border-border">
+          <Label className="text-sm font-medium text-mono-700 mb-3 block">Configuration du produit</Label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {Object.entries(groupedVariants).map(([attributeName, attributeVariants]) => (
-              <div key={attributeName}>
-                <Label className="text-xs text-muted-foreground">{attributeName}</Label>
+              <div key={attributeName} className="min-w-0">
+                <Label className="text-xs text-mono-600 mb-1 block truncate">{attributeName}</Label>
                 <Select
                   value={selectedAttributes[attributeName] || ''}
                   onValueChange={(value) => handleAttributeChange(attributeName, value)}
                 >
                   <SelectTrigger className="h-8 text-xs">
-                    <SelectValue placeholder={`${attributeName}...`} />
+                    <SelectValue placeholder="Choisir..." />
                   </SelectTrigger>
                   <SelectContent className="bg-background border-border shadow-lg z-50">
                     {attributeVariants.map((variant: any) => (
                       <SelectItem key={variant.id} value={variant.attribute_value}>
                         <div className="flex justify-between items-center w-full">
-                          <span>{variant.attribute_value}</span>
+                          <span className="truncate">{variant.attribute_value}</span>
                           {variant.price > 0 && (
-                            <span className="ml-2 text-xs text-green-600">
+                            <span className="ml-2 text-xs text-positive flex-shrink-0">
                               +${variant.price.toFixed(2)}
                             </span>
                           )}
@@ -173,75 +194,72 @@ export function ProductLineItem({
               </div>
             ))}
           </div>
+          
           {Object.keys(selectedAttributes).length > 0 && (
-            <div className="text-xs text-muted-foreground mt-2 p-2 bg-muted/20 rounded">
-              <div>Configuration: {Object.entries(selectedAttributes).map(([attr, value]) => `${attr}: ${value}`).join(', ')}</div>
+            <div className="mt-4 p-3 bg-background rounded border border-border">
+              <div className="text-xs text-mono-600 mb-1">
+                Configuration sélectionnée: {Object.entries(selectedAttributes).map(([attr, value]) => `${attr}: ${value}`).join(', ')}
+              </div>
               {calculatedPrice > 0 && (
-                <div className="text-green-600 font-medium">Prix calculé: ${calculatedPrice.toFixed(2)}</div>
+                <div className="text-sm font-medium text-positive">
+                  Prix calculé: ${calculatedPrice.toFixed(2)}
+                </div>
               )}
             </div>
           )}
         </div>
       )}
 
-      {/* Description */}
-      <div className={`col-span-12 ${currentItem?.product_id && variants && variants.length > 0 ? 'md:col-span-12 mt-4' : 'md:col-span-3'}`}>
-        <Label>Description</Label>
-        <Textarea
-          {...register(`items.${index}.description`)}
-          placeholder="Description du produit"
-          rows={2}
-        />
-      </div>
-      
-      {/* Bottom row: Quantity, Unit Price, Total, Remove */}
-      <div className="col-span-12 grid grid-cols-12 gap-4 items-end mt-4">
-        {/* Quantity */}
-        <div className="col-span-6 md:col-span-3">
-          <Label>Quantité</Label>
-          <Input
-            type="number"
-            min="1"
-            {...register(`items.${index}.quantity`, { valueAsNumber: true })}
+      {/* Details Section */}
+      <div className="px-4 py-4 space-y-4">
+        {/* Description */}
+        <div>
+          <Label className="text-sm font-medium text-mono-700">Description</Label>
+          <Textarea
+            {...register(`items.${index}.description`)}
+            placeholder="Description du produit"
+            rows={2}
+            className="mt-1 resize-none"
           />
         </div>
         
-        {/* Unit Price */}
-        <div className="col-span-6 md:col-span-3">
-          <Label>Prix unitaire ($)</Label>
-          <Input
-            type="number"
-            step="0.01"
-            min="0"
-            {...register(`items.${index}.unit_price`, { valueAsNumber: true })}
-            value={calculatedPrice || currentItem?.unit_price || ''}
-            onChange={(e) => {
-              const value = parseFloat(e.target.value) || 0;
-              setValue(`items.${index}.unit_price`, value);
-            }}
-          />
-        </div>
-        
-        {/* Total */}
-        <div className="col-span-6 md:col-span-3">
-          <Label>Total</Label>
-          <div className="h-10 flex items-center font-medium text-lg text-green-600">
-            ${((currentItem?.quantity || 0) * (calculatedPrice || currentItem?.unit_price || 0)).toFixed(2)}
+        {/* Bottom row: Quantity, Unit Price, Total */}
+        <div className="grid grid-cols-3 gap-4">
+          {/* Quantity */}
+          <div>
+            <Label className="text-sm font-medium text-mono-700">Quantité</Label>
+            <Input
+              type="number"
+              min="1"
+              {...register(`items.${index}.quantity`, { valueAsNumber: true })}
+              className="mt-1"
+            />
           </div>
-        </div>
-        
-        {/* Remove Button */}
-        <div className="col-span-6 md:col-span-3 flex justify-end">
-          {onRemove && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={onRemove}
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          )}
+          
+          {/* Unit Price */}
+          <div>
+            <Label className="text-sm font-medium text-mono-700">Prix unitaire ($)</Label>
+            <Input
+              type="number"
+              step="0.01"
+              min="0"
+              {...register(`items.${index}.unit_price`, { valueAsNumber: true })}
+              value={calculatedPrice || currentItem?.unit_price || ''}
+              onChange={(e) => {
+                const value = parseFloat(e.target.value) || 0;
+                setValue(`items.${index}.unit_price`, value);
+              }}
+              className="mt-1"
+            />
+          </div>
+          
+          {/* Total */}
+          <div>
+            <Label className="text-sm font-medium text-mono-700">Total</Label>
+            <div className="h-10 flex items-center mt-1 px-3 bg-mono-100 rounded border font-medium text-positive">
+              ${((currentItem?.quantity || 0) * (calculatedPrice || currentItem?.unit_price || 0)).toFixed(2)}
+            </div>
+          </div>
         </div>
       </div>
     </div>
