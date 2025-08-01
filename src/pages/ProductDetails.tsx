@@ -33,7 +33,10 @@ const ProductDetails = () => {
   const handleSaveProduct = (data: any) => {
     if (!product?.id) return;
     
-    updateProduct.mutate({ id: product.id, updates: data }, {
+    // Remove supplier_ids from the data as it's not a column in products table
+    const { supplier_ids, ...productData } = data;
+    
+    updateProduct.mutate({ id: product.id, updates: productData }, {
       onSuccess: () => {
         toast({
           title: '✅ Succès',
