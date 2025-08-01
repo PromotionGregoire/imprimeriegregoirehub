@@ -8,7 +8,7 @@ interface SubmissionStatusTimelineProps {
   status: SubmissionStatus
   className?: string
   showLabels?: boolean
-  size?: 'compact' | 'default' | 'spacious'
+  size?: 'sm' | 'md' | 'lg'
 }
 
 const statusSteps = [
@@ -36,7 +36,7 @@ export function SubmissionStatusTimeline({
   status, 
   className, 
   showLabels = true,
-  size = 'default' 
+  size = 'md' 
 }: SubmissionStatusTimelineProps) {
   const getCurrentStepIndex = () => {
     if (status === 'Brouillon') return 0
@@ -63,7 +63,7 @@ export function SubmissionStatusTimeline({
   const getResultColor = () => {
     if (status === 'Acceptée') return 'text-[hsl(var(--status-green))]'
     if (status === 'Refusée') return 'text-[hsl(var(--status-red))]'
-    return 'text-content-secondary'
+    return 'text-muted-foreground'
   }
 
   const getResultLabel = () => {
@@ -72,44 +72,32 @@ export function SubmissionStatusTimeline({
     return 'En attente'
   }
 
-  // BaseWeb spacing tokens and content density
   const sizeClasses = {
-    compact: {
+    sm: {
+      icon: 'w-3 h-3',
+      circle: 'w-6 h-6',
+      line: 'h-0.5',
+      text: 'text-xs'
+    },
+    md: {
       icon: 'w-4 h-4',
-      circle: 'min-w-[32px] min-h-[32px] w-8 h-8',
+      circle: 'w-8 h-8',
       line: 'h-1',
-      text: 'text-[14px] leading-[1.2]',
-      spacing: 'gap-2',
-      margin: 'mt-2'
+      text: 'text-sm'
     },
-    default: {
+    lg: {
       icon: 'w-5 h-5',
-      circle: 'min-w-[40px] min-h-[40px] w-10 h-10',
-      line: 'h-1',
-      text: 'text-[16px] leading-[1.5]',
-      spacing: 'gap-4',
-      margin: 'mt-4'
-    },
-    spacious: {
-      icon: 'w-6 h-6',
-      circle: 'min-w-[48px] min-h-[48px] w-12 h-12',
+      circle: 'w-10 h-10',
       line: 'h-1.5',
-      text: 'text-[18px] leading-[1.5]',
-      spacing: 'gap-6',
-      margin: 'mt-6'
+      text: 'text-base'
     }
   }
 
   const sizes = sizeClasses[size]
 
   return (
-    <div className={cn('w-full max-w-full overflow-hidden', className)}>
-      {/* BaseWeb Layout Grid Pattern - 8px spacing system */}
-      <div className={cn(
-        "flex items-center justify-between relative w-full",
-        "px-2 md:px-4", // 16px mobile, 32px desktop margins
-        sizes.spacing
-      )}>
+    <div className={cn('w-full', className)}>
+      <div className="flex items-center justify-between relative">
         {statusSteps.map((step, index) => {
           const stepState = getStepState(index)
           
@@ -126,42 +114,35 @@ export function SubmissionStatusTimeline({
           
           return (
             <React.Fragment key={step.key}>
-              <div className="flex flex-col items-center relative z-10 min-w-0 flex-shrink-0">
-                {/* BaseWeb Circle Pattern with proper touch targets */}
+              <div className="flex flex-col items-center relative z-10">
+                {/* Circle with icon */}
                 <div
                   className={cn(
                     'rounded-full flex items-center justify-center transition-all duration-300',
-                    'shadow-sm hover:shadow-md',
-                    // BaseWeb elevation system
-                    'border border-border',
                     sizes.circle,
                     {
-                      'bg-primary text-white border-primary shadow-lg': isCompleted && index !== 2,
-                      'bg-[hsl(var(--status-green))] text-white border-[hsl(var(--status-green))] shadow-lg': isCompleted && index === 2 && status === 'Acceptée',
-                      'bg-[hsl(var(--status-red))] text-white border-[hsl(var(--status-red))] shadow-lg': isCompleted && index === 2 && status === 'Refusée',
-                      'bg-primary/10 text-primary border-primary ring-2 ring-primary/20': isCurrent,
-                      'bg-background text-content-secondary border-border': stepState === 'upcoming'
+                      'bg-primary text-primary-foreground shadow-lg': isCompleted && index !== 2,
+                      'bg-[hsl(var(--status-green))] text-white shadow-lg': isCompleted && index === 2 && status === 'Acceptée',
+                      'bg-[hsl(var(--status-red))] text-white shadow-lg': isCompleted && index === 2 && status === 'Refusée',
+                      'bg-primary/20 text-primary ring-2 ring-primary/30': isCurrent,
+                      'bg-muted text-muted-foreground': stepState === 'upcoming'
                     }
                   )}
                 >
-                  <Icon className={cn(sizes.icon, 'flex-shrink-0')} />
+                  <Icon className={sizes.icon} />
                 </div>
                 
-                {/* BaseWeb Typography Pattern */}
+                {/* Label */}
                 {showLabels && (
-                  <div className={cn(
-                    'font-medium text-center min-w-0 max-w-[80px]',
-                    sizes.text,
-                    sizes.margin
-                  )}>
+                  <div className={cn('mt-2 font-medium text-center', sizes.text)}>
                     <div className={cn(
-                      'transition-colors duration-300 truncate',
+                      'transition-colors duration-300',
                       {
                         'text-primary': isCompleted && index !== 2,
                         'text-[hsl(var(--status-green))] font-semibold': isCompleted && index === 2 && status === 'Acceptée',
                         'text-[hsl(var(--status-red))] font-semibold': isCompleted && index === 2 && status === 'Refusée',
                         'text-primary font-semibold': isCurrent,
-                        'text-content-secondary': stepState === 'upcoming'
+                        'text-muted-foreground': stepState === 'upcoming'
                       }
                     )}>
                       {index === 2 ? getResultLabel() : step.label}
@@ -170,9 +151,9 @@ export function SubmissionStatusTimeline({
                 )}
               </div>
               
-              {/* BaseWeb Connecting Line Pattern */}
+              {/* Connecting line */}
               {index < statusSteps.length - 1 && (
-                <div className="flex-1 mx-2 md:mx-4 min-w-0">
+                <div className="flex-1 mx-4">
                   <div
                     className={cn(
                       'w-full rounded-full transition-all duration-500',
@@ -180,7 +161,7 @@ export function SubmissionStatusTimeline({
                       {
                         'bg-primary': index < currentStepIndex,
                         'bg-primary/30': index === currentStepIndex - 1,
-                        'bg-border': index >= currentStepIndex
+                        'bg-muted': index >= currentStepIndex
                       }
                     )}
                   />
@@ -191,20 +172,15 @@ export function SubmissionStatusTimeline({
         })}
       </div>
 
-      {/* BaseWeb Badge Pattern with semantic colors */}
-      <div className={cn("flex justify-center w-full", sizes.margin)}>
+      {/* Status badge with semantic colors */}
+      <div className="mt-base-400 flex justify-center">
         <div className={cn(
-          'px-4 py-2 rounded-full font-medium transition-all duration-200',
-          // BaseWeb typography: 14px caption
-          'text-[14px] leading-[1.2]',
-          'max-w-full truncate',
-          // BaseWeb elevation
-          'shadow-sm border',
+          'px-base-300 py-base-100 rounded-full text-base-200 font-medium transition-all ease-uber',
           {
-            'bg-[hsl(var(--status-blue-light))] text-[hsl(var(--status-blue))] border-[hsl(var(--status-blue))]': status === 'Brouillon',
-            'bg-[hsl(var(--status-orange-light))] text-[hsl(var(--status-orange))] border-[hsl(var(--status-orange))]': status === 'Envoyée' || status === 'En révision',
-            'bg-[hsl(var(--status-green-light))] text-[hsl(var(--status-green))] border-[hsl(var(--status-green))]': status === 'Acceptée',
-            'bg-[hsl(var(--status-red-light))] text-[hsl(var(--status-red))] border-[hsl(var(--status-red))]': status === 'Refusée'
+            'bg-[hsl(var(--status-blue-light))] text-[hsl(var(--status-blue))]': status === 'Brouillon',
+            'bg-[hsl(var(--status-orange-light))] text-[hsl(var(--status-orange))]': status === 'Envoyée' || status === 'En révision',
+            'bg-[hsl(var(--status-green-light))] text-[hsl(var(--status-green))]': status === 'Acceptée',
+            'bg-[hsl(var(--status-red-light))] text-[hsl(var(--status-red))]': status === 'Refusée'
           }
         )}>
           {status}
