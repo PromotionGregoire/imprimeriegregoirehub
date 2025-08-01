@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Clock, AlertCircle, Eye, CheckCircle2, CircleDot, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 
 const Proofs = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -24,12 +25,12 @@ const Proofs = () => {
 
   if (error) {
     return (
-      <div className="p-6">
+      <div className="p-4 sm:p-6 md:p-8">
         <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-            <h3 className="text-lg font-medium mb-2">Erreur de chargement</h3>
-            <p className="text-muted-foreground">
+          <div className="text-center max-w-md mx-auto">
+            <AlertCircle className="h-12 w-12 text-negative mx-auto mb-4" />
+            <h3 className="text-lg font-medium leading-tight mb-2">Erreur de chargement</h3>
+            <p className="text-base leading-relaxed text-muted-foreground">
               Impossible de charger les épreuves. Veuillez réessayer.
             </p>
           </div>
@@ -49,160 +50,223 @@ const Proofs = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="p-base-600 space-y-base-600 pb-24 md:pb-base-600">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
-        <div className="flex items-center gap-3 min-w-0">
-          <FileText className="h-6 w-6 text-primary flex-shrink-0" />
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold leading-tight truncate">Gestion des Épreuves</h1>
+    <div className="min-h-screen bg-background">
+      {/* BaseWeb Layout Container with responsive margins */}
+      <div className={cn(
+        "mx-auto max-w-7xl",
+        "px-4 py-4 sm:px-6 sm:py-6 md:px-8 md:py-8",
+        "pb-20 md:pb-8" // Bottom nav spacing
+      )}>
+        
+        {/* Header Section - BaseWeb Typography Scale */}
+        <div className={cn(
+          "flex flex-col sm:flex-row items-start sm:items-center justify-between",
+          "gap-4 mb-6"
+        )}>
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <FileText className="h-6 w-6 text-primary flex-shrink-0" />
+            <h1 className={cn(
+              "text-[36px] font-semibold leading-tight text-foreground",
+              "truncate" // Prevent overflow
+            )}>
+              Gestion des Épreuves
+            </h1>
+          </div>
+          {/* BaseWeb Button with 48px touch target */}
+          <Button 
+            variant="primary"
+            size="default"
+            className={cn(
+              "min-h-[48px] px-4 gap-2",
+              "bg-primary hover:bg-primary/90 text-primary-foreground",
+              "transition-all duration-200 ease-out",
+              "shadow-sm hover:shadow-md",
+              "whitespace-nowrap"
+            )}
+            onClick={() => navigate('/dashboard/orders')}
+          >
+            <Plus className="h-4 w-4 flex-shrink-0" />
+            <span className="hidden sm:inline">Nouvelle Épreuve</span>
+            <span className="sm:hidden">Nouvelle</span>
+          </Button>
         </div>
-        <Button 
-          variant="primary" 
-          size="default" 
-          className="gap-2 transition-all ease-uber flex-shrink-0 w-full sm:w-auto" 
-          onClick={() => navigate('/dashboard/orders')}
-        >
-          <Plus className="h-4 w-4" />
-          <span className="truncate">Nouvelle Épreuve</span>
-        </Button>
-      </div>
 
-      {/* Toolbar */}
-      <FlexibleDashboardToolbar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        searchPlaceholder="Rechercher par numéro de commande ou client..."
-        filters={[
-          {
-            label: "Statut",
-            value: statusFilter,
-            onChange: setStatusFilter,
-            options: [
-              { value: "all", label: "Tous les statuts" },
-              ...proofStatusOptions
-            ]
-          },
-          {
-            label: "Période",
-            value: periodFilter,
-            onChange: setPeriodFilter,
-            options: [
-              { value: "all", label: "Toute période" },
-              { value: "7days", label: "7 derniers jours" },
-              { value: "30days", label: "30 derniers jours" },
-              { value: "90days", label: "90 derniers jours" }
-            ]
-          }
-        ]}
-      />
+        {/* Toolbar - BaseWeb Search and Filter Pattern */}
+        <div className="mb-6">
+          <FlexibleDashboardToolbar
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            searchPlaceholder="Rechercher par numéro de commande ou client..."
+            filters={[
+              {
+                label: "Statut",
+                value: statusFilter,
+                onChange: setStatusFilter,
+                options: [
+                  { value: "all", label: "Tous les statuts" },
+                  ...proofStatusOptions
+                ]
+              },
+              {
+                label: "Période",
+                value: periodFilter,
+                onChange: setPeriodFilter,
+                options: [
+                  { value: "all", label: "Toute période" },
+                  { value: "7days", label: "7 derniers jours" },
+                  { value: "30days", label: "30 derniers jours" },
+                  { value: "90days", label: "90 derniers jours" }
+                ]
+              }
+            ]}
+          />
+        </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 lg:gap-6">
-        <Card className="bg-card border border-border">
-          <CardContent className="p-base-600">
-            <div className="flex items-center space-x-base-300">
-              <div className="p-base-200 rounded-full bg-primary/10">
-                <FileText className="h-base-500 w-base-500 text-primary" />
-              </div>
-              <div>
-                <p className="text-base-750 font-semibold text-primary">{statistics.total}</p>
-                <p className="text-base-300 text-muted-foreground font-medium">Total</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-background to-[hsl(var(--status-orange-light))]">
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-full bg-[hsl(var(--status-orange))]/10">
-                <CircleDot className="h-5 w-5 text-[hsl(var(--status-orange))]" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-[hsl(var(--status-orange))]">{statistics.toPrepare}</p>
-                <p className="text-sm text-muted-foreground font-medium">À préparer</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-background to-blue-50">
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-full bg-blue-500/10">
-                <Clock className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-blue-600">{statistics.inPreparation}</p>
-                <p className="text-sm text-muted-foreground font-medium">En cours</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-background to-[hsl(var(--status-purple-light))]">
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-full bg-[hsl(var(--status-purple))]/10">
-                <Eye className="h-5 w-5 text-[hsl(var(--status-purple))]" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-[hsl(var(--status-purple))]">{statistics.sent}</p>
-                <p className="text-sm text-muted-foreground font-medium">Envoyées</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-background to-amber-50">
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-full bg-amber-500/10">
-                <CheckCircle2 className="h-5 w-5 text-amber-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-amber-600">{statistics.inRevision}</p>
-                <p className="text-sm text-muted-foreground font-medium">En révision</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Proofs List */}
-      <Card className="border-0 shadow-sm">
-        <CardHeader className="pb-6">
-          <CardTitle className="text-xl font-semibold text-primary">Épreuves en attente</CardTitle>
-        </CardHeader>
-        <CardContent className="p-6 pt-0">
-          {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-base-400 md:gap-base-600">
-              {[...Array(8)].map((_, i) => (
-                <div key={i} className="space-y-3">
-                  <Skeleton className="h-32 w-full rounded-lg" />
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-3 w-1/2" />
+        {/* Statistics Cards - BaseWeb Card Pattern with 8px Grid */}
+        <div className={cn(
+          "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5",
+          "gap-2 mb-6" // 8px gaps
+        )}>
+          {/* Total Card */}
+          <Card className="bg-background border-border shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <FileText className="h-5 w-5 text-primary flex-shrink-0" />
                 </div>
-              ))}
-            </div>
-          ) : proofs && proofs.length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
-              {proofs.map((proof) => (
-                <ProofCard key={proof.id} proof={proof} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16">
-              <div className="p-4 rounded-full bg-muted/30 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <FileText className="h-8 w-8 text-muted-foreground" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-[14px] leading-tight text-muted-foreground font-medium mb-1">
+                    Total
+                  </p>
+                  <p className="text-[24px] font-semibold leading-tight text-foreground">
+                    {statistics.total}
+                  </p>
+                </div>
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-foreground">Aucune épreuve en attente</h3>
-              <p className="text-muted-foreground max-w-sm mx-auto">
-                Les nouvelles épreuves apparaîtront ici dès qu'une commande sera acceptée et qu'une épreuve sera générée.
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+
+          {/* To Prepare Card */}
+          <Card className="bg-background border-border shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-warning/10 rounded-lg">
+                  <CircleDot className="h-5 w-5 text-warning flex-shrink-0" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[14px] leading-tight text-muted-foreground font-medium mb-1">
+                    À préparer
+                  </p>
+                  <p className="text-[24px] font-semibold leading-tight text-foreground">
+                    {statistics.toPrepare}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* In Preparation Card */}
+          <Card className="bg-background border-border shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-info/10 rounded-lg">
+                  <Clock className="h-5 w-5 text-info flex-shrink-0" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[14px] leading-tight text-muted-foreground font-medium mb-1">
+                    En cours
+                  </p>
+                  <p className="text-[24px] font-semibold leading-tight text-foreground">
+                    {statistics.inPreparation}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Sent Card */}
+          <Card className="bg-background border-border shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-positive/10 rounded-lg">
+                  <Eye className="h-5 w-5 text-positive flex-shrink-0" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[14px] leading-tight text-muted-foreground font-medium mb-1">
+                    Envoyées
+                  </p>
+                  <p className="text-[24px] font-semibold leading-tight text-foreground">
+                    {statistics.sent}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* In Revision Card */}
+          <Card className="bg-background border-border shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-warning/10 rounded-lg">
+                  <CheckCircle2 className="h-5 w-5 text-warning flex-shrink-0" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[14px] leading-tight text-muted-foreground font-medium mb-1">
+                    En révision
+                  </p>
+                  <p className="text-[24px] font-semibold leading-tight text-foreground">
+                    {statistics.inRevision}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Proofs List - BaseWeb Layout Grid */}
+        <Card className="bg-background border-border shadow-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-[18px] font-medium text-foreground">Épreuves en attente</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 pt-0">
+            {isLoading ? (
+              <div className={cn(
+                "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3",
+                "gap-2" // 8px grid
+              )}>
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="space-y-3">
+                    <Skeleton className="h-32 w-full rounded-lg" />
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                ))}
+              </div>
+            ) : proofs && proofs.length > 0 ? (
+              <div className={cn(
+                "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3",
+                "gap-2" // 8px grid spacing
+              )}>
+                {proofs.map((proof) => (
+                  <ProofCard key={proof.id} proof={proof} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16">
+                <div className="flex flex-col items-center max-w-md mx-auto">
+                  <FileText className="h-12 w-12 text-muted-foreground/60 mb-4" />
+                  <h3 className="text-[18px] font-medium leading-tight mb-2 text-foreground">
+                    Aucune épreuve en attente
+                  </h3>
+                  <p className="text-[16px] leading-relaxed text-muted-foreground text-center">
+                    Les nouvelles épreuves apparaîtront ici dès qu'une commande sera acceptée et qu'une épreuve sera générée.
+                  </p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
