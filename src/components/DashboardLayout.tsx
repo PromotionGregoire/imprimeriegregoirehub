@@ -7,10 +7,10 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const DashboardLayout = () => {
   const isMobile = useIsMobile();
 
-  // Show bottom navigation for mobile AND tablet (below lg breakpoint)
-  const useBottomNav = isMobile || (typeof window !== 'undefined' && window.innerWidth < 1024);
+  // Check if we should use mobile layout (mobile + tablet)
+  const useMobileLayout = isMobile || (typeof window !== 'undefined' && window.innerWidth <= 1024);
   
-  if (useBottomNav) {
+  if (useMobileLayout) {
     return (
       <div className="min-h-screen flex flex-col w-full">
         <main className="flex-1 bg-background pb-20">
