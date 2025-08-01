@@ -12,6 +12,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useProducts } from '@/hooks/useProducts';
 import { useSuppliers } from '@/hooks/useSuppliers';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import ProductVariantManager from './ProductVariantManager';
 import ProductSuppliersManager from './ProductSuppliersManager';
 
@@ -44,6 +46,9 @@ const ProductModal = ({ trigger, product, onSave, isLoading, isOpen: controlledO
   const [selectedSuppliers, setSelectedSuppliers] = useState<string[]>([]);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
+  const [isUploading, setIsUploading] = useState(false);
+  
+  const { toast } = useToast();
   
   const { data: suppliers } = useSuppliers();
   
@@ -91,31 +96,126 @@ const ProductModal = ({ trigger, product, onSave, isLoading, isOpen: controlledO
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "Fichier trop volumineux",
+          description: "L'image ne doit pas dépasser 5MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Type de fichier invalide",
+          description: "Veuillez sélectionner une image.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       setSelectedImage(file);
       const reader = new FileReader();
       reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setImagePreview(result);
-        form.setValue('image_url', result);
+        setImagePreview(e.target?.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleRemoveImage = () => {
+  const uploadImageToStorage = async (file: File): Promise<string | null> => {
+    setIsUploading(true);
+    try {
+      // Generate unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      
+      // Upload to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('product-images')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) {
+        console.error('Storage upload error:', error);
+        toast({
+          title: "Erreur d'upload",
+          description: "Impossible de téléverser l'image.",
+          variant: "destructive",
+        });
+        return null;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(data.path);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Erreur d'upload",
+        description: "Une erreur inattendue s'est produite.",
+        variant: "destructive",
+      });
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveImage = async () => {
+    // If there's an existing image URL, optionally delete it from storage
+    if (form.getValues('image_url') && form.getValues('image_url').includes('product-images')) {
+      try {
+        const imagePath = form.getValues('image_url').split('/product-images/')[1];
+        if (imagePath) {
+          await supabase.storage
+            .from('product-images')
+            .remove([imagePath]);
+        }
+      } catch (error) {
+        console.error('Error deleting image:', error);
+      }
+    }
+
     setSelectedImage(null);
     setImagePreview('');
     form.setValue('image_url', '');
   };
 
-  const handleSubmit = (data: ProductFormData) => {
+  const handleSubmit = async (data: ProductFormData) => {
+    let imageUrl = data.image_url;
+
+    // Upload image if a new one was selected
+    if (selectedImage) {
+      const uploadedUrl = await uploadImageToStorage(selectedImage);
+      if (uploadedUrl) {
+        imageUrl = uploadedUrl;
+      } else {
+        // Upload failed, don't proceed
+        return;
+      }
+    }
+
     const submitData = {
       ...data,
+      image_url: imageUrl,
       supplier_ids: selectedSuppliers,
     };
+    
     onSave(submitData);
+    
     if (!isLoading) {
       setIsOpen(false);
+      // Reset form state
+      setSelectedImage(null);
+      setImagePreview('');
     }
   };
 
@@ -231,6 +331,7 @@ const ProductModal = ({ trigger, product, onSave, isLoading, isOpen: controlledO
                       size="sm"
                       className="absolute top-1 right-1 h-6 w-6 p-0"
                       onClick={handleRemoveImage}
+                      disabled={isUploading}
                     >
                       <X className="h-3 w-3" />
                     </Button>
@@ -244,10 +345,16 @@ const ProductModal = ({ trigger, product, onSave, isLoading, isOpen: controlledO
                 {/* Upload Button */}
                 <div className="flex-1 space-y-2">
                   <div className="flex gap-2">
-                    <Button type="button" variant="outline" size="sm" asChild>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm" 
+                      asChild
+                      disabled={isUploading}
+                    >
                       <label htmlFor="image-upload" className="cursor-pointer">
                         <Upload className="h-4 w-4 mr-2" />
-                        Choisir une image
+                        {isUploading ? 'Upload en cours...' : 'Choisir une image'}
                       </label>
                     </Button>
                     {imagePreview && (
@@ -256,6 +363,7 @@ const ProductModal = ({ trigger, product, onSave, isLoading, isOpen: controlledO
                         variant="ghost" 
                         size="sm"
                         onClick={handleRemoveImage}
+                        disabled={isUploading}
                       >
                         Supprimer
                       </Button>
@@ -267,10 +375,17 @@ const ProductModal = ({ trigger, product, onSave, isLoading, isOpen: controlledO
                     accept="image/*"
                     onChange={handleImageSelect}
                     className="hidden"
+                    disabled={isUploading}
                   />
                   <p className="text-xs text-muted-foreground">
                     Formats acceptés: JPG, PNG, GIF (max 5MB)
                   </p>
+                  {isUploading && (
+                    <p className="text-xs text-blue-600 flex items-center gap-1">
+                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
+                      Upload en cours...
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -342,8 +457,11 @@ const ProductModal = ({ trigger, product, onSave, isLoading, isOpen: controlledO
               <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
                 Annuler
               </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? 'Sauvegarde...' : (product ? 'Mettre à jour' : 'Créer')}
+              <Button type="submit" disabled={isLoading || isUploading}>
+                {isLoading || isUploading 
+                  ? (isUploading ? 'Upload...' : 'Sauvegarde...') 
+                  : (product ? 'Mettre à jour' : 'Créer')
+                }
               </Button>
             </div>
           </form>

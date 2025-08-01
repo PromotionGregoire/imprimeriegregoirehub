@@ -312,6 +312,7 @@ export type Database = {
           default_price: number | null
           description: string | null
           id: string
+          image_url: string | null
           name: string
           product_code: string
           updated_at: string
@@ -322,6 +323,7 @@ export type Database = {
           default_price?: number | null
           description?: string | null
           id?: string
+          image_url?: string | null
           name: string
           product_code: string
           updated_at?: string
@@ -332,6 +334,7 @@ export type Database = {
           default_price?: number | null
           description?: string | null
           id?: string
+          image_url?: string | null
           name?: string
           product_code?: string
           updated_at?: string

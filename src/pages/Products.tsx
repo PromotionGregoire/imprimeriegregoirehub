@@ -9,6 +9,7 @@ import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct, Prod
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import ProductModal from '@/components/ProductModal';
+import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 
 const Products = () => {
@@ -72,7 +73,27 @@ const Products = () => {
 
   const handleDelete = async (id: string) => {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-      deleteProduct.mutate(id);
+      // Find the product to get its image URL for cleanup
+      const productToDelete = products?.find(p => p.id === id);
+      
+      deleteProduct.mutate(id, {
+        onSuccess: async () => {
+          // Clean up the image from storage if it exists
+          if (productToDelete?.image_url && productToDelete.image_url.includes('product-images')) {
+            try {
+              const imagePath = productToDelete.image_url.split('/product-images/')[1];
+              if (imagePath) {
+                await supabase.storage
+                  .from('product-images')
+                  .remove([imagePath]);
+              }
+            } catch (error) {
+              console.error('Error deleting image from storage:', error);
+              // Don't show error to user as the product was deleted successfully
+            }
+          }
+        }
+      });
     }
   };
 
@@ -208,37 +229,50 @@ const Products = () => {
               >
                 {/* Image Section - Fixed Height */}
                 <div className="relative h-48 overflow-hidden flex-shrink-0">
-                  {(product as any).image_url ? (
-                    <img 
-                      src={(product as any).image_url} 
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className={cn(
-                      "w-full h-full flex items-center justify-center",
-                      product.category === 'Impression' 
-                        ? "bg-emerald-100" 
-                        : "bg-blue-100"
-                    )}>
-                      <div className="text-center">
-                        <Tag className={cn(
-                          "h-12 w-12 mx-auto mb-2",
-                          product.category === 'Impression' 
-                            ? "text-emerald-600" 
-                            : "text-blue-600"
-                        )} />
-                        <div className={cn(
-                          "text-sm font-medium",
-                          product.category === 'Impression' 
-                            ? "text-emerald-700" 
-                            : "text-blue-700"
-                        )}>
-                          {product.category}
-                        </div>
+                  {product.image_url ? (
+                    <div className="relative w-full h-full">
+                      <img 
+                        src={product.image_url} 
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          // Hide the image and show fallback
+                          const target = e.currentTarget;
+                          target.style.display = 'none';
+                          const fallback = target.parentElement?.nextElementSibling;
+                          if (fallback) {
+                            fallback.classList.remove('hidden');
+                          }
+                        }}
+                      />
+                    </div>
+                  ) : null}
+                  
+                  {/* Fallback color-coded background */}
+                  <div className={cn(
+                    "w-full h-full flex items-center justify-center",
+                    product.image_url ? "hidden" : "",
+                    product.category === 'Impression' 
+                      ? "bg-emerald-100" 
+                      : "bg-blue-100"
+                  )}>
+                    <div className="text-center">
+                      <Tag className={cn(
+                        "h-12 w-12 mx-auto mb-2",
+                        product.category === 'Impression' 
+                          ? "text-emerald-600" 
+                          : "text-blue-600"
+                      )} />
+                      <div className={cn(
+                        "text-sm font-medium",
+                        product.category === 'Impression' 
+                          ? "text-emerald-700" 
+                          : "text-blue-700"
+                      )}>
+                        {product.category}
                       </div>
                     </div>
-                  )}
+                  </div>
                   
                   {/* Actions Overlay */}
                   <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>

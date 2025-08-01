@@ -8,6 +8,7 @@ export interface Product {
   description?: string;
   default_price: number;
   category: 'Impression' | 'Article Promotionnel';
+  image_url?: string;
   created_at: string;
   updated_at: string;
 }
