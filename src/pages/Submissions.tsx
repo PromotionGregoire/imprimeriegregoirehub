@@ -119,25 +119,38 @@ const Submissions = () => {
   }
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden">
-      {/* BaseWeb Container with responsive margins: 16px mobile, 24px tablet, 32px desktop */}
-      <div className="mx-4 md:mx-6 lg:mx-8 py-4 md:py-6 space-y-6 pb-24 md:pb-6 max-w-full">
-        {/* Header - BaseWeb Layout Grid with proper overflow handling */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 min-h-[48px] w-full">
-          <div className="flex items-center gap-2 min-w-0 flex-shrink">
+    <div className="min-h-screen bg-background">
+      {/* BaseWeb Layout Container with responsive margins */}
+      <div className={cn(
+        "mx-auto max-w-7xl",
+        "px-4 py-4 sm:px-6 sm:py-6 md:px-8 md:py-8",
+        "pb-20 md:pb-8" // Bottom nav spacing
+      )}>
+        
+        {/* Header Section - BaseWeb Typography Scale */}
+        <div className={cn(
+          "flex flex-col sm:flex-row items-start sm:items-center justify-between",
+          "gap-4 mb-6"
+        )}>
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             <FileText className="h-6 w-6 text-primary flex-shrink-0" />
-            <h1 className="text-[24px] sm:text-[28px] lg:text-[36px] leading-[1.2] font-semibold text-content-primary truncate">
+            <h1 className={cn(
+              "text-[36px] font-semibold leading-tight text-foreground",
+              "truncate" // Prevent overflow
+            )}>
               Soumissions
             </h1>
           </div>
+          {/* BaseWeb Button with 48px touch target */}
           <Button 
-            variant="primary" 
-            size="large" 
+            variant="primary"
+            size="default"
             className={cn(
-              "gap-2 min-h-[48px] px-4 text-[16px] leading-[1.5] flex-shrink-0",
-              "hover:shadow-lg transition-all duration-200",
-              "focus:ring-2 focus:ring-primary focus:ring-offset-2",
-              "w-full sm:w-auto max-w-full"
+              "min-h-[48px] px-4 gap-2",
+              "bg-primary hover:bg-primary/90 text-primary-foreground",
+              "transition-all duration-200 ease-out",
+              "shadow-sm hover:shadow-md",
+              "whitespace-nowrap"
             )}
             onClick={() => navigate('/dashboard/submissions/new')}
           >
@@ -147,165 +160,197 @@ const Submissions = () => {
           </Button>
         </div>
 
-      {/* Date Range Filter - BaseWeb Pattern */}
-      <div className="flex items-center justify-start">
-        <Select value={periodFilter} onValueChange={setPeriodFilter}>
-          <SelectTrigger className={cn(
-            "w-full sm:w-[200px] min-h-[48px] text-[16px] leading-[1.5]",
-            "focus:ring-2 focus:ring-primary focus:ring-offset-2",
-            "bg-background border border-border"
-          )}>
-            <SelectValue placeholder="Filtrer par période" />
-          </SelectTrigger>
-          <SelectContent className="z-50 bg-background border border-border shadow-lg">
-            <SelectItem value="all">Tous</SelectItem>
-            <SelectItem value="today">Aujourd'hui</SelectItem>
-            <SelectItem value="yesterday">Hier</SelectItem>
-            <SelectItem value="thisWeek">Cette semaine</SelectItem>
-            <SelectItem value="7days">Les 7 derniers jours</SelectItem>
-            <SelectItem value="14days">Les 14 derniers jours</SelectItem>
-            <SelectItem value="thisMonth">Ce mois-ci</SelectItem>
-            <SelectItem value="30days">Les 30 derniers jours</SelectItem>
-            <SelectItem value="3months">Les 3 derniers mois</SelectItem>
-            <SelectItem value="6months">Les 6 derniers mois</SelectItem>
-            <SelectItem value="thisYear">Cette année</SelectItem>
-            <SelectItem value="12months">Les 12 derniers mois</SelectItem>
-            <SelectItem value="lastYear">L'année dernière</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+        {/* Date Range Filter - BaseWeb Pattern */}
+        <div className="mb-6">
+          <Select value={periodFilter} onValueChange={setPeriodFilter}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Filtrer par période" />
+            </SelectTrigger>
+            <SelectContent className="z-50 bg-background border border-border shadow-lg">
+              <SelectItem value="all">Tous</SelectItem>
+              <SelectItem value="today">Aujourd'hui</SelectItem>
+              <SelectItem value="yesterday">Hier</SelectItem>
+              <SelectItem value="thisWeek">Cette semaine</SelectItem>
+              <SelectItem value="7days">Les 7 derniers jours</SelectItem>
+              <SelectItem value="14days">Les 14 derniers jours</SelectItem>
+              <SelectItem value="thisMonth">Ce mois-ci</SelectItem>
+              <SelectItem value="30days">Les 30 derniers jours</SelectItem>
+              <SelectItem value="3months">Les 3 derniers mois</SelectItem>
+              <SelectItem value="6months">Les 6 derniers mois</SelectItem>
+              <SelectItem value="thisYear">Cette année</SelectItem>
+              <SelectItem value="12months">Les 12 derniers mois</SelectItem>
+              <SelectItem value="lastYear">L'année dernière</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-      {/* KPI Cards - BaseWeb Card Pattern with overflow prevention */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 w-full">
-        <Card className={cn(
-          "bg-background border border-border",
-          "shadow-sm hover:shadow-md transition-shadow duration-200",
-          "min-w-0 overflow-hidden"
+        {/* Statistics Cards - BaseWeb Card Pattern with 8px Grid */}
+        <div className={cn(
+          "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5",
+          "gap-2 mb-6" // 8px gaps
         )}>
-          <CardContent className="p-4">
-            <div className="text-[14px] leading-[1.5] text-content-secondary font-medium mb-2 truncate">Total</div>
-            <div className="text-[24px] sm:text-[28px] leading-[1.2] font-semibold text-content-primary truncate">{stats.total}</div>
-          </CardContent>
-        </Card>
-        
-        <Card className={cn(
-          "bg-[hsl(var(--status-purple-light))] border border-[hsl(var(--status-purple))]",
-          "shadow-sm hover:shadow-md transition-shadow duration-200",
-          "min-w-0 overflow-hidden"
-        )}>
-          <CardContent className="p-4">
-            <div className="text-[14px] leading-[1.5] text-content-secondary font-medium mb-2 truncate">Complétées</div>
-            <div className="text-[24px] sm:text-[28px] leading-[1.2] font-semibold text-[hsl(var(--status-purple))] truncate">{stats.completed}</div>
-          </CardContent>
-        </Card>
-        
-        <Card className={cn(
-          "bg-[hsl(var(--status-green-light))] border border-[hsl(var(--status-green))]",
-          "shadow-sm hover:shadow-md transition-shadow duration-200",
-          "min-w-0 overflow-hidden"
-        )}>
-          <CardContent className="p-4">
-            <div className="text-[14px] leading-[1.5] text-content-secondary font-medium mb-2 truncate">Acceptées</div>
-            <div className="text-[24px] sm:text-[28px] leading-[1.2] font-semibold text-[hsl(var(--status-green))] truncate">{stats.accepted}</div>
-          </CardContent>
-        </Card>
-        
-        <Card className={cn(
-          "bg-[hsl(var(--status-orange-light))] border border-[hsl(var(--status-orange))]",
-          "shadow-sm hover:shadow-md transition-shadow duration-200",
-          "min-w-0 overflow-hidden"
-        )}>
-          <CardContent className="p-4">
-            <div className="text-[14px] leading-[1.5] text-content-secondary font-medium mb-2 truncate">Envoyées</div>
-            <div className="text-[24px] sm:text-[28px] leading-[1.2] font-semibold text-[hsl(var(--status-orange))] truncate">{stats.sent}</div>
-          </CardContent>
-        </Card>
-        
-        <Card className={cn(
-          "bg-[hsl(var(--status-blue-light))] border border-[hsl(var(--status-blue))]",
-          "shadow-sm hover:shadow-md transition-shadow duration-200",
-          "min-w-0 overflow-hidden"
-        )}>
-          <CardContent className="p-4">
-            <div className="text-[14px] leading-[1.5] text-content-secondary font-medium mb-2 truncate">Valeur Totale</div>
-            <div className="text-[20px] sm:text-[24px] lg:text-[28px] leading-[1.2] font-semibold text-[hsl(var(--status-blue))] truncate break-all">{formatPrice(stats.totalValue)}</div>
-          </CardContent>
-        </Card>
-      </div>
+          {/* Total Card */}
+          <Card className="bg-background border-border shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <FileText className="h-5 w-5 text-primary flex-shrink-0" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[14px] leading-tight text-muted-foreground font-medium mb-1">
+                    Total
+                  </p>
+                  <p className="text-[24px] font-semibold leading-tight text-foreground">
+                    {stats.total}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* Search & Status Filter Bar - BaseWeb Pattern */}
-      <Card className={cn(
-        "border border-border-default shadow-sm",
-        "hover:shadow-md transition-shadow duration-200"
-      )}>
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* Search Bar */}
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-content-secondary" />
-              <Input
-                placeholder="Rechercher par numéro de soumission ou client..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={cn(
-                  "pl-10 min-h-[48px] text-[16px] leading-[1.5]",
-                  "focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                )}
-              />
+          {/* Completed Card */}
+          <Card className="bg-background border-border shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-positive/10 rounded-lg">
+                  <FileText className="h-5 w-5 text-positive flex-shrink-0" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[14px] leading-tight text-muted-foreground font-medium mb-1">
+                    Complétées
+                  </p>
+                  <p className="text-[24px] font-semibold leading-tight text-foreground">
+                    {stats.completed}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Accepted Card */}
+          <Card className="bg-background border-border shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-info/10 rounded-lg">
+                  <FileText className="h-5 w-5 text-info flex-shrink-0" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[14px] leading-tight text-muted-foreground font-medium mb-1">
+                    Acceptées
+                  </p>
+                  <p className="text-[24px] font-semibold leading-tight text-foreground">
+                    {stats.accepted}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Sent Card */}
+          <Card className="bg-background border-border shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-warning/10 rounded-lg">
+                  <FileText className="h-5 w-5 text-warning flex-shrink-0" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[14px] leading-tight text-muted-foreground font-medium mb-1">
+                    Envoyées
+                  </p>
+                  <p className="text-[24px] font-semibold leading-tight text-foreground">
+                    {stats.sent}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Total Value Card */}
+          <Card className="bg-background border-border shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-accent/10 rounded-lg">
+                  <FileText className="h-5 w-5 text-accent flex-shrink-0" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[14px] leading-tight text-muted-foreground font-medium mb-1">
+                    Valeur Totale
+                  </p>
+                  <p className="text-[20px] font-semibold leading-tight text-foreground truncate">
+                    {formatPrice(stats.totalValue)}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Toolbar - BaseWeb Search and Filter Pattern */}
+        <div className="mb-6">
+          <Card className="bg-background border-border shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Rechercher par numéro de soumission ou client..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-full sm:w-[200px]">
+                    <SelectValue placeholder="Filtrer par statut" />
+                  </SelectTrigger>
+                  <SelectContent className="z-50 bg-background border border-border shadow-lg">
+                    <SelectItem value="all">Tous les statuts</SelectItem>
+                    {submissionStatusOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Submissions Grid - BaseWeb Layout Grid */}
+        <div className={cn(
+          "grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4",
+          "gap-2" // 8px grid spacing
+        )}>
+          {submissions.length === 0 ? (
+            <div className="col-span-full">
+              <Card className="bg-background border-border">
+                <CardContent className="p-8 text-center">
+                  <div className="flex flex-col items-center max-w-md mx-auto">
+                    <FileText className="h-12 w-12 text-muted-foreground/60 mb-4" />
+                    <h3 className="text-[18px] font-medium leading-tight mb-2 text-foreground">
+                      Aucune soumission trouvée
+                    </h3>
+                    <p className="text-[16px] leading-relaxed text-muted-foreground text-center">
+                      {searchQuery || statusFilter !== 'all' 
+                        ? 'Aucune soumission trouvée avec ces critères'
+                        : 'Aucune soumission pour le moment'
+                      }
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-
-            {/* Status Filter */}
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className={cn(
-                "w-full sm:w-[200px] min-h-[48px] text-[16px] leading-[1.5]",
-                "focus:ring-2 focus:ring-primary focus:ring-offset-2",
-                "bg-background border border-border"
-              )}>
-                <SelectValue placeholder="Filtrer par statut" />
-              </SelectTrigger>
-              <SelectContent className="z-50 bg-background border border-border shadow-lg">
-                <SelectItem value="all">Tous les statuts</SelectItem>
-                {submissionStatusOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Submissions Grid - BaseWeb Layout Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {submissions.length === 0 ? (
-          <div className="col-span-full">
-            <Card className={cn(
-              "border border-border-default shadow-sm",
-              "hover:shadow-md transition-shadow duration-200"
-            )}>
-              <CardContent className="text-center py-16">
-                <FileText className="mx-auto h-12 w-12 text-content-secondary mb-4" />
-                <h3 className="text-[24px] leading-[1.2] font-semibold mb-2 text-content-primary">Aucune soumission trouvée</h3>
-                <p className="text-[16px] leading-[1.5] text-content-secondary max-w-sm mx-auto">
-                  {searchQuery || statusFilter !== 'all' 
-                    ? 'Aucune soumission trouvée avec ces critères'
-                    : 'Aucune soumission pour le moment'
-                  }
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        ) : (
-          submissions.map((submission) => (
-            <ModernSubmissionCard
-              key={submission.id}
-              submission={submission}
-              onClick={() => navigate(`/dashboard/submissions/${submission.id}`)}
-            />
-          ))
-        )}
-      </div>
+          ) : (
+            submissions.map((submission) => (
+              <ModernSubmissionCard
+                key={submission.id}
+                submission={submission}
+                onClick={() => navigate(`/dashboard/submissions/${submission.id}`)}
+              />
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
