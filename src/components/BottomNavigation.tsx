@@ -86,7 +86,8 @@ export function BottomNavigation() {
                   <span className={cn(
                     // Base typography: 14px caption with 1.2 line-height
                     "text-xs font-medium leading-tight text-center",
-                    "max-w-full truncate",
+                    "w-full truncate px-1", // Ensure proper truncation with padding
+                    "max-w-[60px]", // Limit width to prevent overflow
                     active ? "font-semibold" : "font-medium"
                   )}>
                     {item.title}
