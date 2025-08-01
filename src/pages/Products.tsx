@@ -175,86 +175,95 @@ const Products = () => {
         </Card>
 
         {/* Products List - BaseWeb Layout Grid */}
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProducts.length === 0 ? (
-            <Card className="bg-background border-border">
-              <CardContent className="p-8 text-center">
-                <div className="flex flex-col items-center max-w-md mx-auto">
-                  <Tag className="h-12 w-12 text-muted-foreground/60 mb-4" />
-                  <h3 className="text-[18px] font-medium leading-tight mb-2 text-foreground">
-                    Aucun produit trouvé
-                  </h3>
-                  <p className="text-[16px] leading-relaxed text-muted-foreground text-center">
-                    {searchTerm || categoryFilter !== 'all' 
-                      ? 'Aucun produit trouvé avec ces critères'
-                      : 'Aucun produit pour le moment'
-                    }
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="col-span-full">
+              <Card className="bg-background border-border">
+                <CardContent className="p-8 text-center">
+                  <div className="flex flex-col items-center max-w-md mx-auto">
+                    <Tag className="h-12 w-12 text-muted-foreground/60 mb-4" />
+                    <h3 className="text-[18px] font-medium leading-tight mb-2 text-foreground">
+                      Aucun produit trouvé
+                    </h3>
+                    <p className="text-[16px] leading-relaxed text-muted-foreground text-center">
+                      {searchTerm || categoryFilter !== 'all' 
+                        ? 'Aucun produit trouvé avec ces critères'
+                        : 'Aucun produit pour le moment'
+                      }
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           ) : (
             filteredProducts.map((product) => (
               <Card 
                 key={product.id} 
                 className={cn(
-                  "bg-background border-border shadow-sm hover:shadow-md transition-all duration-200",
-                  "cursor-pointer overflow-hidden"
+                  "bg-background border-border shadow-sm hover:shadow-lg transition-all duration-200",
+                  "cursor-pointer overflow-hidden group hover:border-primary/20"
                 )}
                 onClick={() => window.location.href = `/dashboard/products/${product.id}`}
               >
-                <CardContent className="p-8">
-                  <div className="flex items-center justify-between min-w-0 gap-6">
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[20px] font-semibold leading-tight text-foreground mb-2 truncate">
-                        {product.name}
-                      </div>
-                      <div className="text-[14px] text-muted-foreground leading-tight mb-3 font-medium">
+                <CardContent className="p-6">
+                  <div className="flex flex-col space-y-4">
+                    {/* Header with Code and Actions */}
+                    <div className="flex items-start justify-between">
+                      <div className="text-sm font-mono text-muted-foreground bg-muted/30 px-2 py-1 rounded">
                         {product.product_code}
                       </div>
+                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleEdit(product)}
+                          className="h-8 w-8 p-0 hover:bg-muted/50"
+                          aria-label="Modifier le produit"
+                        >
+                          <Pencil className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(product.id)}
+                          className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
+                          aria-label="Supprimer le produit"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Product Name */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-foreground line-clamp-2 leading-tight">
+                        {product.name}
+                      </h3>
                       {product.description && (
-                        <div className="text-[16px] text-muted-foreground leading-relaxed truncate">
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
                           {product.description}
-                        </div>
+                        </p>
                       )}
                     </div>
-                    
-                    <div className="flex items-center gap-8 flex-shrink-0">
-                      <div className="text-right">
-                        <div className="text-[20px] font-bold text-foreground">
-                          ${Number(product.default_price).toFixed(2)}
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-4">
-                        <Badge 
-                          variant={product.category === 'Impression' ? 'default' : 'secondary'}
-                          className="px-3 py-1 text-sm font-medium"
-                        >
-                          {product.category}
-                        </Badge>
-                        
-                        <div className="flex gap-3" onClick={(e) => e.stopPropagation()}>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleEdit(product)}
-                            className="h-10 w-10 p-0 hover:bg-muted/50 transition-colors duration-200"
-                            aria-label="Modifier le produit"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(product.id)}
-                            className="h-10 w-10 p-0 hover:bg-destructive/10 hover:text-destructive transition-colors duration-200"
-                            aria-label="Supprimer le produit"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
+
+                    {/* Price */}
+                    <div className="text-2xl font-bold text-foreground">
+                      ${Number(product.default_price).toFixed(2)}
+                    </div>
+
+                    {/* Category Badge */}
+                    <div className="flex justify-start">
+                      <Badge 
+                        variant={product.category === 'Impression' ? 'default' : 'secondary'}
+                        className={cn(
+                          "px-3 py-1 text-xs font-medium rounded-full",
+                          product.category === 'Impression' 
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
+                            : "bg-blue-50 text-blue-700 border-blue-200"
+                        )}
+                      >
+                        {product.category}
+                      </Badge>
                     </div>
                   </div>
                 </CardContent>
