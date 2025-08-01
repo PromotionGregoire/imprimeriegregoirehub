@@ -50,19 +50,19 @@ const Proofs = () => {
 
   return (
     <div className="p-base-600 space-y-base-600 pb-24 md:pb-base-600">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-base-300">
-          <FileText className="h-base-600 w-base-600 text-primary" />
-          <h1 className="text-base-750 font-semibold">Gestion des Épreuves</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
+        <div className="flex items-center gap-3 min-w-0">
+          <FileText className="h-6 w-6 text-primary flex-shrink-0" />
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold leading-tight truncate">Gestion des Épreuves</h1>
         </div>
         <Button 
           variant="primary" 
           size="default" 
-          className="gap-base-200 transition-all ease-uber" 
+          className="gap-2 transition-all ease-uber flex-shrink-0 w-full sm:w-auto" 
           onClick={() => navigate('/dashboard/orders')}
         >
-          <Plus className="h-base-400 w-base-400" />
-          Nouvelle Épreuve
+          <Plus className="h-4 w-4" />
+          <span className="truncate">Nouvelle Épreuve</span>
         </Button>
       </div>
 
