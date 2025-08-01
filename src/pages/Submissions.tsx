@@ -1,5 +1,4 @@
 import { useState } from 'react';
-
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import ModernSubmissionCard from '@/components/ModernSubmissionCard';
+import { cn } from '@/lib/utils';
 
 const Submissions = () => {
   const navigate = useNavigate();
@@ -30,12 +30,12 @@ const Submissions = () => {
 
   if (error) {
     return (
-      <div className="p-6">
+      <div className="px-4 md:px-6 lg:px-8">
         <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-            <h3 className="text-lg font-medium mb-2">Erreur de chargement</h3>
-            <p className="text-muted-foreground">
+          <div className="text-center max-w-md">
+            <AlertCircle className="h-12 w-12 text-negative mx-auto mb-4" />
+            <h3 className="text-[24px] leading-[1.2] font-semibold mb-2">Erreur de chargement</h3>
+            <p className="text-[16px] leading-[1.5] text-content-secondary">
               Impossible de charger les soumissions. Veuillez réessayer.
             </p>
           </div>
@@ -99,10 +99,10 @@ const Submissions = () => {
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-6">
+      <div className="px-4 md:px-6 lg:px-8 py-6 space-y-6">
         <div className="flex items-center justify-between">
           <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-10 w-32" />
+          <Skeleton className="h-12 w-32" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           {[...Array(5)].map((_, i) => (
@@ -119,28 +119,35 @@ const Submissions = () => {
   }
 
   return (
-    <div className="p-base-600 space-y-base-600 pb-24 md:pb-base-600">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-base-300">
-          <FileText className="h-base-600 w-base-600 text-primary" />
-          <h1 className="text-base-750 font-semibold">Soumissions</h1>
+    <div className="px-4 md:px-6 lg:px-8 py-6 space-y-6 pb-24 md:pb-6">
+      {/* Header - BaseWeb Layout Grid */}
+      <div className="flex items-center justify-between min-h-[48px]">
+        <div className="flex items-center gap-2">
+          <FileText className="h-6 w-6 text-primary" />
+          <h1 className="text-[36px] leading-[1.2] font-semibold text-content-primary">Soumissions</h1>
         </div>
         <Button 
           variant="primary" 
-          size="default" 
-          className="gap-base-200 transition-all ease-uber" 
+          size="large" 
+          className={cn(
+            "gap-2 min-h-[48px] px-4 text-[16px] leading-[1.5]",
+            "hover:shadow-lg transition-all duration-200",
+            "focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          )}
           onClick={() => navigate('/dashboard/submissions/new')}
         >
-          <Plus className="h-base-400 w-base-400" />
+          <Plus className="h-4 w-4" />
           Nouvelle Soumission
         </Button>
       </div>
 
-      {/* Date Range Filter */}
-      <div className="flex items-center justify-between">
+      {/* Date Range Filter - BaseWeb Pattern */}
+      <div className="flex items-center justify-start">
         <Select value={periodFilter} onValueChange={setPeriodFilter}>
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className={cn(
+            "w-[200px] min-h-[48px] text-[16px] leading-[1.5]",
+            "focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          )}>
             <SelectValue placeholder="Filtrer par période" />
           </SelectTrigger>
           <SelectContent>
@@ -161,62 +168,86 @@ const Submissions = () => {
         </Select>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 lg:gap-6">
-        <Card className="bg-card border border-border">
-          <CardContent className="p-4 sm:p-5 lg:p-6">
-            <div className="text-sm text-muted-foreground font-medium mb-2">Total</div>
-            <div className="text-2xl font-bold">{stats.total}</div>
+      {/* KPI Cards - BaseWeb Card Pattern */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <Card className={cn(
+          "bg-background-primary border border-border-default",
+          "shadow-sm hover:shadow-md transition-shadow duration-200"
+        )}>
+          <CardContent className="p-4">
+            <div className="text-[14px] leading-[1.5] text-content-secondary font-medium mb-2">Total</div>
+            <div className="text-[28px] leading-[1.2] font-semibold text-content-primary">{stats.total}</div>
           </CardContent>
         </Card>
         
-        <Card className="bg-[hsl(var(--status-purple-light))] border border-[hsl(var(--status-purple))]">
-          <CardContent className="p-4 sm:p-5 lg:p-6">
-            <div className="text-sm text-muted-foreground font-medium mb-2">Complétées</div>
-            <div className="text-2xl font-bold text-[hsl(var(--status-purple))]">{stats.completed}</div>
+        <Card className={cn(
+          "bg-[hsl(var(--status-purple-light))] border border-[hsl(var(--status-purple))]",
+          "shadow-sm hover:shadow-md transition-shadow duration-200"
+        )}>
+          <CardContent className="p-4">
+            <div className="text-[14px] leading-[1.5] text-content-secondary font-medium mb-2">Complétées</div>
+            <div className="text-[28px] leading-[1.2] font-semibold text-[hsl(var(--status-purple))]">{stats.completed}</div>
           </CardContent>
         </Card>
         
-        <Card className="bg-[hsl(var(--status-green-light))] border border-[hsl(var(--status-green))]">
-          <CardContent className="p-4 sm:p-5 lg:p-6">
-            <div className="text-sm text-muted-foreground font-medium mb-2">Acceptées</div>
-            <div className="text-2xl font-bold text-[hsl(var(--status-green))]">{stats.accepted}</div>
+        <Card className={cn(
+          "bg-[hsl(var(--status-green-light))] border border-[hsl(var(--status-green))]",
+          "shadow-sm hover:shadow-md transition-shadow duration-200"
+        )}>
+          <CardContent className="p-4">
+            <div className="text-[14px] leading-[1.5] text-content-secondary font-medium mb-2">Acceptées</div>
+            <div className="text-[28px] leading-[1.2] font-semibold text-[hsl(var(--status-green))]">{stats.accepted}</div>
           </CardContent>
         </Card>
         
-        <Card className="bg-[hsl(var(--status-orange-light))] border border-[hsl(var(--status-orange))]">
-          <CardContent className="p-4 sm:p-5 lg:p-6">
-            <div className="text-sm text-muted-foreground font-medium mb-2">Envoyées</div>
-            <div className="text-2xl font-bold text-[hsl(var(--status-orange))]">{stats.sent}</div>
+        <Card className={cn(
+          "bg-[hsl(var(--status-orange-light))] border border-[hsl(var(--status-orange))]",
+          "shadow-sm hover:shadow-md transition-shadow duration-200"
+        )}>
+          <CardContent className="p-4">
+            <div className="text-[14px] leading-[1.5] text-content-secondary font-medium mb-2">Envoyées</div>
+            <div className="text-[28px] leading-[1.2] font-semibold text-[hsl(var(--status-orange))]">{stats.sent}</div>
           </CardContent>
         </Card>
         
-        <Card className="bg-[hsl(var(--status-blue-light))] border border-[hsl(var(--status-blue))]">
-          <CardContent className="p-4 sm:p-5 lg:p-6">
-            <div className="text-sm text-muted-foreground font-medium mb-2">Valeur Totale</div>
-            <div className="text-2xl font-bold text-[hsl(var(--status-blue))]">{formatPrice(stats.totalValue)}</div>
+        <Card className={cn(
+          "bg-[hsl(var(--status-blue-light))] border border-[hsl(var(--status-blue))]",
+          "shadow-sm hover:shadow-md transition-shadow duration-200"
+        )}>
+          <CardContent className="p-4">
+            <div className="text-[14px] leading-[1.5] text-content-secondary font-medium mb-2">Valeur Totale</div>
+            <div className="text-[28px] leading-[1.2] font-semibold text-[hsl(var(--status-blue))]">{formatPrice(stats.totalValue)}</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Search & Status Filter Bar */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex flex-col sm:flex-row gap-4 md:gap-6">
+      {/* Search & Status Filter Bar - BaseWeb Pattern */}
+      <Card className={cn(
+        "border border-border-default shadow-sm",
+        "hover:shadow-md transition-shadow duration-200"
+      )}>
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             {/* Search Bar */}
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-content-secondary" />
               <Input
                 placeholder="Rechercher par numéro de soumission ou client..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-10 sm:h-11 lg:h-12"
+                className={cn(
+                  "pl-10 min-h-[48px] text-[16px] leading-[1.5]",
+                  "focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                )}
               />
             </div>
 
             {/* Status Filter */}
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectTrigger className={cn(
+                "w-full sm:w-[200px] min-h-[48px] text-[16px] leading-[1.5]",
+                "focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              )}>
                 <SelectValue placeholder="Filtrer par statut" />
               </SelectTrigger>
               <SelectContent>
@@ -232,15 +263,18 @@ const Submissions = () => {
         </CardContent>
       </Card>
 
-      {/* Submissions Grid - 4-3-1 Responsive Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-base-400 md:gap-base-600 animate-fade-in">
+      {/* Submissions Grid - BaseWeb Layout Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {submissions.length === 0 ? (
           <div className="col-span-full">
-            <Card>
-              <CardContent className="text-center py-base-1000 md:py-base-800">
-                <FileText className="mx-auto h-base-800 w-base-800 md:h-base-600 md:w-base-600 text-muted-foreground mb-base-600 md:mb-base-400" />
-                <h3 className="text-base-550 md:text-base-400 font-semibold mb-base-300 md:mb-base-200 text-foreground">Aucune soumission trouvée</h3>
-                <p className="text-muted-foreground text-base-300 md:text-base-200 leading-relaxed max-w-sm mx-auto">
+            <Card className={cn(
+              "border border-border-default shadow-sm",
+              "hover:shadow-md transition-shadow duration-200"
+            )}>
+              <CardContent className="text-center py-16">
+                <FileText className="mx-auto h-12 w-12 text-content-secondary mb-4" />
+                <h3 className="text-[24px] leading-[1.2] font-semibold mb-2 text-content-primary">Aucune soumission trouvée</h3>
+                <p className="text-[16px] leading-[1.5] text-content-secondary max-w-sm mx-auto">
                   {searchQuery || statusFilter !== 'all' 
                     ? 'Aucune soumission trouvée avec ces critères'
                     : 'Aucune soumission pour le moment'
