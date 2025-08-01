@@ -240,12 +240,16 @@ const ProductModal = ({ trigger, product, onSave, isLoading, isOpen: controlledO
           {trigger}
         </DialogTrigger>
       )}
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {product ? 'Modifier le produit' : 'Créer un nouveau produit'}
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className="max-w-4xl h-[95vh] max-h-[800px] flex flex-col p-0 gap-0">
+        <div className="p-6 border-b flex-shrink-0">
+          <DialogHeader>
+            <DialogTitle>
+              {product ? 'Modifier le produit' : 'Créer un nouveau produit'}
+            </DialogTitle>
+          </DialogHeader>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto p-6">
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
@@ -476,6 +480,7 @@ const ProductModal = ({ trigger, product, onSave, isLoading, isOpen: controlledO
             </div>
           </form>
         </Form>
+        </div>
       </DialogContent>
     </Dialog>
   );

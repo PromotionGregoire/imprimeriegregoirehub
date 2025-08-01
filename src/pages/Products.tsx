@@ -260,8 +260,8 @@ const Products = () => {
                 )}
                 onClick={() => window.location.href = `/dashboard/products/${product.id}`}
               >
-                {/* Image Section - Fixed Height */}
-                <div className="relative h-48 overflow-hidden flex-shrink-0">
+                {/* Image Section - Reduced Height for compact cards */}
+                <div className="relative h-32 sm:h-36 overflow-hidden flex-shrink-0">
                   {product.image_url ? (
                     <div className="relative w-full h-full">
                       <img 
@@ -344,27 +344,27 @@ const Products = () => {
                   </div>
                 </div>
 
-                {/* Content Section */}
-                <CardContent className="p-4 flex-1 flex flex-col">
+                {/* Content Section - Compact padding */}
+                <CardContent className="p-3 sm:p-4 flex-1 flex flex-col">
                   {/* Product Code */}
                   <div className="text-xs font-mono text-muted-foreground mb-2 truncate">
                     {product.product_code}
                   </div>
 
-                  {/* Product Name */}
-                  <h3 className="font-semibold text-foreground line-clamp-2 leading-tight mb-2 min-h-[2.5rem]">
+                  {/* Product Name - Reduced height */}
+                  <h3 className="font-semibold text-foreground line-clamp-1 sm:line-clamp-2 leading-tight mb-2 text-sm sm:text-base min-h-[1.25rem] sm:min-h-[2.5rem]">
                     {product.name}
                   </h3>
 
-                  {/* Description */}
+                  {/* Description - More compact */}
                   {product.description && (
-                    <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed mb-3 flex-1">
+                    <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1 sm:line-clamp-2 leading-relaxed mb-2 flex-1">
                       {product.description}
                     </p>
                   )}
 
-                  {/* Price - Fixed at bottom */}
-                  <div className="text-lg font-bold text-foreground mt-auto pt-2">
+                  {/* Price - More compact */}
+                  <div className="text-base sm:text-lg font-bold text-foreground mt-auto pt-1 sm:pt-2">
                     ${Number(product.default_price).toFixed(2)}
                   </div>
                 </CardContent>

@@ -8,7 +8,9 @@ const DashboardLayout = () => {
   const isMobile = useIsMobile();
 
   // Show bottom navigation for mobile AND tablet (below lg breakpoint)
-  if (isMobile || window.innerWidth < 1024) {
+  const useBottomNav = isMobile || (typeof window !== 'undefined' && window.innerWidth < 1024);
+  
+  if (useBottomNav) {
     return (
       <div className="min-h-screen flex flex-col w-full">
         <main className="flex-1 bg-background pb-20">
