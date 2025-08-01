@@ -111,13 +111,13 @@ const Products = () => {
         {/* Header Section - BaseWeb Typography Scale */}
         <div className={cn(
           "flex flex-col sm:flex-row items-start sm:items-center justify-between",
-          "gap-4 mb-6"
+          "gap-4 mb-8" // Increased from mb-6 to mb-8 for proper spacing
         )}>
-          <div className="flex items-center gap-2 min-w-0 flex-1">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <Tag className="h-6 w-6 text-primary flex-shrink-0" />
             <h1 className={cn(
-              "text-[36px] font-semibold leading-tight text-foreground",
-              "truncate" // Prevent overflow
+              "text-[24px] sm:text-[28px] lg:text-[32px] font-semibold leading-tight text-foreground",
+              "truncate max-w-full" // Responsive typography + overflow prevention
             )}>
               Produits
             </h1>
@@ -142,9 +142,9 @@ const Products = () => {
         </div>
 
         {/* Search and Filters - BaseWeb Form Pattern */}
-        <Card className="bg-background border-border shadow-sm hover:shadow-md transition-shadow mb-6">
-          <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-4">
+        <Card className="bg-background border-border shadow-sm hover:shadow-md transition-shadow mb-8">
+          <CardContent className="p-6">
+            <div className="flex flex-col sm:flex-row gap-6">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
@@ -175,7 +175,7 @@ const Products = () => {
         </Card>
 
         {/* Products List - BaseWeb Layout Grid */}
-        <div className="space-y-2">
+        <div className="space-y-4">
           {filteredProducts.length === 0 ? (
             <Card className="bg-background border-border">
               <CardContent className="p-8 text-center">
@@ -203,40 +203,44 @@ const Products = () => {
                 )}
                 onClick={() => window.location.href = `/dashboard/products/${product.id}`}
               >
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between min-w-0 gap-4">
+                <CardContent className="p-8">
+                  <div className="flex items-center justify-between min-w-0 gap-6">
                     <div className="flex-1 min-w-0">
-                      <div className="text-[18px] font-medium leading-tight text-foreground mb-1 truncate">
+                      <div className="text-[20px] font-semibold leading-tight text-foreground mb-2 truncate">
                         {product.name}
                       </div>
-                      <div className="text-[14px] text-muted-foreground leading-tight mb-2">
+                      <div className="text-[14px] text-muted-foreground leading-tight mb-3 font-medium">
                         {product.product_code}
                       </div>
                       {product.description && (
-                        <div className="text-[14px] text-muted-foreground leading-tight truncate">
+                        <div className="text-[16px] text-muted-foreground leading-relaxed truncate">
                           {product.description}
                         </div>
                       )}
                     </div>
                     
-                    <div className="flex items-center gap-6 flex-shrink-0">
+                    <div className="flex items-center gap-8 flex-shrink-0">
                       <div className="text-right">
-                        <div className="text-[18px] font-semibold text-foreground">
+                        <div className="text-[20px] font-bold text-foreground">
                           ${Number(product.default_price).toFixed(2)}
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-3">
-                        <Badge variant={product.category === 'Impression' ? 'default' : 'secondary'}>
+                      <div className="flex items-center gap-4">
+                        <Badge 
+                          variant={product.category === 'Impression' ? 'default' : 'secondary'}
+                          className="px-3 py-1 text-sm font-medium"
+                        >
                           {product.category}
                         </Badge>
                         
-                        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex gap-3" onClick={(e) => e.stopPropagation()}>
                           <Button 
                             variant="ghost" 
                             size="sm" 
                             onClick={() => handleEdit(product)}
-                            className="h-8 w-8 p-0 hover:bg-muted/50"
+                            className="h-10 w-10 p-0 hover:bg-muted/50 transition-colors duration-200"
+                            aria-label="Modifier le produit"
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
@@ -244,7 +248,8 @@ const Products = () => {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDelete(product.id)}
-                            className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
+                            className="h-10 w-10 p-0 hover:bg-destructive/10 hover:text-destructive transition-colors duration-200"
+                            aria-label="Supprimer le produit"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
