@@ -11,7 +11,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import ProductModal from '@/components/ProductModal';
-import { FlexibleDashboardToolbar } from '@/components/FlexibleDashboardToolbar';
 
 
 const Products = () => {
@@ -185,32 +184,65 @@ const Products = () => {
           </div>
         </div>
 
-        <FlexibleDashboardToolbar
-          searchQuery={searchTerm}
-          onSearchChange={setSearchTerm}
-          searchPlaceholder="Rechercher par nom ou code..."
-          filters={[
-            {
-              label: "Catégorie",
-              value: categoryFilter,
-              onChange: setCategoryFilter,
-              options: [
-                { value: "all", label: "Toutes les catégories" },
-                { value: "Impression", label: "Impression" },
-                { value: "Article Promotionnel", label: "Article Promotionnel" },
-              ]
-            },
-            {
-              label: "Ordre alphabétique",
-              value: alphabeticalOrder,
-              onChange: setAlphabeticalOrder,
-              options: [
-                { value: "az", label: "A → Z" },
-                { value: "za", label: "Z → A" },
-              ]
-            }
-          ]}
-        />
+        {/* Search and Filters */}
+        <Card className="bg-background border-border shadow-sm hover:shadow-md transition-shadow mb-8">
+          <CardContent className="p-6">
+            <div className="flex flex-col sm:flex-row gap-4">
+              {/* Search Bar */}
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Rechercher par nom ou code..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+              {/* Combined Filter */}
+              <Select 
+                value={categoryFilter === 'all' && alphabeticalOrder === 'az' ? 'all' : 
+                       categoryFilter === 'all' && alphabeticalOrder === 'za' ? 'za' :
+                       categoryFilter === 'Impression' && alphabeticalOrder === 'az' ? 'impression-az' :
+                       categoryFilter === 'Impression' && alphabeticalOrder === 'za' ? 'impression-za' :
+                       categoryFilter === 'Article Promotionnel' && alphabeticalOrder === 'az' ? 'promo-az' :
+                       'promo-za'}
+                onValueChange={(value) => {
+                  if (value === 'all') {
+                    setCategoryFilter('all');
+                    setAlphabeticalOrder('az');
+                  } else if (value === 'za') {
+                    setCategoryFilter('all');
+                    setAlphabeticalOrder('za');
+                  } else if (value === 'impression-az') {
+                    setCategoryFilter('Impression');
+                    setAlphabeticalOrder('az');
+                  } else if (value === 'impression-za') {
+                    setCategoryFilter('Impression');
+                    setAlphabeticalOrder('za');
+                  } else if (value === 'promo-az') {
+                    setCategoryFilter('Article Promotionnel');
+                    setAlphabeticalOrder('az');
+                  } else if (value === 'promo-za') {
+                    setCategoryFilter('Article Promotionnel');
+                    setAlphabeticalOrder('za');
+                  }
+                }}
+              >
+                <SelectTrigger className="w-full sm:w-[220px]">
+                  <SelectValue placeholder="Toutes les catégories" />
+                </SelectTrigger>
+                <SelectContent className="bg-background border-border shadow-lg z-50">
+                  <SelectItem value="all">✓ Toutes les catégories</SelectItem>
+                  <SelectItem value="impression-az">Impression</SelectItem>
+                  <SelectItem value="promo-az">Article Promotionnel</SelectItem>
+                  <SelectItem value="za">A → Z</SelectItem>
+                  <SelectItem value="impression-za">Z → A</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Products List - Responsive Grid: 1 col mobile/tablet, multiple cols desktop */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6">
