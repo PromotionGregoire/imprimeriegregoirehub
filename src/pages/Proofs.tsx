@@ -69,7 +69,7 @@ const Proofs = () => {
               "text-[36px] font-semibold leading-tight text-foreground",
               "truncate" // Prevent overflow
             )}>
-              Gestion des Épreuves
+              Épreuves
             </h1>
           </div>
           {/* BaseWeb Button with 48px touch target */}
