@@ -148,23 +148,24 @@ const SubmissionDetails = () => {
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8 space-y-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={() => navigate('/dashboard/submissions')}
+            className="flex-shrink-0"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Retour
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold truncate">
               Soumission {submission.submission_number}
             </h1>
             <Button
               variant="link"
-              className="p-0 h-auto text-primary"
+              className="p-0 h-auto text-primary text-sm sm:text-base truncate max-w-full"
               onClick={() => navigate(`/dashboard/clients/${submission.client_id}`)}
             >
               {submission.clients?.business_name}
@@ -172,7 +173,7 @@ const SubmissionDetails = () => {
           </div>
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-shrink-0">
           <StatusManager submission={submission} currentStatus={submission.status} />
         </div>
       </div>
@@ -185,31 +186,31 @@ const SubmissionDetails = () => {
             <CardHeader>
               <CardTitle>Informations Clés</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div>
+            <CardContent className="p-4 sm:p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                <div className="space-y-1">
                   <div className="text-sm text-muted-foreground">Date de création</div>
-                  <div className="font-medium">
+                  <div className="font-medium text-base">
                     {new Date(submission.created_at).toLocaleDateString('fr-FR')}
                   </div>
                 </div>
-                <div>
+                <div className="space-y-1">
                   <div className="text-sm text-muted-foreground">Échéance</div>
-                  <div className="font-medium">
+                  <div className="font-medium text-base">
                     {submission.deadline 
                       ? new Date(submission.deadline).toLocaleDateString('fr-FR')
                       : 'Non définie'
                     }
                   </div>
                 </div>
-                <div>
+                <div className="space-y-1 sm:col-span-2">
                   <div className="text-sm text-muted-foreground">Montant Total</div>
-                  <div className="font-bold text-2xl text-primary">
+                  <div className="font-bold text-2xl sm:text-3xl text-primary">
                     ${Number(submission.total_price || 0).toFixed(2)}
                   </div>
                 </div>
-                <div className="col-span-2 md:col-span-3">
-                  <div className="text-sm text-muted-foreground mb-2">Employé assigné</div>
+                <div className="space-y-2 sm:col-span-2 pt-2 border-t">
+                  <div className="text-sm text-muted-foreground">Employé assigné</div>
                   <EmployeeAssignManager 
                     clientId={submission.client_id}
                     currentAssignedUserId={submission.clients?.assigned_user_id}
