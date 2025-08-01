@@ -202,12 +202,12 @@ const Products = () => {
                 className={cn(
                   "bg-background border-border shadow-sm hover:shadow-lg transition-all duration-200",
                   "cursor-pointer overflow-hidden group hover:border-primary/20",
-                  "aspect-[3/4] max-w-[280px] mx-auto"
+                  "w-full h-full flex flex-col"
                 )}
                 onClick={() => window.location.href = `/dashboard/products/${product.id}`}
               >
-                {/* Image Section */}
-                <div className="relative h-48 bg-gradient-to-br from-primary/5 to-primary/10 overflow-hidden">
+                {/* Image Section - Fixed Height */}
+                <div className="relative h-48 overflow-hidden flex-shrink-0">
                   {(product as any).image_url ? (
                     <img 
                       src={(product as any).image_url} 
@@ -215,23 +215,26 @@ const Products = () => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      {/* Placeholder pattern based on product category */}
-                      <img 
-                        src={`https://images.unsplash.com/${
+                    <div className={cn(
+                      "w-full h-full flex items-center justify-center",
+                      product.category === 'Impression' 
+                        ? "bg-emerald-100" 
+                        : "bg-blue-100"
+                    )}>
+                      <div className="text-center">
+                        <Tag className={cn(
+                          "h-12 w-12 mx-auto mb-2",
                           product.category === 'Impression' 
-                            ? 'photo-1461749280684-dccba630e2f6' // monitor showing code
-                            : 'photo-1465146344425-f00d5f5c8f07' // orange flowers
-                        }?w=400&h=300&fit=crop`}
-                        alt={`${product.category} placeholder`}
-                        className="w-full h-full object-cover opacity-60"
-                      />
-                      <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
-                        <div className="text-center">
-                          <Tag className="h-8 w-8 text-primary/60 mx-auto mb-1" />
-                          <div className="text-xs text-primary/80 font-medium">
-                            {product.category}
-                          </div>
+                            ? "text-emerald-600" 
+                            : "text-blue-600"
+                        )} />
+                        <div className={cn(
+                          "text-sm font-medium",
+                          product.category === 'Impression' 
+                            ? "text-emerald-700" 
+                            : "text-blue-700"
+                        )}>
+                          {product.category}
                         </div>
                       </div>
                     </div>
@@ -263,10 +266,10 @@ const Products = () => {
                   <div className="absolute bottom-2 left-2">
                     <Badge 
                       className={cn(
-                        "px-2 py-1 text-xs font-medium rounded-full shadow-sm",
+                        "px-2 py-1 text-xs font-medium rounded-full shadow-sm border",
                         product.category === 'Impression' 
-                          ? "bg-emerald-100 text-emerald-800 border-emerald-200" 
-                          : "bg-blue-100 text-blue-800 border-blue-200"
+                          ? "bg-emerald-500 text-white border-emerald-600" 
+                          : "bg-blue-500 text-white border-blue-600"
                       )}
                     >
                       {product.category}
@@ -282,19 +285,19 @@ const Products = () => {
                   </div>
 
                   {/* Product Name */}
-                  <h3 className="font-semibold text-foreground line-clamp-2 leading-tight mb-2 flex-1">
+                  <h3 className="font-semibold text-foreground line-clamp-2 leading-tight mb-2 min-h-[2.5rem]">
                     {product.name}
                   </h3>
 
                   {/* Description */}
                   {product.description && (
-                    <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed mb-3">
+                    <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed mb-3 flex-1">
                       {product.description}
                     </p>
                   )}
 
-                  {/* Price */}
-                  <div className="text-lg font-bold text-foreground mt-auto">
+                  {/* Price - Fixed at bottom */}
+                  <div className="text-lg font-bold text-foreground mt-auto pt-2">
                     ${Number(product.default_price).toFixed(2)}
                   </div>
                 </CardContent>
