@@ -11,7 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import ProductModal from '@/components/ProductModal';
-import { createBusinessCardsProducts } from '@/utils/createBusinessCardsProducts';
+
 
 const Products = () => {
   const { data: products, isLoading } = useProducts();
@@ -35,21 +35,6 @@ const Products = () => {
     return matchesSearch && matchesCategory;
   }) || [];
 
-  const handleCreateBulkProducts = async () => {
-    try {
-      const result = await createBusinessCardsProducts();
-      toast({
-        title: '✅ Succès',
-        description: `${result.details.createdProducts} produits créés avec ${result.details.createdVariants} variantes!`,
-      });
-    } catch (error) {
-      toast({
-        title: '❌ Erreur',
-        description: 'Impossible de créer les produits en lot.',
-        variant: 'destructive',
-      });
-    }
-  };
 
   const handleCreateProduct = (data: any) => {
     console.log('Creating product with data:', data);
@@ -173,10 +158,7 @@ const Products = () => {
             </h1>
           </div>
           <div className="flex gap-2">
-            <Button onClick={handleCreateBulkProducts} variant="outline">
-              Créer cartes d'affaires
-            </Button>
-            <Button 
+            <Button
               variant="primary"
               size="default"
               className={cn(
