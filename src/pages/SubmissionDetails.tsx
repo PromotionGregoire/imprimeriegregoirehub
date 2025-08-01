@@ -160,7 +160,7 @@ const SubmissionDetails = () => {
             Retour
           </Button>
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold truncate">
+            <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold leading-tight tracking-tight truncate">
               Soumission {submission.submission_number}
             </h1>
             <Button
