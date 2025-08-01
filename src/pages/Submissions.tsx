@@ -160,29 +160,6 @@ const Submissions = () => {
           </Button>
         </div>
 
-        {/* Date Range Filter - BaseWeb Pattern */}
-        <div className="mb-6">
-          <Select value={periodFilter} onValueChange={setPeriodFilter}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Filtrer par période" />
-            </SelectTrigger>
-            <SelectContent className="z-50 bg-background border border-border shadow-lg">
-              <SelectItem value="all">Tous</SelectItem>
-              <SelectItem value="today">Aujourd'hui</SelectItem>
-              <SelectItem value="yesterday">Hier</SelectItem>
-              <SelectItem value="thisWeek">Cette semaine</SelectItem>
-              <SelectItem value="7days">Les 7 derniers jours</SelectItem>
-              <SelectItem value="14days">Les 14 derniers jours</SelectItem>
-              <SelectItem value="thisMonth">Ce mois-ci</SelectItem>
-              <SelectItem value="30days">Les 30 derniers jours</SelectItem>
-              <SelectItem value="3months">Les 3 derniers mois</SelectItem>
-              <SelectItem value="6months">Les 6 derniers mois</SelectItem>
-              <SelectItem value="thisYear">Cette année</SelectItem>
-              <SelectItem value="12months">Les 12 derniers mois</SelectItem>
-              <SelectItem value="lastYear">L'année dernière</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
 
         {/* Statistics Cards - BaseWeb Card Pattern with 8px Grid */}
         <div className={cn(
@@ -299,9 +276,29 @@ const Submissions = () => {
                     className="pl-10"
                   />
                 </div>
+                <Select value={periodFilter} onValueChange={setPeriodFilter}>
+                  <SelectTrigger className="w-full sm:w-[200px]">
+                    <SelectValue placeholder="Tous" />
+                  </SelectTrigger>
+                  <SelectContent className="z-50 bg-background border border-border shadow-lg">
+                    <SelectItem value="all">Tous</SelectItem>
+                    <SelectItem value="today">Aujourd'hui</SelectItem>
+                    <SelectItem value="yesterday">Hier</SelectItem>
+                    <SelectItem value="thisWeek">Cette semaine</SelectItem>
+                    <SelectItem value="7days">Les 7 derniers jours</SelectItem>
+                    <SelectItem value="14days">Les 14 derniers jours</SelectItem>
+                    <SelectItem value="thisMonth">Ce mois-ci</SelectItem>
+                    <SelectItem value="30days">Les 30 derniers jours</SelectItem>
+                    <SelectItem value="3months">Les 3 derniers mois</SelectItem>
+                    <SelectItem value="6months">Les 6 derniers mois</SelectItem>
+                    <SelectItem value="thisYear">Cette année</SelectItem>
+                    <SelectItem value="12months">Les 12 derniers mois</SelectItem>
+                    <SelectItem value="lastYear">L'année dernière</SelectItem>
+                  </SelectContent>
+                </Select>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="w-full sm:w-[200px]">
-                    <SelectValue placeholder="Filtrer par statut" />
+                    <SelectValue placeholder="Tous les statuts" />
                   </SelectTrigger>
                   <SelectContent className="z-50 bg-background border border-border shadow-lg">
                     <SelectItem value="all">Tous les statuts</SelectItem>
