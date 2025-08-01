@@ -104,7 +104,7 @@ const ProductDetails = () => {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <Package className="h-5 w-5 text-primary" />
-                  <span className="font-medium">{product.category}</span>
+                  <span className="font-medium">{product.name}</span>
                 </div>
                 {getCategoryBadge(product.category)}
               </div>
@@ -177,23 +177,6 @@ const ProductDetails = () => {
             </Card>
           )}
 
-          {/* Mobile Quick Stats */}
-          <div className="grid grid-cols-2 gap-3">
-            <Card className="rounded-lg">
-              <CardContent className="p-3 text-center">
-                <Tag className="h-6 w-6 mx-auto mb-2 text-primary" />
-                <div className="text-sm font-medium">{product.category}</div>
-                <div className="text-xs text-muted-foreground">Catégorie</div>
-              </CardContent>
-            </Card>
-            <Card className="rounded-lg">
-              <CardContent className="p-3 text-center">
-                <Warehouse className="h-6 w-6 mx-auto mb-2 text-primary" />
-                <div className="text-sm font-medium">-</div>
-                <div className="text-xs text-muted-foreground">Fournisseurs</div>
-              </CardContent>
-            </Card>
-          </div>
         </div>
 
         <ProductModal
