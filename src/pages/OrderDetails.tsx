@@ -132,23 +132,30 @@ const OrderDetails = () => {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/dashboard/orders')}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Retour
-        </Button>
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold">{order.order_number}</h1>
-          <p className="text-muted-foreground">
-            Créée le {format(new Date(order.created_at), 'dd MMMM yyyy', { locale: fr })}
-          </p>
+      {/* Header - Base Web Design System */}
+      <div className="flex items-start justify-between gap-base-400 min-h-[60px]">
+        <div className="flex items-start gap-base-400 sm:gap-base-500 min-w-0 flex-1">
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/dashboard/orders')}
+            className="min-h-[44px] min-w-[44px] p-base-300 flex-shrink-0 flex items-center gap-base-200"
+            aria-label="Retour aux commandes"
+          >
+            <ArrowLeft className="h-5 w-5" strokeWidth={2} />
+            <span className="hidden sm:inline text-base-300 font-medium">Retour</span>
+          </Button>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-base-750 font-semibold text-foreground leading-tight mb-base-200 truncate" title={order.order_number}>
+              {order.order_number}
+            </h1>
+            <p className="text-base-300 text-muted-foreground font-medium">
+              Créée le {format(new Date(order.created_at), 'dd MMMM yyyy', { locale: fr })}
+            </p>
+          </div>
         </div>
-        {getStatusBadge(order.status)}
+        <div className="flex-shrink-0">
+          {getStatusBadge(order.status)}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
