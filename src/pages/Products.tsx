@@ -22,6 +22,7 @@ const Products = () => {
   
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [alphabeticalOrder, setAlphabeticalOrder] = useState('az');
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
 
@@ -33,6 +34,12 @@ const Products = () => {
     const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
     
     return matchesSearch && matchesCategory;
+  }).sort((a, b) => {
+    if (alphabeticalOrder === 'az') {
+      return a.name.localeCompare(b.name);
+    } else {
+      return b.name.localeCompare(a.name);
+    }
   }) || [];
 
 
@@ -180,7 +187,7 @@ const Products = () => {
         {/* Search and Filters - BaseWeb Form Pattern */}
         <Card className="bg-background border-border shadow-sm hover:shadow-md transition-shadow mb-8">
           <CardContent className="p-6">
-            <div className="flex flex-col sm:flex-row gap-6">
+            <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
@@ -193,19 +200,33 @@ const Products = () => {
                   )}
                   />
                 </div>
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger className={cn(
-                    "w-full sm:w-[240px] min-h-[48px] text-[16px] leading-relaxed",
-                    "focus:ring-2 focus:ring-primary focus:border-primary"
-                  )}>
-                    <SelectValue placeholder="Filtrer par catégorie" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border-border shadow-lg z-50">
-                    <SelectItem value="all">Toutes les catégories</SelectItem>
-                    <SelectItem value="Impression">Impression</SelectItem>
-                    <SelectItem value="Article Promotionnel">Article Promotionnel</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                    <SelectTrigger className={cn(
+                      "w-full sm:w-[200px] min-h-[48px] text-[16px] leading-relaxed",
+                      "focus:ring-2 focus:ring-primary focus:border-primary"
+                    )}>
+                      <SelectValue placeholder="Catégorie" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border-border shadow-lg z-50">
+                      <SelectItem value="all">Toutes les catégories</SelectItem>
+                      <SelectItem value="Impression">Impression</SelectItem>
+                      <SelectItem value="Article Promotionnel">Article Promotionnel</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={alphabeticalOrder} onValueChange={setAlphabeticalOrder}>
+                    <SelectTrigger className={cn(
+                      "w-full sm:w-[180px] min-h-[48px] text-[16px] leading-relaxed",
+                      "focus:ring-2 focus:ring-primary focus:border-primary"
+                    )}>
+                      <SelectValue placeholder="Ordre" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border-border shadow-lg z-50">
+                      <SelectItem value="az">A → Z</SelectItem>
+                      <SelectItem value="za">Z → A</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
             </div>
           </CardContent>
         </Card>
