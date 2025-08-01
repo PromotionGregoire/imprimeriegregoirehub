@@ -159,7 +159,7 @@ const ProofApproval = () => {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'Envoyée au client':
+      case 'Envoyé':
         return <Badge className="bg-blue-100 text-blue-800">En attente de votre décision</Badge>;
       case 'Modification demandée':
         return <Badge className="bg-orange-100 text-orange-800">Modification demandée</Badge>;
