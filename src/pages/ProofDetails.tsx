@@ -378,27 +378,29 @@ const ProofDetails = () => {
 
       {/* Tabs - Base Web Design System */}
       <Tabs defaultValue="manage" className="space-y-base-600">
-        <TabsList className="flex overflow-x-auto scrollbar-hide w-full gap-base-200 p-base-200 bg-muted/30 rounded-base-300">
+        <TabsList className="flex w-full bg-background border border-border rounded-md p-1 overflow-x-auto scrollbar-hide">
           <TabsTrigger 
             value="manage" 
-            className="text-base-300 font-medium truncate px-base-500 py-base-300 whitespace-nowrap min-h-[44px] flex items-center justify-center transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            className="flex-1 min-w-0 text-sm font-medium px-3 py-2.5 min-h-[40px] flex items-center justify-center transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm hover:bg-muted/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 rounded-sm whitespace-nowrap"
             aria-label="Onglet Gestion des Fichiers"
           >
-            Gestion des Fichiers
+            <span className="truncate">Gestion</span>
+            <span className="hidden sm:inline ml-1">des Fichiers</span>
           </TabsTrigger>
           <TabsTrigger 
             value="history" 
-            className="text-base-300 font-medium truncate px-base-500 py-base-300 whitespace-nowrap min-h-[44px] flex items-center justify-center transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            className="flex-1 min-w-0 text-sm font-medium px-3 py-2.5 min-h-[40px] flex items-center justify-center transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm hover:bg-muted/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 rounded-sm whitespace-nowrap"
             aria-label="Onglet Historique"
           >
-            Historique
+            <span className="truncate">Historique</span>
           </TabsTrigger>
           <TabsTrigger 
             value="comments" 
-            className="text-base-300 font-medium truncate px-base-500 py-base-300 whitespace-nowrap min-h-[44px] flex items-center justify-center transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            className="flex-1 min-w-0 text-sm font-medium px-3 py-2.5 min-h-[40px] flex items-center justify-center transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm hover:bg-muted/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 rounded-sm whitespace-nowrap"
             aria-label="Onglet Commentaires Client"
           >
-            Commentaires Client
+            <span className="truncate">Commentaires</span>
+            <span className="hidden md:inline ml-1">Client</span>
           </TabsTrigger>
         </TabsList>
 
