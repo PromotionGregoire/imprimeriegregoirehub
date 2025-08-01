@@ -144,11 +144,15 @@ const OrderDetails = () => {
             <ArrowLeft className="h-5 w-5" strokeWidth={2} />
             <span className="hidden sm:inline text-base-300 font-medium">Retour</span>
           </Button>
-          <div className="min-w-0 flex-1">
-            <h1 className="text-base-750 font-semibold text-foreground leading-tight mb-base-200 truncate" title={order.order_number}>
+          <div className="min-w-0 flex-1 max-w-full overflow-hidden">
+            <h1 
+              className="text-base-750 font-semibold text-foreground leading-tight mb-base-200 truncate max-w-full block" 
+              title={order.order_number}
+              style={{ wordBreak: 'break-all' }}
+            >
               {order.order_number}
             </h1>
-            <p className="text-base-300 text-muted-foreground font-medium">
+            <p className="text-base-300 text-muted-foreground font-medium truncate max-w-full">
               Créée le {format(new Date(order.created_at), 'dd MMMM yyyy', { locale: fr })}
             </p>
           </div>
