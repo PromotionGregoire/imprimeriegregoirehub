@@ -21,27 +21,27 @@ export function StatusBadge({
     
     // Common status mappings
     const statusMap: Record<string, { bg: string; text: string; border: string }> = {
-      // Positive/Success states
+      // Positive/Success/Completed states (GREEN)
       'complétée': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
       'completed': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
       'approuvée': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
       'approved': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
       'acceptée': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
       'accepted': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+      'envoyée': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+      'envoyé': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+      'envoyée au client': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+      'sent': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
       'actif': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
       'active': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
       
-      // In Progress states
+      // In Progress states (BLUE)
       'en cours': { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
       'en préparation': { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
       'en production': { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-      'envoyée': { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-      'envoyé': { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-      'envoyée au client': { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-      'sent': { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
       'in_progress': { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
       
-      // Warning/Attention states
+      // Warning/Attention/Pending states (AMBER)
       'a preparer': { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
       'à préparer': { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
       'en attente': { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
@@ -50,13 +50,13 @@ export function StatusBadge({
       'pending': { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
       'waiting': { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
       
-      // Revision/Modification states
+      // Revision/Modification states (ORANGE)
       'en révision': { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
       'modification demandée': { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
       'revision': { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
       'needs_revision': { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
       
-      // Neutral states
+      // Neutral states (GRAY)
       'prospect': { bg: 'bg-gray-50', text: 'text-gray-700', border: 'border-gray-200' },
       'client': { bg: 'bg-gray-50', text: 'text-gray-700', border: 'border-gray-200' },
       'brouillon': { bg: 'bg-gray-50', text: 'text-gray-700', border: 'border-gray-200' },
