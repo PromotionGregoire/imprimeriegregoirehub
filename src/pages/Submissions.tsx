@@ -119,38 +119,45 @@ const Submissions = () => {
   }
 
   return (
-    <div className="px-4 md:px-6 lg:px-8 py-6 space-y-6 pb-24 md:pb-6">
-      {/* Header - BaseWeb Layout Grid */}
-      <div className="flex items-center justify-between min-h-[48px]">
-        <div className="flex items-center gap-2">
-          <FileText className="h-6 w-6 text-primary" />
-          <h1 className="text-[36px] leading-[1.2] font-semibold text-content-primary">Soumissions</h1>
+    <div className="min-h-screen w-full overflow-x-hidden">
+      {/* BaseWeb Container with responsive margins: 16px mobile, 24px tablet, 32px desktop */}
+      <div className="mx-4 md:mx-6 lg:mx-8 py-4 md:py-6 space-y-6 pb-24 md:pb-6 max-w-full">
+        {/* Header - BaseWeb Layout Grid with proper overflow handling */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 min-h-[48px] w-full">
+          <div className="flex items-center gap-2 min-w-0 flex-shrink">
+            <FileText className="h-6 w-6 text-primary flex-shrink-0" />
+            <h1 className="text-[24px] sm:text-[28px] lg:text-[36px] leading-[1.2] font-semibold text-content-primary truncate">
+              Soumissions
+            </h1>
+          </div>
+          <Button 
+            variant="primary" 
+            size="large" 
+            className={cn(
+              "gap-2 min-h-[48px] px-4 text-[16px] leading-[1.5] flex-shrink-0",
+              "hover:shadow-lg transition-all duration-200",
+              "focus:ring-2 focus:ring-primary focus:ring-offset-2",
+              "w-full sm:w-auto max-w-full"
+            )}
+            onClick={() => navigate('/dashboard/submissions/new')}
+          >
+            <Plus className="h-4 w-4 flex-shrink-0" />
+            <span className="hidden sm:inline">Nouvelle Soumission</span>
+            <span className="sm:hidden">Nouvelle</span>
+          </Button>
         </div>
-        <Button 
-          variant="primary" 
-          size="large" 
-          className={cn(
-            "gap-2 min-h-[48px] px-4 text-[16px] leading-[1.5]",
-            "hover:shadow-lg transition-all duration-200",
-            "focus:ring-2 focus:ring-primary focus:ring-offset-2"
-          )}
-          onClick={() => navigate('/dashboard/submissions/new')}
-        >
-          <Plus className="h-4 w-4" />
-          Nouvelle Soumission
-        </Button>
-      </div>
 
       {/* Date Range Filter - BaseWeb Pattern */}
       <div className="flex items-center justify-start">
         <Select value={periodFilter} onValueChange={setPeriodFilter}>
           <SelectTrigger className={cn(
-            "w-[200px] min-h-[48px] text-[16px] leading-[1.5]",
-            "focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            "w-full sm:w-[200px] min-h-[48px] text-[16px] leading-[1.5]",
+            "focus:ring-2 focus:ring-primary focus:ring-offset-2",
+            "bg-background border border-border"
           )}>
             <SelectValue placeholder="Filtrer par période" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="z-50 bg-background border border-border shadow-lg">
             <SelectItem value="all">Tous</SelectItem>
             <SelectItem value="today">Aujourd'hui</SelectItem>
             <SelectItem value="yesterday">Hier</SelectItem>
@@ -168,55 +175,60 @@ const Submissions = () => {
         </Select>
       </div>
 
-      {/* KPI Cards - BaseWeb Card Pattern */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      {/* KPI Cards - BaseWeb Card Pattern with overflow prevention */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 w-full">
         <Card className={cn(
-          "bg-background-primary border border-border-default",
-          "shadow-sm hover:shadow-md transition-shadow duration-200"
+          "bg-background border border-border",
+          "shadow-sm hover:shadow-md transition-shadow duration-200",
+          "min-w-0 overflow-hidden"
         )}>
           <CardContent className="p-4">
-            <div className="text-[14px] leading-[1.5] text-content-secondary font-medium mb-2">Total</div>
-            <div className="text-[28px] leading-[1.2] font-semibold text-content-primary">{stats.total}</div>
+            <div className="text-[14px] leading-[1.5] text-content-secondary font-medium mb-2 truncate">Total</div>
+            <div className="text-[24px] sm:text-[28px] leading-[1.2] font-semibold text-content-primary truncate">{stats.total}</div>
           </CardContent>
         </Card>
         
         <Card className={cn(
           "bg-[hsl(var(--status-purple-light))] border border-[hsl(var(--status-purple))]",
-          "shadow-sm hover:shadow-md transition-shadow duration-200"
+          "shadow-sm hover:shadow-md transition-shadow duration-200",
+          "min-w-0 overflow-hidden"
         )}>
           <CardContent className="p-4">
-            <div className="text-[14px] leading-[1.5] text-content-secondary font-medium mb-2">Complétées</div>
-            <div className="text-[28px] leading-[1.2] font-semibold text-[hsl(var(--status-purple))]">{stats.completed}</div>
+            <div className="text-[14px] leading-[1.5] text-content-secondary font-medium mb-2 truncate">Complétées</div>
+            <div className="text-[24px] sm:text-[28px] leading-[1.2] font-semibold text-[hsl(var(--status-purple))] truncate">{stats.completed}</div>
           </CardContent>
         </Card>
         
         <Card className={cn(
           "bg-[hsl(var(--status-green-light))] border border-[hsl(var(--status-green))]",
-          "shadow-sm hover:shadow-md transition-shadow duration-200"
+          "shadow-sm hover:shadow-md transition-shadow duration-200",
+          "min-w-0 overflow-hidden"
         )}>
           <CardContent className="p-4">
-            <div className="text-[14px] leading-[1.5] text-content-secondary font-medium mb-2">Acceptées</div>
-            <div className="text-[28px] leading-[1.2] font-semibold text-[hsl(var(--status-green))]">{stats.accepted}</div>
+            <div className="text-[14px] leading-[1.5] text-content-secondary font-medium mb-2 truncate">Acceptées</div>
+            <div className="text-[24px] sm:text-[28px] leading-[1.2] font-semibold text-[hsl(var(--status-green))] truncate">{stats.accepted}</div>
           </CardContent>
         </Card>
         
         <Card className={cn(
           "bg-[hsl(var(--status-orange-light))] border border-[hsl(var(--status-orange))]",
-          "shadow-sm hover:shadow-md transition-shadow duration-200"
+          "shadow-sm hover:shadow-md transition-shadow duration-200",
+          "min-w-0 overflow-hidden"
         )}>
           <CardContent className="p-4">
-            <div className="text-[14px] leading-[1.5] text-content-secondary font-medium mb-2">Envoyées</div>
-            <div className="text-[28px] leading-[1.2] font-semibold text-[hsl(var(--status-orange))]">{stats.sent}</div>
+            <div className="text-[14px] leading-[1.5] text-content-secondary font-medium mb-2 truncate">Envoyées</div>
+            <div className="text-[24px] sm:text-[28px] leading-[1.2] font-semibold text-[hsl(var(--status-orange))] truncate">{stats.sent}</div>
           </CardContent>
         </Card>
         
         <Card className={cn(
           "bg-[hsl(var(--status-blue-light))] border border-[hsl(var(--status-blue))]",
-          "shadow-sm hover:shadow-md transition-shadow duration-200"
+          "shadow-sm hover:shadow-md transition-shadow duration-200",
+          "min-w-0 overflow-hidden"
         )}>
           <CardContent className="p-4">
-            <div className="text-[14px] leading-[1.5] text-content-secondary font-medium mb-2">Valeur Totale</div>
-            <div className="text-[28px] leading-[1.2] font-semibold text-[hsl(var(--status-blue))]">{formatPrice(stats.totalValue)}</div>
+            <div className="text-[14px] leading-[1.5] text-content-secondary font-medium mb-2 truncate">Valeur Totale</div>
+            <div className="text-[20px] sm:text-[24px] lg:text-[28px] leading-[1.2] font-semibold text-[hsl(var(--status-blue))] truncate break-all">{formatPrice(stats.totalValue)}</div>
           </CardContent>
         </Card>
       </div>
@@ -246,11 +258,12 @@ const Submissions = () => {
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className={cn(
                 "w-full sm:w-[200px] min-h-[48px] text-[16px] leading-[1.5]",
-                "focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                "focus:ring-2 focus:ring-primary focus:ring-offset-2",
+                "bg-background border border-border"
               )}>
                 <SelectValue placeholder="Filtrer par statut" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-50 bg-background border border-border shadow-lg">
                 <SelectItem value="all">Tous les statuts</SelectItem>
                 {submissionStatusOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
@@ -292,6 +305,7 @@ const Submissions = () => {
             />
           ))
         )}
+      </div>
       </div>
     </div>
   );
