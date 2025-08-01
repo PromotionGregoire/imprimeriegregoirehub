@@ -59,8 +59,20 @@ const Products = () => {
     if (editingProduct) {
       updateProduct.mutate({ id: editingProduct.id, updates: data }, {
         onSuccess: () => {
+          toast({
+            title: '✅ Succès',
+            description: 'Produit mis à jour avec succès.',
+          });
           setEditingProduct(null);
           setEditModalOpen(false);
+        },
+        onError: (error) => {
+          console.error('Error updating product:', error);
+          toast({
+            title: '❌ Erreur',
+            description: 'Impossible de mettre à jour le produit.',
+            variant: 'destructive',
+          });
         }
       });
     }

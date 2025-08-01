@@ -197,6 +197,10 @@ const ProductModal = ({ trigger, product, onSave, isLoading, isOpen: controlledO
       const uploadedUrl = await uploadImageToStorage(selectedImage);
       if (uploadedUrl) {
         imageUrl = uploadedUrl;
+        // Update the form field with the new URL
+        form.setValue('image_url', imageUrl);
+        // Update preview to show the uploaded image
+        setImagePreview(imageUrl);
       } else {
         // Upload failed, don't proceed
         return;
@@ -209,11 +213,18 @@ const ProductModal = ({ trigger, product, onSave, isLoading, isOpen: controlledO
       supplier_ids: selectedSuppliers,
     };
     
+    // Call onSave with the updated data
     onSave(submitData);
     
-    if (!isLoading) {
+    // Reset the selected image after successful upload
+    if (selectedImage) {
+      setSelectedImage(null);
+    }
+    
+    // Only close modal if not loading (for creating new products)
+    if (!isLoading && !product) {
       setIsOpen(false);
-      // Reset form state
+      // Reset form state completely for new products
       setSelectedImage(null);
       setImagePreview('');
     }
