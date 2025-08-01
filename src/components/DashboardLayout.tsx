@@ -2,15 +2,13 @@ import { Outlet } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { BottomNavigation } from "@/components/BottomNavigation";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobileOrTablet } from "@/hooks/use-mobile-tablet";
 
 const DashboardLayout = () => {
-  const isMobile = useIsMobile();
+  const isMobileOrTablet = useIsMobileOrTablet();
 
-  // Check if we should use mobile layout (mobile + tablet)
-  const useMobileLayout = isMobile || (typeof window !== 'undefined' && window.innerWidth <= 1024);
-  
-  if (useMobileLayout) {
+  // Use mobile layout for mobile and tablet (≤ 1024px)
+  if (isMobileOrTablet) {
     return (
       <div className="min-h-screen flex flex-col w-full">
         <main className="flex-1 bg-background pb-20">
