@@ -39,7 +39,7 @@ export const FlexibleDashboardToolbar = ({
               placeholder={searchPlaceholder}
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-10"
+              className="pl-10 sm:pl-11 lg:pl-12 text-sm sm:text-base truncate"
             />
           </div>
 
