@@ -176,17 +176,60 @@ const ProofDetails = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'A preparer':
-        return <Badge variant="secondary">À préparer</Badge>;
+        return (
+          <Badge 
+            className="bg-warning-light text-warning border-warning/20 font-medium text-base-200 px-base-400 py-base-200 min-h-[32px] flex items-center"
+            aria-label={`Statut: À préparer`}
+          >
+            À préparer
+          </Badge>
+        );
       case 'En préparation':
-        return <Badge className="bg-blue-100 text-blue-800">En préparation</Badge>;
+        return (
+          <Badge 
+            className="bg-info-light text-info border-info/20 font-medium text-base-200 px-base-400 py-base-200 min-h-[32px] flex items-center"
+            aria-label={`Statut: En préparation`}
+          >
+            En préparation
+          </Badge>
+        );
       case 'Envoyée au client':
-        return <Badge className="bg-purple-100 text-purple-800">Envoyée au client</Badge>;
+        return (
+          <Badge 
+            className="bg-primary/10 text-primary border-primary/20 font-medium text-base-200 px-base-400 py-base-200 min-h-[32px] flex items-center"
+            aria-label={`Statut: Envoyée au client`}
+          >
+            Envoyée au client
+          </Badge>
+        );
       case 'Modification demandée':
-        return <Badge className="bg-orange-100 text-orange-800">Modification demandée</Badge>;
+        return (
+          <Badge 
+            className="bg-warning-light text-warning border-warning/20 font-medium text-base-200 px-base-400 py-base-200 min-h-[32px] flex items-center"
+            aria-label={`Statut: Modification demandée`}
+          >
+            Modification demandée
+          </Badge>
+        );
       case 'Approuvée':
-        return <Badge className="bg-green-100 text-green-800">Approuvée</Badge>;
+        return (
+          <Badge 
+            className="bg-positive-light text-positive border-positive/20 font-medium text-base-200 px-base-400 py-base-200 min-h-[32px] flex items-center"
+            aria-label={`Statut: Approuvée`}
+          >
+            Approuvée
+          </Badge>
+        );
       default:
-        return <Badge variant="secondary">{status}</Badge>;
+        return (
+          <Badge 
+            variant="secondary" 
+            className="font-medium text-base-200 px-base-400 py-base-200 min-h-[32px] flex items-center"
+            aria-label={`Statut: ${status}`}
+          >
+            {status}
+          </Badge>
+        );
     }
   };
 
