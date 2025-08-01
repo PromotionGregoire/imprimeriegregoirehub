@@ -17,14 +17,18 @@ import { cn } from '@/lib/utils';
 import { useClients } from '@/hooks/useClients';
 import { useCreateSubmission, SubmissionFormData } from '@/hooks/useSubmissions';
 import { useProducts } from '@/hooks/useProducts';
+import { useProductVariants } from '@/hooks/useProductVariants';
 import { useToast } from '@/hooks/use-toast';
 import { AdvancedDatePicker } from '@/components/ui/advanced-date-picker';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { ProductLineItem } from '@/components/ProductLineItem';
 
 const submissionItemSchema = z.object({
   product_type: z.string().min(1, 'Le type de produit est requis'),
   product_id: z.string().optional(),
+  product_variant_id: z.string().optional(),
   product_name: z.string().min(1, 'Le nom du produit est requis'),
+  variant_details: z.string().optional(),
   description: z.string().optional(),
   quantity: z.number().min(1, 'La quantité doit être au moins 1'),
   unit_price: z.number().min(0, 'Le prix unitaire doit être positif'),
@@ -66,7 +70,9 @@ const CreateSubmission = () => {
       items: [{
         product_type: '',
         product_id: '',
+        product_variant_id: '',
         product_name: '',
+        variant_details: '',
         description: '',
         quantity: 1,
         unit_price: 0,
@@ -146,7 +152,9 @@ const CreateSubmission = () => {
   const handleProductTypeChange = (index: number, productType: string) => {
     setValue(`items.${index}.product_type`, productType);
     setValue(`items.${index}.product_id`, '');
+    setValue(`items.${index}.product_variant_id`, '');
     setValue(`items.${index}.product_name`, '');
+    setValue(`items.${index}.variant_details`, '');
     setValue(`items.${index}.description`, '');
     setValue(`items.${index}.unit_price`, 0);
   };
@@ -156,9 +164,27 @@ const CreateSubmission = () => {
     const selectedProduct = products?.find(p => p.id === productId);
     if (selectedProduct) {
       setValue(`items.${index}.product_id`, productId);
+      setValue(`items.${index}.product_variant_id`, '');
       setValue(`items.${index}.product_name`, selectedProduct.name);
+      setValue(`items.${index}.variant_details`, '');
       setValue(`items.${index}.description`, selectedProduct.description || '');
       setValue(`items.${index}.unit_price`, Number(selectedProduct.default_price));
+    }
+  };
+
+  // Handle variant selection
+  const handleVariantSelection = (index: number, variantId: string, variants: any[]) => {
+    const selectedVariant = variants?.find(v => v.id === variantId);
+    if (selectedVariant) {
+      setValue(`items.${index}.product_variant_id`, variantId);
+      
+      // Build variant details string
+      const variantDetails = `${selectedVariant.attribute_name}: ${selectedVariant.attribute_value}`;
+      setValue(`items.${index}.variant_details`, variantDetails);
+      
+      // Use variant price if available, otherwise use product default price
+      const variantPrice = selectedVariant.price || 0;
+      setValue(`items.${index}.unit_price`, Number(variantPrice));
     }
   };
 
@@ -166,7 +192,9 @@ const CreateSubmission = () => {
     append({
       product_type: '',
       product_id: '',
+      product_variant_id: '',
       product_name: '',
+      variant_details: '',
       description: '',
       quantity: 1,
       unit_price: 0,
@@ -362,101 +390,22 @@ const CreateSubmission = () => {
               <div className="space-y-4">
                 {fields.map((item, index) => {
                   const currentItem = watchedItems?.[index];
+                  const selectedProductId = currentItem?.product_id;
+                  
                   return (
-                    <div key={item.id} className="grid grid-cols-12 gap-4 items-start p-4 border rounded-lg">
-                      {/* Product Type Selection */}
-                      <div className="col-span-2">
-                        <Label>Type de produit</Label>
-                        <Select
-                          value={currentItem?.product_type || ''}
-                          onValueChange={(value) => handleProductTypeChange(index, value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Type..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Impression">Impression</SelectItem>
-                            <SelectItem value="Article Promotionnel">Article Promotionnel</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Product Selection */}
-                      <div className="col-span-3">
-                        <Label>Produit</Label>
-                        {currentItem?.product_type && !productsLoading ? (
-                          <Select
-                            value={currentItem?.product_id || ''}
-                            onValueChange={(value) => handleProductSelection(index, value)}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Sélectionner un produit..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {products
-                                ?.filter(p => p.category === currentItem.product_type)
-                                .map(product => (
-                                  <SelectItem key={product.id} value={product.id}>
-                                    {product.name}
-                                  </SelectItem>
-                                ))}
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <Input
-                            {...register(`items.${index}.product_name`)}
-                            placeholder="Nom du produit"
-                          />
-                        )}
-                      </div>
-
-                      <div className="col-span-3">
-                        <Label>Description</Label>
-                        <Textarea
-                          {...register(`items.${index}.description`)}
-                          placeholder="Description du produit"
-                          rows={2}
-                        />
-                      </div>
-                      
-                      <div className="col-span-2">
-                        <Label>Quantité</Label>
-                        <Input
-                          type="number"
-                          min="1"
-                          {...register(`items.${index}.quantity`, { valueAsNumber: true })}
-                        />
-                      </div>
-                      
-                      <div className="col-span-2">
-                        <Label>Prix unitaire ($)</Label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          {...register(`items.${index}.unit_price`, { valueAsNumber: true })}
-                        />
-                      </div>
-                      
-                      <div className="col-span-1 text-right pt-6">
-                        <div className="font-medium">
-                          ${((currentItem?.quantity || 0) * (currentItem?.unit_price || 0)).toFixed(2)}
-                        </div>
-                      </div>
-                      
-                      <div className="col-span-1 pt-6">
-                        {fields.length > 1 && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => remove(index)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </div>
+                    <ProductLineItem
+                      key={item.id}
+                      index={index}
+                      currentItem={currentItem}
+                      products={products}
+                      register={register}
+                      setValue={setValue}
+                      onProductTypeChange={handleProductTypeChange}
+                      onProductSelection={handleProductSelection}
+                      onVariantSelection={handleVariantSelection}
+                      onRemove={fields.length > 1 ? () => remove(index) : undefined}
+                      productsLoading={productsLoading}
+                    />
                   );
                 })}
                 
