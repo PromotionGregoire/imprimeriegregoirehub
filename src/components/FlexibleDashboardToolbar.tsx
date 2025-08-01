@@ -30,7 +30,7 @@ export const FlexibleDashboardToolbar = ({
 }: FlexibleDashboardToolbarProps) => {
   return (
     <Card>
-      <CardContent className="p-4">
+      <CardContent className="p-4 sm:p-6 lg:p-8">
         <div className="flex flex-col sm:flex-row gap-4">
           {/* Search Bar */}
           <div className="relative flex-1">
