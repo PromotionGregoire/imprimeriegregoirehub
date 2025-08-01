@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import ProductModal from '@/components/ProductModal';
+import { createBusinessCardsProducts } from '@/utils/createBusinessCardsProducts';
 
 const Products = () => {
   const { data: products, isLoading } = useProducts();
