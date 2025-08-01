@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import ProductModal from '@/components/ProductModal';
+import { FlexibleDashboardToolbar } from '@/components/FlexibleDashboardToolbar';
 
 
 const Products = () => {
@@ -184,52 +185,32 @@ const Products = () => {
           </div>
         </div>
 
-        {/* Search and Filters - BaseWeb Form Pattern */}
-        <Card className="bg-background border-border shadow-sm hover:shadow-md transition-shadow mb-8">
-          <CardContent className="p-6">
-            <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Input
-                  placeholder="Rechercher par nom ou code..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className={cn(
-                    "pl-10 min-h-[48px] text-[16px] leading-relaxed",
-                    "focus:ring-2 focus:ring-primary focus:border-primary"
-                  )}
-                  />
-                </div>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                    <SelectTrigger className={cn(
-                      "w-full sm:w-[200px] min-h-[48px] text-[16px] leading-relaxed",
-                      "focus:ring-2 focus:ring-primary focus:border-primary"
-                    )}>
-                      <SelectValue placeholder="Catégorie" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background border-border shadow-lg z-50">
-                      <SelectItem value="all">Toutes les catégories</SelectItem>
-                      <SelectItem value="Impression">Impression</SelectItem>
-                      <SelectItem value="Article Promotionnel">Article Promotionnel</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={alphabeticalOrder} onValueChange={setAlphabeticalOrder}>
-                    <SelectTrigger className={cn(
-                      "w-full sm:w-[180px] min-h-[48px] text-[16px] leading-relaxed",
-                      "focus:ring-2 focus:ring-primary focus:border-primary"
-                    )}>
-                      <SelectValue placeholder="Ordre" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background border-border shadow-lg z-50">
-                      <SelectItem value="az">A → Z</SelectItem>
-                      <SelectItem value="za">Z → A</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-            </div>
-          </CardContent>
-        </Card>
+        <FlexibleDashboardToolbar
+          searchQuery={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Rechercher par nom ou code..."
+          filters={[
+            {
+              label: "Catégorie",
+              value: categoryFilter,
+              onChange: setCategoryFilter,
+              options: [
+                { value: "all", label: "Toutes les catégories" },
+                { value: "Impression", label: "Impression" },
+                { value: "Article Promotionnel", label: "Article Promotionnel" },
+              ]
+            },
+            {
+              label: "Ordre alphabétique",
+              value: alphabeticalOrder,
+              onChange: setAlphabeticalOrder,
+              options: [
+                { value: "az", label: "A → Z" },
+                { value: "za", label: "Z → A" },
+              ]
+            }
+          ]}
+        />
 
         {/* Products List - Responsive Grid: 1 col mobile/tablet, multiple cols desktop */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6">
