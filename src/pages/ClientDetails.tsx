@@ -77,7 +77,7 @@ const ClientDetails = () => {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="min-w-0 flex-1">
-            <h1 className="text-[36px] font-semibold leading-tight text-foreground truncate">
+            <h1 className="text-[24px] sm:text-[28px] lg:text-[32px] font-semibold leading-tight text-foreground truncate max-w-full">
               {client.business_name}
             </h1>
             <p className="text-[16px] text-muted-foreground mt-1">{client.client_number}</p>
