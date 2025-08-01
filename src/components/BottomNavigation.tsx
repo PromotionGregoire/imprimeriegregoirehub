@@ -41,76 +41,146 @@ export function BottomNavigation() {
 
   return (
     <>
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-lg border-t border-border/20 safe-area-inset-bottom">
-        <div className="flex items-center justify-center px-3 py-2 sm:px-4 sm:py-3 max-w-screen-sm mx-auto">
-          <div className="flex items-center justify-between w-full max-w-lg mx-auto px-2 sm:px-4">{/* Proper spacing distribution */}
-          {navigationItems.map((item) => {
-            const active = isActive(item.url)
-            return (
-              <NavLink
-                key={item.title}
-                to={item.url}
+      {/* Bottom Navigation - BaseWeb Layout Grid Pattern */}
+      <nav className={cn(
+        "fixed bottom-0 left-0 right-0 z-50",
+        "bg-background border-t border-border",
+        "shadow-lg",
+        "pb-[env(safe-area-inset-bottom)]"
+      )}>
+        {/* BaseWeb Container with 16px mobile margins */}
+        <div className="px-4 py-2 max-w-full overflow-hidden">
+          {/* BaseWeb Layout Grid - 8px spacing system */}
+          <div className={cn(
+            "flex items-center justify-between w-full max-w-2xl mx-auto",
+            "gap-2"
+          )}>
+            {navigationItems.map((item) => {
+              const active = isActive(item.url)
+              return (
+                <NavLink
+                  key={item.title}
+                  to={item.url}
+                  className={cn(
+                    // BaseWeb touch target: 48px minimum
+                    "flex flex-col items-center justify-center",
+                    "min-w-[48px] min-h-[48px] sm:min-w-[56px] sm:min-h-[56px]",
+                    "px-2 py-2 rounded-lg",
+                    "transition-all duration-200",
+                    // BaseWeb focus states
+                    "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+                    // BaseWeb interactive states
+                    "active:scale-95 hover:scale-105",
+                    "flex-1 max-w-[80px]",
+                    active 
+                      ? "text-primary bg-primary/10" 
+                      : "text-content-secondary hover:text-content-primary hover:bg-background-secondary"
+                  )}
+                >
+                  <item.icon className={cn(
+                    "h-5 w-5 mb-1 transition-all duration-200 flex-shrink-0", 
+                    active ? "text-primary scale-110 stroke-[2.5]" : "text-content-secondary stroke-[2]"
+                  )} />
+                  <span className={cn(
+                    // BaseWeb typography: 14px caption
+                    "text-[14px] leading-[1.2] font-medium text-center",
+                    "transition-all duration-200 block w-full truncate",
+                    active ? "text-primary font-semibold" : "text-content-secondary"
+                  )}>
+                    {item.title}
+                  </span>
+                </NavLink>
+              )
+            })}
+            
+            {/* Menu Button - BaseWeb Pattern */}
+            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+              <SheetTrigger asChild>
+                <div className={cn(
+                  // BaseWeb touch target: 48px minimum
+                  "flex flex-col items-center justify-center",
+                  "min-w-[48px] min-h-[48px] sm:min-w-[56px] sm:min-h-[56px]",
+                  "px-2 py-2 rounded-lg",
+                  "transition-all duration-200 cursor-pointer",
+                  // BaseWeb focus states
+                  "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+                  // BaseWeb interactive states
+                  "active:scale-95 hover:scale-105",
+                  "flex-1 max-w-[80px]",
+                  "text-content-secondary hover:text-content-primary hover:bg-background-secondary"
+                )}>
+                  <Menu className="h-5 w-5 mb-1 stroke-[2] flex-shrink-0" />
+                  <span className={cn(
+                    // BaseWeb typography: 14px caption
+                    "text-[14px] leading-[1.2] font-medium text-center",
+                    "block w-full truncate"
+                  )}>
+                    Plus
+                  </span>
+                </div>
+              </SheetTrigger>
+              
+              {/* BaseWeb Modal/Sheet Pattern */}
+              <SheetContent 
+                side="bottom" 
                 className={cn(
-                  "flex flex-col items-center justify-center min-w-[64px] min-h-[56px] px-2 py-2 sm:px-3 sm:py-3 sm:min-h-[64px] rounded-lg sm:rounded-xl transition-all ease-uber active:scale-95 hover:scale-105",
-                  active 
-                    ? "text-[#5a7a51] bg-[#5a7a51]/10" 
-                    : "text-muted-foreground/70 hover:text-foreground hover:bg-muted/40"
+                  "h-[50vh] z-50 bg-background border-t border-border",
+                  "shadow-2xl"
                 )}
               >
-                <item.icon className={cn(
-                  "h-5 w-5 mb-1 transition-all ease-uber flex-shrink-0", 
-                  active ? "text-[#5a7a51] scale-110 stroke-[2.5]" : "text-muted-foreground/70 stroke-[2]"
-                )} />
-                <span className={cn(
-                  "text-[10px] sm:text-[11px] font-medium leading-none text-center transition-all ease-uber block w-full",
-                  active ? "text-[#5a7a51] font-semibold" : "text-muted-foreground/70"
-                )}>
-                  {item.title}
-                </span>
-              </NavLink>
-            )
-          })}
-          
-          {/* Menu Button */}
-          <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-            <SheetTrigger asChild>
-              <div className="flex flex-col items-center justify-center min-w-[64px] min-h-[56px] px-2 py-2 sm:px-3 sm:py-3 sm:min-h-[64px] rounded-lg sm:rounded-xl transition-all ease-uber active:scale-95 hover:scale-105 cursor-pointer text-muted-foreground/70 hover:text-foreground hover:bg-muted/40">
-                <Menu className="h-5 w-5 mb-1 stroke-[2] flex-shrink-0" />
-                <span className="text-[10px] sm:text-[11px] font-medium leading-none text-center block w-full">Plus</span>
-              </div>
-            </SheetTrigger>
-            <SheetContent side="bottom" className="h-[50vh]">
-              <SheetHeader>
-                <SheetTitle>Menu</SheetTitle>
-              </SheetHeader>
-              <div className="grid gap-4 py-6">
-                {menuItems.map((item) => (
+                <SheetHeader className="pb-4">
+                  <SheetTitle className="text-[24px] leading-[1.2] font-semibold text-content-primary">
+                    Menu
+                  </SheetTitle>
+                </SheetHeader>
+                
+                {/* BaseWeb List Pattern with 8px spacing */}
+                <div className="space-y-2 py-4 overflow-y-auto max-h-full">
+                  {menuItems.map((item) => (
+                    <Button
+                      key={item.title}
+                      variant="ghost"
+                      className={cn(
+                        // BaseWeb touch target: 48px minimum
+                        "justify-start min-h-[48px] w-full",
+                        // BaseWeb typography: 16px body
+                        "text-[16px] leading-[1.5] px-4 py-3",
+                        "hover:bg-background-secondary",
+                        // BaseWeb focus states
+                        "focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                      )}
+                      onClick={() => {
+                        navigate(item.url)
+                        setIsMenuOpen(false)
+                      }}
+                    >
+                      <item.icon className="h-5 w-5 mr-3 flex-shrink-0" />
+                      <span className="truncate">{item.title}</span>
+                    </Button>
+                  ))}
+                  
+                  {/* BaseWeb Separator */}
+                  <Separator className="my-4" />
+                  
                   <Button
-                    key={item.title}
                     variant="ghost"
-                    className="justify-start h-14 text-base"
-                    onClick={() => {
-                      navigate(item.url)
-                      setIsMenuOpen(false)
-                    }}
+                    className={cn(
+                      // BaseWeb touch target: 48px minimum
+                      "justify-start min-h-[48px] w-full",
+                      // BaseWeb typography: 16px body
+                      "text-[16px] leading-[1.5] px-4 py-3",
+                      "text-negative hover:text-negative hover:bg-negative/10",
+                      // BaseWeb focus states
+                      "focus:ring-2 focus:ring-negative focus:ring-offset-2"
+                    )}
+                    onClick={handleSignOut}
                   >
-                    <item.icon className="h-5 w-5 mr-3" />
-                    {item.title}
+                    <LogOut className="h-5 w-5 mr-3 flex-shrink-0" />
+                    <span className="truncate">Déconnexion</span>
                   </Button>
-                ))}
-                <Separator className="my-2" />
-                <Button
-                  variant="ghost"
-                  className="justify-start h-14 text-base text-destructive hover:text-destructive"
-                  onClick={handleSignOut}
-                >
-                  <LogOut className="h-5 w-5 mr-3" />
-                  Déconnexion
-                </Button>
-              </div>
-            </SheetContent>
-          </Sheet>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </nav>
