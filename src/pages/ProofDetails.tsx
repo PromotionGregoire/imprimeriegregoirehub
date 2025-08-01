@@ -261,21 +261,33 @@ const ProofDetails = () => {
 
   return (
     <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3 sm:gap-4 lg:gap-6 min-w-0">
-          <Button variant="ghost" onClick={() => navigate('/dashboard/proofs')}>
-            <ArrowLeft className="w-4 h-4" />
+      {/* Header - Base Web Design System */}
+      <div className="flex items-start justify-between gap-base-400 min-h-[60px]">
+        <div className="flex items-start gap-base-400 sm:gap-base-500 lg:gap-base-600 min-w-0 flex-1">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate('/dashboard/proofs')}
+            className="min-h-[44px] min-w-[44px] p-base-300 flex-shrink-0"
+            aria-label="Retour aux épreuves"
+          >
+            <ArrowLeft className="w-5 h-5" strokeWidth={2} />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-base-750 font-semibold text-foreground leading-tight mb-base-300">
               Épreuve v{proof.version}
             </h1>
-            <div className="flex items-center gap-3 mt-2">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-base-300 sm:gap-base-400">
               {getStatusBadge(proof.status)}
-              <span className="text-sm text-muted-foreground">
-                Commande {proof.orders.order_number}
-              </span>
+              <div className="flex items-center gap-base-200">
+                <Package className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={2} />
+                <span 
+                  className="text-base-300 text-muted-foreground font-medium truncate"
+                  title={`Commande ${proof.orders.order_number}`}
+                  aria-label={`Numéro de commande: ${proof.orders.order_number}`}
+                >
+                  Commande {proof.orders.order_number}
+                </span>
+              </div>
             </div>
           </div>
         </div>
