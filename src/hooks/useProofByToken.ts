@@ -9,9 +9,9 @@ export const useProofByToken = (token: string | undefined) => {
         throw new Error('Token is required');
       }
 
-      // Utiliser GET avec le token en paramètre
+      // Utiliser la nouvelle fonction edge function
       const response = await fetch(
-        `https://ytcrplsistsxfaxkfqqp.supabase.co/functions/v1/get-proof-by-token?token=${token}`,
+        `https://ytcrplsistsxfaxkfqqp.supabase.co/functions/v1/get-public-proof-details?token=${token}`,
         {
           method: 'GET',
           headers: {
