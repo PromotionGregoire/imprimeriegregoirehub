@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
@@ -12,7 +13,9 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { SubmissionStatusTimeline } from './SubmissionStatusTimeline';
 import ModernToggle from './ModernToggle';
-import { useForceAcceptSubmission } from '@/hooks/useForceAcceptSubmission';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface ModernSubmissionCardProps {
   submission: any;
@@ -20,8 +23,10 @@ interface ModernSubmissionCardProps {
 }
 
 const ModernSubmissionCard = ({ submission, onClick }: ModernSubmissionCardProps) => {
-  const [isAccepting, setIsAccepting] = useState(false);
-  const forceAcceptSubmission = useForceAcceptSubmission();
+  const [accepting, setAccepting] = useState(false);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-CA', {
@@ -46,14 +51,37 @@ const ModernSubmissionCard = ({ submission, onClick }: ModernSubmissionCardProps
     
     if (!confirmed) return;
     
-    setIsAccepting(true);
     try {
-      await forceAcceptSubmission.mutateAsync({ 
-        submissionId: submission.id,
-        approvedBy: 'Acceptation manuelle via interface'
+      setAccepting(true);
+      
+      // Appeler l'edge function
+      const { data, error } = await supabase.functions.invoke('accept-submission', {
+        body: { submissionId: submission.id }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "✅ Soumission acceptée",
+        description: `${data.message}. L'épreuve a été créée automatiquement.`,
+      });
+
+      // Recharger les données
+      await queryClient.invalidateQueries({ queryKey: ['submission', submission.id] });
+      
+      // Naviguer vers la page de l'épreuve créée
+      if (data.proof?.id) {
+        navigate(`/dashboard/proofs/${data.proof.id}`);
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'acceptation de la soumission:', error);
+      toast({
+        title: "❌ Erreur",
+        description: error.message || "Impossible d'accepter la soumission",
+        variant: "destructive",
       });
     } finally {
-      setIsAccepting(false);
+      setAccepting(false);
     }
   };
 
@@ -124,7 +152,7 @@ const ModernSubmissionCard = ({ submission, onClick }: ModernSubmissionCardProps
             label="Accepter la Soumission"
             checked={submission.status === 'Acceptée'}
             onCheckedChange={handleAcceptSubmission}
-            disabled={submission.status === 'Acceptée' || isAccepting}
+            disabled={submission.status === 'Acceptée' || accepting}
           />
         </div>
 
