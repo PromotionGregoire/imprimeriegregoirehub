@@ -54,12 +54,16 @@ export const useQuoteByToken = (token: string | undefined) => {
         .maybeSingle();
 
       if (error) {
+        console.error('Erreur Supabase:', error);
         throw new Error(`Erreur lors de la récupération du devis: ${error.message}`);
       }
 
       if (!submission) {
+        console.error('Aucune soumission trouvée pour le token:', token);
         throw new Error('Devis non trouvé ou token invalide');
       }
+
+      console.log('Soumission trouvée:', submission);
 
       // Calculer les totaux
       const items = submission.submission_items.map((item: any) => ({
