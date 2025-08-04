@@ -36,38 +36,38 @@ export const ProofCard = ({ proof }: ProofCardProps) => {
       className="group hover:shadow-lg transition-all duration-300 cursor-pointer active:scale-[0.98] bg-card border-border/50"
       onClick={handleCardClick}
     >
-      <CardContent className="p-5 md:p-6 space-y-4">
+      <CardContent className="p-base-500 md:p-base-600 space-y-base-400">
         {/* Header avec nom entreprise proéminent */}
-        <div className="space-y-2">
-          <h3 className="font-semibold text-lg md:text-base text-foreground leading-tight group-hover:text-primary transition-colors">
+        <div className="space-y-base-200">
+          <h3 className="font-bold text-lg md:text-xl text-foreground leading-tight group-hover:text-primary transition-colors">
             {proof.orders?.clients?.business_name || 'Client inconnu'}
           </h3>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-base-200">
             <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
-            <p className="text-sm text-muted-foreground font-medium">
+            <p className="text-sm text-muted-foreground font-mono">
               {proof.orders?.order_number || 'N° de commande manquant'}
             </p>
           </div>
         </div>
 
         {/* Version et statut avec design moderne */}
-        <div className="flex items-center justify-between pt-2">
-          <div className="px-3 py-1 bg-primary/5 rounded-full">
+        <div className="flex items-center justify-between pt-base-200">
+          <div className="px-base-300 py-base-200 bg-primary/5 rounded-full">
             <span className="text-sm font-semibold text-primary">
               V{proof.version}
             </span>
           </div>
           <Badge 
-            className={`text-xs font-semibold px-3 py-1 ${statusColors[proof.status as keyof typeof statusColors] || 'bg-muted text-muted-foreground border-muted'}`}
+            className={`text-xs font-semibold px-base-300 py-base-200 ${statusColors[proof.status as keyof typeof statusColors] || 'bg-muted text-muted-foreground border-muted'}`}
           >
             {proof.status === 'A preparer' ? 'À préparer' : proof.status}
           </Badge>
         </div>
 
         {/* Footer avec date et contact */}
-        <div className="pt-3 border-t border-border/40">
+        <div className="pt-base-300 border-t border-border/40">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-base-200">
               <Calendar className="h-3 w-3" />
               <span className="font-medium">
                 {format(new Date(proof.created_at), 'dd MMM yyyy', { locale: fr })}

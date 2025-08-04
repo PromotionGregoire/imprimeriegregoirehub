@@ -1,4 +1,4 @@
-import { Users, FileText, Package, Menu, ShoppingBag, Tag, LogOut } from "lucide-react"
+import { Users, FileText, Package, Menu, ShoppingBag, Tag, LogOut, User, ClipboardList, Layers } from "lucide-react"
 import { NavLink, useLocation, useNavigate } from "react-router-dom"
 import { cn } from "@/lib/utils"
 import { useState } from "react"
@@ -8,10 +8,10 @@ import { useAuth } from "@/hooks/useAuth"
 import { Separator } from "@/components/ui/separator"
 
 const navigationItems = [
-  { title: "Clients", url: "/dashboard", icon: Users },
-  { title: "Soumissions", url: "/dashboard/submissions", icon: FileText },
+  { title: "Clients", url: "/dashboard", icon: User },
+  { title: "Soumissions", url: "/dashboard/submissions", icon: ClipboardList },
   { title: "Commandes", url: "/dashboard/orders", icon: Package },
-  { title: "Épreuves", url: "/dashboard/proofs", icon: FileText },
+  { title: "Épreuves", url: "/dashboard/proofs", icon: Layers },
 ]
 
 const menuItems = [
@@ -42,9 +42,9 @@ export function BottomNavigation() {
   return (
     <>
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-lg border-t border-border/20 safe-area-inset-bottom">
-        <div className="flex items-center justify-center px-3 py-2 sm:px-4 sm:py-3 max-w-screen-sm mx-auto">
-          <div className="flex items-center justify-between w-full max-w-lg mx-auto px-2 sm:px-4">{/* Proper spacing distribution */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-lg border-t border-border/20">
+        <div className="flex items-center justify-center px-base-300 py-base-300 max-w-screen-sm mx-auto">
+          <div className="flex items-center justify-between w-full max-w-lg mx-auto px-base-200">
           {navigationItems.map((item) => {
             const active = isActive(item.url)
             return (
@@ -52,18 +52,18 @@ export function BottomNavigation() {
                 key={item.title}
                 to={item.url}
                 className={cn(
-                  "flex flex-col items-center justify-center min-w-[64px] min-h-[56px] px-2 py-2 sm:px-3 sm:py-3 sm:min-h-[64px] rounded-lg sm:rounded-xl transition-all ease-uber active:scale-95 hover:scale-105",
+                  "flex flex-col items-center justify-center min-w-[72px] min-h-[64px] px-base-200 py-base-300 rounded-lg transition-all ease-uber active:scale-95 hover:scale-105",
                   active 
                     ? "text-[#5a7a51] bg-[#5a7a51]/10" 
                     : "text-muted-foreground/70 hover:text-foreground hover:bg-muted/40"
                 )}
               >
                 <item.icon className={cn(
-                  "h-5 w-5 mb-1 transition-all ease-uber flex-shrink-0", 
+                  "h-5 w-5 mb-base-200 transition-all ease-uber flex-shrink-0", 
                   active ? "text-[#5a7a51] scale-110 stroke-[2.5]" : "text-muted-foreground/70 stroke-[2]"
                 )} />
                 <span className={cn(
-                  "text-[10px] sm:text-[11px] font-medium leading-none text-center transition-all ease-uber block w-full",
+                  "text-xs font-medium leading-tight text-center transition-all ease-uber block w-full whitespace-nowrap",
                   active ? "text-[#5a7a51] font-semibold" : "text-muted-foreground/70"
                 )}>
                   {item.title}
@@ -75,9 +75,9 @@ export function BottomNavigation() {
           {/* Menu Button */}
           <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
             <SheetTrigger asChild>
-              <div className="flex flex-col items-center justify-center min-w-[64px] min-h-[56px] px-2 py-2 sm:px-3 sm:py-3 sm:min-h-[64px] rounded-lg sm:rounded-xl transition-all ease-uber active:scale-95 hover:scale-105 cursor-pointer text-muted-foreground/70 hover:text-foreground hover:bg-muted/40">
-                <Menu className="h-5 w-5 mb-1 stroke-[2] flex-shrink-0" />
-                <span className="text-[10px] sm:text-[11px] font-medium leading-none text-center block w-full">Plus</span>
+              <div className="flex flex-col items-center justify-center min-w-[72px] min-h-[64px] px-base-200 py-base-300 rounded-lg transition-all ease-uber active:scale-95 hover:scale-105 cursor-pointer text-muted-foreground/70 hover:text-foreground hover:bg-muted/40">
+                <Menu className="h-5 w-5 mb-base-200 stroke-[2] flex-shrink-0" />
+                <span className="text-xs font-medium leading-tight text-center block w-full whitespace-nowrap">Plus</span>
               </div>
             </SheetTrigger>
             <SheetContent side="bottom" className="h-[50vh]">

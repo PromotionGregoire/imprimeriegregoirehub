@@ -47,13 +47,13 @@ const ClientCard = ({
       <CardHeader className="pb-base-400 space-y-0">
         <div className="flex items-start justify-between gap-base-300">
           <div className="flex-1 min-w-0">
-            <h3 className="text-base-550 md:text-base-400 font-semibold text-foreground mb-base-200 leading-tight">
+            <h3 className="text-lg md:text-xl font-bold text-foreground mb-base-200 leading-tight">
               {business_name}
             </h3>
-            <p className="text-base-300 text-muted-foreground font-mono">
+            <p className="text-sm text-muted-foreground font-mono">
               {client_number}
             </p>
-            <div className="space-y-base-100 mt-base-200">
+            <div className="space-y-base-100 mt-base-300">
               <p className="text-base-300 md:text-base-300 text-foreground font-medium">
                 {contact_name}
               </p>

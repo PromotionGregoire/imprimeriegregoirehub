@@ -67,10 +67,10 @@ const ModernSubmissionCard = ({ submission, onClick }: ModernSubmissionCardProps
               <FileText className="h-5 w-5 text-primary" />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="font-semibold text-base text-foreground leading-tight truncate">
+              <h3 className="font-bold text-lg text-foreground leading-tight truncate">
                 {submission.clients?.business_name}
               </h3>
-              <p className="text-sm text-muted-foreground font-mono mt-1">
+              <p className="text-sm text-muted-foreground font-mono mt-base-200">
                 {submission.submission_number}
               </p>
             </div>

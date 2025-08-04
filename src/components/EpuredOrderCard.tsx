@@ -69,17 +69,17 @@ const EpuredOrderCard = ({ order, onProofAccepted, onDelivered }: OrderCardProps
     >
       <CardContent className="p-4 sm:p-5 lg:p-6">
         {/* Header : Nom d'entreprise principal + Montant à droite */}
-        <div className="flex items-start justify-between mb-base-300">
+        <div className="flex items-start justify-between mb-base-400">
           <div className="flex-1">
-            <h3 className="font-bold text-base-500 text-foreground leading-tight">
+            <h3 className="font-bold text-lg text-foreground leading-tight">
               {order.clients?.business_name}
             </h3>
-            <p className="text-base-300 text-muted-foreground font-mono mt-base-100">
+            <p className="text-sm text-muted-foreground font-mono mt-base-200">
               {order.order_number}
             </p>
           </div>
           <div className="text-right flex-shrink-0">
-            <div className="font-bold text-base-650 text-primary">
+            <div className="font-bold text-xl text-primary">
               ${Number(order.total_price).toFixed(2)}
             </div>
           </div>
