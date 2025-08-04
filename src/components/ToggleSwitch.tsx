@@ -29,7 +29,9 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
   // Utiliser l'état contrôlé si fourni, sinon utiliser l'état interne
   const isOn = checked !== undefined ? checked : internalState;
 
-  const handleToggle = () => {
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Empêcher la propagation vers le parent
+    
     if (disabled) return;
     
     const newState = !isOn;
