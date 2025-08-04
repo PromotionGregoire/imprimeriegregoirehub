@@ -52,7 +52,7 @@ export const useForceAcceptSubmission = () => {
         .from('proofs')
         .insert([{
           order_id: order.id,
-          status: 'À préparer',
+          status: 'A preparer',
           version: 1
         }])
         .select()

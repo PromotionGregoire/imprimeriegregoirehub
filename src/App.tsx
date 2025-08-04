@@ -53,6 +53,7 @@ const App = () => (
               <Route path="clients/:id" element={<ClientDetails />} />
               <Route path="submissions" element={<Submissions />} />
               <Route path="submissions/new" element={<CreateSubmission />} />
+              <Route path="create-submission" element={<CreateSubmission />} />
               <Route path="submissions/:id" element={<SubmissionDetails />} />
               <Route path="submissions/edit/:id" element={<EditSubmission />} />
               <Route path="products" element={<Products />} />
