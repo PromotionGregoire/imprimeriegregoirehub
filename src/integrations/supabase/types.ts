@@ -879,6 +879,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      test_history_triggers: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          test_name: string
+          test_result: boolean
+          test_message: string
+        }[]
+      }
       update_proof_status_enum: {
         Args: Record<PropertyKey, never>
         Returns: undefined
