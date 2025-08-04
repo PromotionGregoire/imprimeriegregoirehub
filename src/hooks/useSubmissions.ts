@@ -83,6 +83,7 @@ export const useCreateSubmission = () => {
             submissionNumber: submission.submission_number,
             totalPrice: submissionData.total_price,
             items: submissionData.items,
+            acceptanceToken: submission.acceptance_token,
           },
         });
 
