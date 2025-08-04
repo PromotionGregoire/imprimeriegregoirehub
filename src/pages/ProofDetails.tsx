@@ -160,6 +160,17 @@ const ProofDetails = () => {
         });
         return;
       }
+      
+      // Validate file size (max 50MB)
+      const maxSize = 50 * 1024 * 1024; // 50MB in bytes
+      if (file.size > maxSize) {
+        toast({
+          title: '❌ Fichier trop volumineux',
+          description: 'La taille maximale autorisée est de 50 MB.',
+          variant: 'destructive',
+        });
+        return;
+      }
       setSelectedFile(file);
     }
   };
@@ -219,19 +230,14 @@ const ProofDetails = () => {
           </Button>
           <div className="min-w-0 flex-1">
             <h1 className="text-base-750 font-semibold text-foreground leading-tight mb-base-300">
-              Épreuve v{proof.version}
+              Épreuve pour la Commande {proof.orders.order_number}
             </h1>
             <div className="flex flex-col sm:flex-row sm:items-center gap-base-300 sm:gap-base-400">
-              {getStatusBadge(proof.status)}
-              <div className="flex items-center gap-base-200">
-                <Package className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={2} />
-                <span 
-                  className="text-base-300 text-muted-foreground font-medium truncate"
-                  title={`Commande ${proof.orders.order_number}`}
-                  aria-label={`Numéro de commande: ${proof.orders.order_number}`}
-                >
-                  Commande {proof.orders.order_number}
-                </span>
+              <div className="flex items-center gap-base-300">
+                <Badge variant="outline" className="font-medium">
+                  Version {proof.version}
+                </Badge>
+                {getStatusBadge(proof.status)}
               </div>
             </div>
           </div>
@@ -345,144 +351,173 @@ const ProofDetails = () => {
         </TabsList>
 
         <TabsContent value="manage">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* File Upload Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Téléverser une nouvelle version</CardTitle>
-                <CardDescription>
-                  Formats acceptés: PDF, JPG, PNG (max 10MB)
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="file-upload">Sélectionner un fichier</Label>
-                  <Input
-                    id="file-upload"
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={handleFileSelect}
-                    className="mt-1"
-                  />
-                </div>
-                
-                {selectedFile && (
-                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
-                      <span className="text-sm">{selectedFile.name}</span>
-                    </div>
-                    <span className="text-xs text-muted-foreground">
-                      {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                    </span>
-                  </div>
-                )}
-
-                <Button 
-                  onClick={handleUpload}
-                  disabled={!selectedFile || uploading}
-                  className="w-full"
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  {uploading ? 'Téléversement...' : 'Téléverser'}
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Current File Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Fichier actuel</CardTitle>
-                <CardDescription>
-                  Version {proof.version}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {proof.file_url ? (
-                  <>
-                    <div className="border rounded-lg p-4 bg-muted/30">
-                      <div className="flex items-center gap-2 mb-2">
-                        <FileText className="h-4 w-4" />
-                        <span className="text-sm font-medium">
-                          Épreuve v{proof.version}
-                        </span>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" asChild>
-                          <a href={proof.file_url} target="_blank" rel="noopener noreferrer">
-                            <Download className="w-4 h-4 mr-2" />
-                            Télécharger
-                          </a>
-                        </Button>
-                      </div>
-                    </div>
-
-                    {proof.status === 'En préparation' && (
-                      <Button
-                        onClick={() => sendToClient.mutate()}
-                        disabled={sendToClient.isPending}
-                        className="w-full"
-                      >
-                        <Send className="w-4 h-4 mr-2" />
-                        {sendToClient.isPending ? 'Envoi...' : 'Envoyer au client pour approbation'}
-                      </Button>
-                    )}
-
-                    {proof.status === 'Envoyée au client' && (
-                      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                        <p className="text-sm text-blue-800 mb-3">
-                          ✅ Épreuve envoyée au client. En attente de leur réponse.
-                        </p>
-                        {proof.approval_token && (
-                          <div className="space-y-2">
-                            <p className="text-xs text-blue-700 font-medium">Lien de validation client :</p>
-                            <div className="flex gap-2">
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                asChild
-                                className="text-xs"
-                              >
-                                <a 
-                                  href={`/epreuve/${proof.approval_token}`}
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                >
-                                  <ExternalLink className="w-3 h-3 mr-1" />
-                                  Voir la page client
-                                </a>
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                className="text-xs"
-                                onClick={() => {
-                                  navigator.clipboard.writeText(`${window.location.origin}/epreuve/${proof.approval_token}`);
-                                  toast({
-                                    title: "Lien copié",
-                                    description: "Le lien de validation a été copié dans le presse-papiers.",
-                                  });
-                                }}
-                              >
-                                Copier le lien
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="text-center py-8">
-                    <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">
-                      Aucun fichier téléversé pour cette épreuve.
+          <Card>
+            <CardHeader>
+              <CardTitle>Historique des Versions</CardTitle>
+              <CardDescription>
+                Gestion des versions et échanges avec le client
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Upload Next Version Section */}
+              <div className="border rounded-lg p-4 bg-muted/30">
+                <h3 className="font-medium text-lg mb-3">
+                  Téléverser la Version {proof.version + 1}
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="file-upload">Sélectionner un fichier</Label>
+                    <Input
+                      id="file-upload"
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={handleFileSelect}
+                      className="mt-1"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Formats acceptés: PDF, JPG, PNG (max 50MB)
                     </p>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                  
+                  {selectedFile && (
+                    <div className="flex items-center justify-between p-3 bg-background border rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        <span className="text-sm">{selectedFile.name}</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                      </span>
+                    </div>
+                  )}
+
+                  <Button 
+                    onClick={handleUpload}
+                    disabled={!selectedFile || uploading}
+                    className="w-full"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    {uploading ? 'Téléversement...' : 'Téléverser la nouvelle version'}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Current Version Block */}
+              {proof.file_url && (
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-medium text-lg">
+                      Version {proof.version} - Envoyée le {format(new Date(proof.updated_at), 'dd MMM yyyy', { locale: fr })}
+                    </h3>
+                    <Badge 
+                      variant={
+                        proof.status === 'Approuvée' ? 'default' :
+                        proof.status === 'Modification demandée' ? 'destructive' :
+                        proof.status === 'Envoyée au client' ? 'secondary' :
+                        'outline'
+                      }
+                    >
+                      {proof.status}
+                    </Badge>
+                  </div>
+                  
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      <span className="text-sm font-medium">
+                        Épreuve v{proof.version}
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" asChild>
+                        <a href={proof.file_url} target="_blank" rel="noopener noreferrer">
+                          <Download className="w-4 h-4 mr-2" />
+                          Télécharger
+                        </a>
+                      </Button>
+                      
+                      {proof.status === 'En préparation' && (
+                        <Button
+                          onClick={() => sendToClient.mutate()}
+                          disabled={sendToClient.isPending}
+                          size="sm"
+                        >
+                          <Send className="w-4 h-4 mr-2" />
+                          {sendToClient.isPending ? 'Envoi...' : 'Envoyer au client'}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Client Comments if any */}
+                  {proof.client_comments && proof.status === 'Modification demandée' && (
+                    <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                      <h4 className="font-medium text-orange-800 mb-2">
+                        Commentaires du client :
+                      </h4>
+                      <p className="text-orange-700 text-sm">{proof.client_comments}</p>
+                    </div>
+                  )}
+
+                  {/* Client validation link */}
+                  {proof.status === 'Envoyée au client' && proof.approval_token && (
+                    <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-sm text-blue-800 mb-3">
+                        ✅ Épreuve envoyée au client. En attente de leur réponse.
+                      </p>
+                      <div className="space-y-2">
+                        <p className="text-xs text-blue-700 font-medium">Lien de validation client :</p>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            asChild
+                            className="text-xs"
+                          >
+                            <a 
+                              href={`/epreuve/${proof.approval_token}`}
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                            >
+                              <ExternalLink className="w-3 h-3 mr-1" />
+                              Voir la page client
+                            </a>
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="text-xs"
+                            onClick={() => {
+                              navigator.clipboard.writeText(`${window.location.origin}/epreuve/${proof.approval_token}`);
+                              toast({
+                                title: "Lien copié",
+                                description: "Le lien de validation a été copié dans le presse-papiers.",
+                              });
+                            }}
+                          >
+                            Copier le lien
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* No file uploaded state */}
+              {!proof.file_url && (
+                <div className="text-center py-8 border rounded-lg border-dashed">
+                  <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">
+                    Aucun fichier téléversé pour cette épreuve.
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Utilisez le formulaire ci-dessus pour téléverser la première version.
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="history">
