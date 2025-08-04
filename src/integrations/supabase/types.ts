@@ -747,6 +747,17 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_latest_proofs_by_order: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          order_id: string
+          status: string
+          version: number
+          created_at: string
+          orders: Json
+        }[]
+      }
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean

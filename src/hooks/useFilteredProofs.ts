@@ -9,17 +9,18 @@ export const useFilteredProofs = (
   const { data: proofs, isLoading, error } = useProofs();
 
   const filteredProofs = useMemo(() => {
-    if (!proofs) return [];
+    if (!proofs || !Array.isArray(proofs)) return [];
 
     let filtered = [...proofs];
 
     // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(proof =>
-        proof.orders?.order_number.toLowerCase().includes(query) ||
-        proof.orders?.clients?.business_name.toLowerCase().includes(query)
-      );
+      filtered = filtered.filter(proof => {
+        const orders = proof.orders as any;
+        return orders?.order_number?.toLowerCase().includes(query) ||
+               orders?.clients?.business_name?.toLowerCase().includes(query);
+      });
     }
 
     // Filter by status

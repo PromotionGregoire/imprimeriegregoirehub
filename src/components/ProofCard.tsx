@@ -12,13 +12,7 @@ interface ProofCardProps {
     status: string;
     version: number;
     created_at: string;
-    orders: {
-      order_number: string;
-      clients: {
-        business_name: string;
-        contact_name: string;
-      };
-    };
+    orders: any; // JSONB type from database function
   };
 }
 
