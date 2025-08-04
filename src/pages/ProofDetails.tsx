@@ -84,8 +84,13 @@ const ProofDetails = () => {
     mutationFn: async (file: File) => {
       if (!proof) throw new Error('Proof not found');
       
+      // Calculate next version number based on existing versions for this order
+      const nextVersion = (allVersions?.length || 0) + 1;
+      
+      // Generate unique ID for the new proof version
+      const newProofId = crypto.randomUUID();
       const fileExt = file.name.split('.').pop();
-      const fileName = `${proof.id}/v${proof.version + 1}.${fileExt}`;
+      const fileName = `${newProofId}/v${nextVersion}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('proofs')
@@ -99,28 +104,31 @@ const ProofDetails = () => {
         .from('proofs')
         .getPublicUrl(fileName);
 
-      // Update proof with new file URL and increment version
-      const { error: updateError } = await supabase
+      // Create NEW proof entry instead of updating existing one
+      const { error: insertError } = await supabase
         .from('proofs')
-        .update({
+        .insert({
+          id: newProofId,
+          order_id: proof.order_id,
           file_url: publicUrl,
-          version: proof.version + 1,
+          version: nextVersion,
           status: 'En préparation',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', proof.id);
+          approval_token: crypto.randomUUID()
+        });
 
-      if (updateError) throw updateError;
+      if (insertError) throw insertError;
 
-      return { publicUrl, version: proof.version + 1 };
+      return { publicUrl, version: nextVersion, newProofId };
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['proof-details', id] });
+    onSuccess: (data) => {
+      // Redirect to the new proof version details page
+      navigate(`/dashboard/proofs/${data.newProofId}`);
+      
       queryClient.invalidateQueries({ queryKey: ['proof-versions', proof?.order_id] });
       setSelectedFile(null);
       toast({
-        title: '✅ Fichier téléversé',
-        description: 'Le fichier a été téléversé avec succès.',
+        title: '✅ Nouvelle version créée',
+        description: `Version ${data.version} créée avec succès.`,
       });
     },
     onError: (error) => {
@@ -257,6 +265,23 @@ const ProofDetails = () => {
                 <Badge variant="outline" className="font-medium">
                   Version {proof.version}
                 </Badge>
+                {/* Check if this is the latest version */}
+                {allVersions && allVersions[0]?.id === proof.id && (
+                  <Badge variant="default" className="bg-primary text-primary-foreground">
+                    ✓ Version Active
+                  </Badge>
+                )}
+                {/* Show button to go to latest version if viewing older version */}
+                {allVersions && allVersions[0]?.id !== proof.id && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => navigate(`/dashboard/proofs/${allVersions[0].id}`)}
+                    className="text-xs"
+                  >
+                    Aller à la version la plus récente (V{allVersions[0].version})
+                  </Button>
+                )}
                 {getStatusBadge(proof.status)}
               </div>
             </div>
@@ -382,7 +407,7 @@ const ProofDetails = () => {
               {/* Upload Next Version Section */}
               <div className="border rounded-lg p-4 bg-muted/30">
                 <h3 className="font-medium text-lg mb-3">
-                  Téléverser la Version {proof.version + 1}
+                  Téléverser la Version {(allVersions?.length || 0) + 1}
                 </h3>
                 <div className="space-y-4">
                   <div>
@@ -430,13 +455,20 @@ const ProofDetails = () => {
                   ))}
                 </div>
               ) : (
-                <div className="space-y-4">
+                 <div className="space-y-4">
                   {allVersions?.map((version, index) => (
-                    <div key={version.id} className="border rounded-lg p-4">
+                    <div key={version.id} className={`border rounded-lg p-4 ${index === 0 ? 'border-primary bg-primary/5' : ''}`}>
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-medium text-lg">
-                          Version {version.version} - Envoyée le {format(new Date(version.updated_at), 'dd MMM yyyy', { locale: fr })}
-                        </h3>
+                        <div className="flex items-center gap-3">
+                          <h3 className="font-medium text-lg">
+                            Version {version.version} - Envoyée le {format(new Date(version.updated_at), 'dd MMM yyyy', { locale: fr })}
+                          </h3>
+                          {index === 0 && (
+                            <Badge variant="default" className="bg-primary text-primary-foreground">
+                              ✓ Version Active
+                            </Badge>
+                          )}
+                        </div>
                         <Badge 
                           variant={
                             version.status === 'Approuvée' ? 'default' :
