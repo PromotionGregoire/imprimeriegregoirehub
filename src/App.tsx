@@ -27,6 +27,7 @@ import AdminHistory from "./pages/AdminHistory";
 import AdminMonitoring from "./pages/AdminMonitoring";
 import ProofApproval from "./pages/ProofApproval";
 import ProofApprovalPage from "./pages/ProofApprovalPage";
+import SubmissionApprovalPage from "./pages/SubmissionApprovalPage";
 import ForcePasswordChange from "./pages/ForcePasswordChange";
 import DashboardLayout from "./components/DashboardLayout";
 
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/epreuve/:token" element={<ProofApproval />} />
             <Route path="/approve/proof/:token" element={<ProofApprovalPage />} />
+            <Route path="/approve/submission/:token" element={<SubmissionApprovalPage />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <DashboardLayout />
