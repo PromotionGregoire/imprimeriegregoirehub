@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Upload, Send, FileText, Download, Clock, User, Package, ExternalLink, Receipt } from 'lucide-react';
+import { ArrowLeft, Upload, Send, FileText, Download, Clock, User, Package, ExternalLink, Receipt, Copy, Mail, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +23,7 @@ const ProofDetails = () => {
   const queryClient = useQueryClient();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   // Fetch proof details
   const { data: proof, isLoading } = useQuery({
@@ -218,6 +219,73 @@ const ProofDetails = () => {
     return <StatusBadge status={status} type="proof" size="medium" />;
   };
 
+  // Helper function to determine if client approval section should be visible
+  const shouldShowClientApprovalSection = () => {
+    const validStatuses = ['Envoyée au client', 'Modification demandée', 'Approuvée'];
+    return validStatuses.includes(proof.status);
+  };
+
+  // Helper function to get the approval URL
+  const getApprovalUrl = () => {
+    if (!proof.validation_token) return null;
+    return `${window.location.origin}/approve/proof/${proof.validation_token}`;
+  };
+
+  // Copy link to clipboard
+  const handleCopyLink = async () => {
+    const url = getApprovalUrl();
+    if (!url) return;
+    
+    try {
+      await navigator.clipboard.writeText(url);
+      setLinkCopied(true);
+      toast({
+        title: '✅ Lien copié',
+        description: 'Le lien d\'approbation a été copié dans le presse-papiers.',
+      });
+      
+      // Reset the copied state after 2 seconds
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch (error) {
+      toast({
+        title: '❌ Erreur',
+        description: 'Impossible de copier le lien.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // Resend email mutation
+  const resendEmail = useMutation({
+    mutationFn: async () => {
+      if (!proof) throw new Error('Proof not found');
+      
+      const { error } = await supabase.functions.invoke('send-proof-to-client', {
+        body: {
+          proofId: proof.id
+        }
+      });
+
+      if (error) throw new Error(error.message);
+      return { success: true };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['proof-details', id] });
+      toast({
+        title: '✅ Courriel renvoyé',
+        description: 'Le courriel d\'approbation a été renvoyé au client.',
+      });
+    },
+    onError: (error) => {
+      console.error('Resend email error:', error);
+      toast({
+        title: '❌ Erreur',
+        description: 'Impossible de renvoyer le courriel.',
+        variant: 'destructive',
+      });
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="space-y-6 p-6">
@@ -367,6 +435,83 @@ const ProofDetails = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Client Approval Section - Only show if proof has been sent to client */}
+      {shouldShowClientApprovalSection() && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5 text-primary" />
+              Lien de Validation Client
+            </CardTitle>
+            <CardDescription>
+              Gérer et visualiser le lien d'approbation envoyé au client
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Approval URL Display */}
+            {getApprovalUrl() && (
+              <div className="space-y-3">
+                <Label htmlFor="approval-url">URL d'approbation</Label>
+                <div className="flex items-center gap-2 p-3 bg-muted/30 border rounded-lg">
+                  <div className="flex-1 min-w-0">
+                    <a
+                      href={getApprovalUrl()!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-primary hover:underline break-all"
+                      id="approval-url"
+                    >
+                      {getApprovalUrl()}
+                    </a>
+                  </div>
+                  <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                </div>
+                
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button
+                    onClick={handleCopyLink}
+                    variant="outline"
+                    className="flex-1 sm:flex-none"
+                    disabled={linkCopied}
+                  >
+                    {linkCopied ? (
+                      <>
+                        <Check className="w-4 h-4 mr-2 text-green-600" />
+                        Copié !
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4 mr-2" />
+                        Copier le lien
+                      </>
+                    )}
+                  </Button>
+                  
+                  <Button
+                    onClick={() => resendEmail.mutate()}
+                    disabled={resendEmail.isPending}
+                    className="flex-1 sm:flex-none"
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    {resendEmail.isPending ? 'Envoi...' : 'Renvoyer le courriel'}
+                  </Button>
+                </div>
+              </div>
+            )}
+            
+            {/* If no validation token exists */}
+            {!getApprovalUrl() && (
+              <div className="text-center py-4 text-muted-foreground">
+                <p className="text-sm">
+                  Aucun lien d'approbation disponible. Envoyez d'abord l'épreuve au client.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Tabs - Base Web Design System */}
       <Tabs defaultValue="manage" className="space-y-base-600">
