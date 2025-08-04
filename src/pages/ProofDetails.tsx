@@ -61,6 +61,24 @@ const ProofDetails = () => {
     enabled: !!id,
   });
 
+  // Fetch all versions for this order
+  const { data: allVersions, isLoading: versionsLoading } = useQuery({
+    queryKey: ['proof-versions', proof?.order_id],
+    queryFn: async () => {
+      if (!proof?.order_id) return [];
+      
+      const { data, error } = await supabase
+        .from('proofs')
+        .select('*')
+        .eq('order_id', proof.order_id)
+        .order('version', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!proof?.order_id,
+  });
+
   // Upload file mutation
   const uploadFile = useMutation({
     mutationFn: async (file: File) => {
@@ -98,6 +116,7 @@ const ProofDetails = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['proof-details', id] });
+      queryClient.invalidateQueries({ queryKey: ['proof-versions', proof?.order_id] });
       setSelectedFile(null);
       toast({
         title: '✅ Fichier téléversé',
@@ -132,6 +151,7 @@ const ProofDetails = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['proof-details', id] });
+      queryClient.invalidateQueries({ queryKey: ['proof-versions', proof?.order_id] });
       toast({
         title: '✅ Épreuve envoyée',
         description: 'L\'épreuve a été envoyée au client par courriel.',
@@ -402,8 +422,117 @@ const ProofDetails = () => {
                 </div>
               </div>
 
-              {/* Current Version Block */}
-              {proof.file_url && (
+              {/* All Versions History */}
+              {versionsLoading ? (
+                <div className="space-y-4">
+                  {[...Array(2)].map((_, i) => (
+                    <Skeleton key={i} className="h-32" />
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {allVersions?.map((version, index) => (
+                    <div key={version.id} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-medium text-lg">
+                          Version {version.version} - Envoyée le {format(new Date(version.updated_at), 'dd MMM yyyy', { locale: fr })}
+                        </h3>
+                        <Badge 
+                          variant={
+                            version.status === 'Approuvée' ? 'default' :
+                            version.status === 'Modification demandée' ? 'destructive' :
+                            version.status === 'Envoyée au client' ? 'secondary' :
+                            'outline'
+                          }
+                        >
+                          {version.status}
+                        </Badge>
+                      </div>
+                      
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          <span className="text-sm font-medium">
+                            Épreuve v{version.version}
+                          </span>
+                        </div>
+                        <div className="flex gap-2">
+                          {version.file_url && (
+                            <Button variant="outline" size="sm" asChild>
+                              <a href={version.file_url} target="_blank" rel="noopener noreferrer">
+                                <Download className="w-4 h-4 mr-2" />
+                                Télécharger
+                              </a>
+                            </Button>
+                          )}
+                          
+                          {version.status === 'En préparation' && index === 0 && (
+                            <Button
+                              onClick={() => sendToClient.mutate()}
+                              disabled={sendToClient.isPending}
+                              size="sm"
+                            >
+                              <Send className="w-4 h-4 mr-2" />
+                              {sendToClient.isPending ? 'Envoi...' : 'Envoyer au client'}
+                            </Button>
+                          )}
+                          
+                          {version.status === 'Envoyée au client' && version.approval_token && (
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                asChild
+                              >
+                                <a 
+                                  href={`/epreuve/${version.approval_token}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <ExternalLink className="w-4 h-4 mr-2" />
+                                  Voir page client
+                                </a>
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  const link = `${window.location.origin}/epreuve/${version.approval_token}`;
+                                  navigator.clipboard.writeText(link);
+                                  toast({
+                                    title: '✅ Lien copié',
+                                    description: 'Le lien d\'approbation a été copié dans le presse-papiers.',
+                                  });
+                                }}
+                              >
+                                📋 Copier le lien
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {version.client_comments && (
+                        <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                          <h4 className="font-medium text-orange-800 mb-2">
+                            Commentaires du client :
+                          </h4>
+                          <p className="text-orange-700 text-sm">{version.client_comments}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  
+                  {(!allVersions || allVersions.length === 0) && (
+                    <p className="text-muted-foreground text-center py-4">
+                      Aucune version disponible pour cette épreuve.
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Current Version Block - KEEP ORIGINAL */}
+              {false && proof.file_url && (
                 <div className="border rounded-lg p-4">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-medium text-lg">
