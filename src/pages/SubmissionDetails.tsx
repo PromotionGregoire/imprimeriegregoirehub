@@ -65,7 +65,7 @@ const SubmissionDetails = () => {
   const taxAmount = submission.total_price ? Number(submission.total_price) - subtotal : 0;
 
   const handleCopyLink = () => {
-    const approvalLink = `${window.location.origin}/approval/${submission.approval_token}`;
+    const approvalLink = `${window.location.origin}/approve/submission/${submission.approval_token}`;
     navigator.clipboard.writeText(approvalLink);
     toast({
       title: 'Lien copié',
@@ -323,7 +323,7 @@ const SubmissionDetails = () => {
                   Lien d'approbation unique:
                 </div>
                 <div className="text-xs font-mono break-all">
-                  /approval/{submission.approval_token || submission.id}
+                  /approve/submission/{submission.approval_token || submission.id}
                 </div>
               </div>
               
