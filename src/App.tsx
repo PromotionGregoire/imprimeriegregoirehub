@@ -23,6 +23,7 @@ import OrderDetails from "./pages/OrderDetails";
 import Suppliers from "./pages/Suppliers";
 import SupplierDetails from "./pages/SupplierDetails";
 import AdminEmployees from "./pages/AdminEmployees";
+import AdminHistory from "./pages/AdminHistory";
 import ProofApproval from "./pages/ProofApproval";
 import ProofApprovalPage from "./pages/ProofApprovalPage";
 import ForcePasswordChange from "./pages/ForcePasswordChange";
@@ -62,6 +63,7 @@ const App = () => (
               <Route path="proofs/:id" element={<ProofDetails />} />
               <Route path="proofs" element={<Proofs />} />
               <Route path="admin/employees" element={<AdminEmployees />} />
+              <Route path="admin/history" element={<AdminHistory />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="/force-password-change" element={<ForcePasswordChange />} />

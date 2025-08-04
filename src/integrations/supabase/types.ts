@@ -183,9 +183,11 @@ export type Database = {
       epreuve_commentaires: {
         Row: {
           client_name: string | null
-          commentaire: string
+          comment_text: string
           created_at: string
           created_by_client: boolean | null
+          created_by_email: string | null
+          created_by_name: string | null
           id: string
           is_modification_request: boolean | null
           order_id: string
@@ -193,9 +195,11 @@ export type Database = {
         }
         Insert: {
           client_name?: string | null
-          commentaire: string
+          comment_text: string
           created_at?: string
           created_by_client?: boolean | null
+          created_by_email?: string | null
+          created_by_name?: string | null
           id?: string
           is_modification_request?: boolean | null
           order_id: string
@@ -203,9 +207,11 @@ export type Database = {
         }
         Update: {
           client_name?: string | null
-          commentaire?: string
+          comment_text?: string
           created_at?: string
           created_by_client?: boolean | null
+          created_by_email?: string | null
+          created_by_name?: string | null
           id?: string
           is_modification_request?: boolean | null
           order_id?: string
@@ -501,6 +507,8 @@ export type Database = {
           order_id: string
           status: string
           updated_at: string
+          uploaded_at: string | null
+          uploaded_by: string | null
           validation_token: string | null
           version: number
         }
@@ -516,6 +524,8 @@ export type Database = {
           order_id: string
           status?: string
           updated_at?: string
+          uploaded_at?: string | null
+          uploaded_by?: string | null
           validation_token?: string | null
           version?: number
         }
@@ -531,6 +541,8 @@ export type Database = {
           order_id?: string
           status?: string
           updated_at?: string
+          uploaded_at?: string | null
+          uploaded_by?: string | null
           validation_token?: string | null
           version?: number
         }
@@ -748,17 +760,71 @@ export type Database = {
           },
         ]
       }
+      v_ordre_historique: {
+        Row: {
+          action_description: string | null
+          action_type: string | null
+          business_name: string | null
+          client_action: boolean | null
+          client_id: string | null
+          contact_name: string | null
+          created_at: string | null
+          created_by_email: string | null
+          created_by_name: string | null
+          formatted_date: string | null
+          id: string | null
+          metadata: Json | null
+          order_id: string | null
+          order_number: string | null
+          proof_id: string | null
+          proof_status: string | null
+          proof_version: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordre_historique_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordre_historique_proof_id_fkey"
+            columns: ["proof_id"]
+            isOneToOne: false
+            referencedRelation: "proofs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       add_ordre_history: {
-        Args: {
-          p_order_id: string
-          p_action_type: string
-          p_action_description: string
-          p_metadata?: Json
-          p_proof_id?: string
-          p_client_action?: boolean
-        }
+        Args:
+          | {
+              p_order_id: string
+              p_action_type: string
+              p_action_description: string
+              p_metadata?: Json
+              p_proof_id?: string
+              p_client_action?: boolean
+            }
+          | {
+              p_order_id: string
+              p_action_type: string
+              p_action_description: string
+              p_metadata?: Json
+              p_proof_id?: string
+              p_client_action?: boolean
+              p_created_by?: string
+            }
         Returns: string
       }
       generate_client_number: {
@@ -786,6 +852,23 @@ export type Database = {
           version: number
           created_at: string
           orders: Json
+        }[]
+      }
+      get_next_proof_version: {
+        Args: { p_order_id: string }
+        Returns: number
+      }
+      get_order_history: {
+        Args: { p_order_id: string }
+        Returns: {
+          id: string
+          action_type: string
+          action_description: string
+          formatted_date: string
+          created_by_name: string
+          client_action: boolean
+          proof_version: number
+          metadata: Json
         }[]
       }
       get_user_role: {

@@ -1,4 +1,4 @@
-import { Users, FileText, Package, LogOut, Tag, UserCog, Building } from "lucide-react"
+import { Users, FileText, Package, LogOut, Tag, UserCog, Building, Activity } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import { useAuth } from "@/hooks/useAuth"
 import { useQuery } from "@tanstack/react-query"
@@ -68,6 +68,7 @@ export function AppSidebar() {
   // Admin navigation items
   const adminItems = currentUserProfile?.role === 'ADMIN' ? [
     { title: "Gestion des Employés", url: "/dashboard/admin/employees", icon: UserCog },
+    { title: "Historique des Actions", url: "/dashboard/admin/history", icon: Activity },
   ] : [];
 
   const handleSignOut = async () => {
