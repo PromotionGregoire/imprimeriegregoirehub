@@ -636,6 +636,7 @@ export type Database = {
           submission_number: string
           total_price: number | null
           updated_at: string
+          valid_until: string
         }
         Insert: {
           acceptance_token?: string
@@ -651,6 +652,7 @@ export type Database = {
           submission_number?: string
           total_price?: number | null
           updated_at?: string
+          valid_until?: string
         }
         Update: {
           acceptance_token?: string
@@ -666,6 +668,7 @@ export type Database = {
           submission_number?: string
           total_price?: number | null
           updated_at?: string
+          valid_until?: string
         }
         Relationships: [
           {

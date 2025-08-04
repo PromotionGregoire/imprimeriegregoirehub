@@ -27,7 +27,7 @@ interface SubmissionData {
   status: string;
   total_price: number;
   created_at: string;
-  deadline: string | null;
+  valid_until: string;
   acceptance_token: string;
   clients: {
     business_name: string;
@@ -187,7 +187,7 @@ export default function SubmissionApprovalPage() {
     );
   }
 
-  const isExpired = submission.deadline ? new Date(submission.deadline) < new Date() : false;
+  const isExpired = new Date(submission.valid_until) < new Date();
   const canAccept = submission.status === 'En attente' && !isExpired;
 
   return (
@@ -236,7 +236,7 @@ export default function SubmissionApprovalPage() {
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  Cette soumission a expiré le {submission.deadline ? format(new Date(submission.deadline), 'dd MMMM yyyy', { locale: fr }) : 'date inconnue'}.
+                  Cette soumission a expiré le {format(new Date(submission.valid_until), 'dd MMMM yyyy', { locale: fr })}.
                   Veuillez nous contacter pour une nouvelle soumission.
                 </AlertDescription>
               </Alert>
@@ -330,16 +330,14 @@ export default function SubmissionApprovalPage() {
             </div>
 
             {/* Validité */}
-            {submission.deadline && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-blue-800">
-                  <strong>Validité:</strong> Cette soumission est valide jusqu'au{' '}
-                  <span className="font-semibold">
-                    {format(new Date(submission.deadline), 'dd MMMM yyyy', { locale: fr })}
-                  </span>
-                </p>
-              </div>
-            )}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm text-blue-800">
+                <strong>Validité:</strong> Cette soumission est valide jusqu'au{' '}
+                <span className="font-semibold">
+                  {format(new Date(submission.valid_until), 'dd MMMM yyyy', { locale: fr })}
+                </span>
+              </p>
+            </div>
 
             {/* Actions */}
             {canAccept && (
