@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { ProofCard } from '@/components/ProofCard';
 import { FlexibleDashboardToolbar } from '@/components/FlexibleDashboardToolbar';
+import { CreateProofDialog } from '@/components/CreateProofDialog';
 import { useFilteredProofs } from '@/hooks/useFilteredProofs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Clock, AlertCircle, Eye, CheckCircle2, CircleDot, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { FileText, Clock, AlertCircle, Eye, CheckCircle2, CircleDot } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
@@ -72,23 +72,7 @@ const Proofs = () => {
               Épreuves
             </h1>
           </div>
-          {/* BaseWeb Button with 48px touch target */}
-          <Button 
-            variant="primary"
-            size="default"
-            className={cn(
-              "min-h-[48px] px-4 gap-2",
-              "bg-primary hover:bg-primary/90 text-primary-foreground",
-              "transition-all duration-200 ease-out",
-              "shadow-sm hover:shadow-md",
-              "whitespace-nowrap"
-            )}
-            onClick={() => navigate('/dashboard/orders')} // Rediriger vers les commandes pour choisir une commande
-          >
-            <Plus className="h-4 w-4 flex-shrink-0" />
-            <span className="hidden sm:inline">Nouvelle Épreuve</span>
-            <span className="sm:hidden">Nouvelle</span>
-          </Button>
+          <CreateProofDialog />
         </div>
 
         {/* Toolbar - BaseWeb Search and Filter Pattern */}
