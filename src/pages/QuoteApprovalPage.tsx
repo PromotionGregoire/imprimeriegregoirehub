@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { CheckCircle, XCircle, FileText, Calendar, Euro, Building2, User, Phone, Mail, AlertCircle } from 'lucide-react';
+import { CheckCircle, XCircle, FileText, Calendar, Euro, Building2, User, Phone, Mail, AlertCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import logoGregoire from '@/assets/logo-imprimerie-gregoire.png';
+import { useQuoteByToken } from '@/hooks/useQuoteByToken';
 
 // Mock data - replace with actual API call
 const mockQuoteData = {
@@ -55,15 +56,28 @@ export default function QuoteApprovalPage() {
   const [isDeclining, setIsDeclining] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [decision, setDecision] = useState<'approved' | 'declined' | null>(null);
+  
+  // Récupérer les données réelles si un token est fourni
+  const { data: quoteData, isLoading, error } = useQuoteByToken(token);
+  
+  // Utiliser les données réelles ou mockées
+  const currentQuoteData = quoteData || mockQuoteData;
+  const isRealData = !!quoteData;
 
   const handleApprove = async () => {
     if (!comments.trim()) {
-      // Simple alert for demo - in real app use toast
       alert('Veuillez ajouter un commentaire avant d\'approuver.');
       return;
     }
     
     setIsApproving(true);
+    
+    if (isRealData && token) {
+      // TODO: Implémenter l'appel API réel pour approuver
+      // await approveQuote(token, comments);
+      console.log('Approving quote with token:', token, 'Comments:', comments);
+    }
+    
     // Simulate API call
     setTimeout(() => {
       setIsApproving(false);
@@ -79,6 +93,13 @@ export default function QuoteApprovalPage() {
     }
     
     setIsDeclining(true);
+    
+    if (isRealData && token) {
+      // TODO: Implémenter l'appel API réel pour refuser
+      // await declineQuote(token, comments);
+      console.log('Declining quote with token:', token, 'Comments:', comments);
+    }
+    
     // Simulate API call
     setTimeout(() => {
       setIsDeclining(false);
@@ -93,6 +114,35 @@ export default function QuoteApprovalPage() {
       currency: 'EUR'
     }).format(price);
   };
+
+  // Afficher un loading si on récupère les données
+  if (token && isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+          <p className="text-muted-foreground">Chargement du devis...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Afficher une erreur si le devis n'est pas trouvé
+  if (token && error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="max-w-md mx-4">
+          <CardContent className="p-6 text-center space-y-4">
+            <XCircle className="h-12 w-12 text-negative mx-auto" />
+            <h1 className="text-lg font-semibold">Devis non trouvé</h1>
+            <p className="text-muted-foreground">
+              Le devis demandé n'existe pas ou le lien a expiré.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (isSubmitted) {
     return (
@@ -198,7 +248,7 @@ export default function QuoteApprovalPage() {
                   "text-xs sm:text-sm text-muted-foreground mt-1",
                   "leading-relaxed"
                 )}>
-                  Devis #{mockQuoteData.quoteNumber}
+                  Devis #{currentQuoteData.quoteNumber}
                 </p>
               </div>
             </div>
@@ -212,7 +262,7 @@ export default function QuoteApprovalPage() {
                   "px-3 py-1 text-xs sm:text-sm font-medium"
                 )}
               >
-                {mockQuoteData.status}
+                {currentQuoteData.status}
               </Badge>
             </div>
           </div>
@@ -276,7 +326,7 @@ export default function QuoteApprovalPage() {
                     "text-sm font-medium text-right leading-tight",
                     "hyphens-none break-words max-w-[200px] sm:max-w-none"
                   )}>
-                    {mockQuoteData.clientName}
+                    {currentQuoteData.clientName}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-3">
@@ -291,7 +341,7 @@ export default function QuoteApprovalPage() {
                     "text-sm font-medium text-right",
                     "hyphens-none break-words"
                   )}>
-                    {mockQuoteData.contactPerson}
+                    {currentQuoteData.contactPerson}
                   </span>
                 </div>
                 <div className="flex items-start justify-between gap-3">
@@ -306,7 +356,7 @@ export default function QuoteApprovalPage() {
                     "text-sm font-medium text-right leading-tight",
                     "hyphens-none break-all max-w-[180px] sm:max-w-none"
                   )}>
-                    {mockQuoteData.email}
+                    {currentQuoteData.email}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-3">
@@ -321,7 +371,7 @@ export default function QuoteApprovalPage() {
                     "text-sm font-medium text-right font-mono",
                     "hyphens-none whitespace-nowrap"
                   )}>
-                    {mockQuoteData.phone}
+                    {currentQuoteData.phone}
                   </span>
                 </div>
               </div>
@@ -365,7 +415,7 @@ export default function QuoteApprovalPage() {
                       "text-sm font-medium text-right",
                       "hyphens-none font-mono"
                     )}>
-                      {mockQuoteData.quoteNumber}
+                      {currentQuoteData.quoteNumber}
                     </span>
                   </div>
                   <div className="flex items-center justify-between gap-2">
@@ -380,7 +430,7 @@ export default function QuoteApprovalPage() {
                       "text-sm font-medium text-right",
                       "hyphens-none whitespace-nowrap"
                     )}>
-                      {mockQuoteData.createdDate}
+                      {currentQuoteData.createdDate}
                     </span>
                   </div>
                   <div className="flex items-center justify-between gap-2">
@@ -395,7 +445,7 @@ export default function QuoteApprovalPage() {
                       "text-xs text-warning border-warning",
                       "hyphens-none whitespace-nowrap"
                     )}>
-                      {mockQuoteData.validUntil}
+                      {currentQuoteData.validUntil}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between gap-2">
@@ -409,7 +459,7 @@ export default function QuoteApprovalPage() {
                       "text-xs bg-info-light text-info",
                       "hyphens-none whitespace-nowrap"
                     )}>
-                      {mockQuoteData.status}
+                      {currentQuoteData.status}
                     </Badge>
                   </div>
                   {/* Prominent total on mobile */}
@@ -428,7 +478,7 @@ export default function QuoteApprovalPage() {
                       "text-lg sm:text-base-550 font-bold text-primary",
                       "hyphens-none whitespace-nowrap font-mono"
                     )}>
-                      {formatPrice(mockQuoteData.total)}
+                      {formatPrice(currentQuoteData.total)}
                     </span>
                   </div>
                 </div>
@@ -445,7 +495,7 @@ export default function QuoteApprovalPage() {
             </CardHeader>
             <CardContent className="px-4 sm:px-6">
               <div className="space-y-3">
-                {mockQuoteData.items.map((item, index) => (
+                {currentQuoteData.items.map((item, index) => (
                   <div 
                     key={item.id} 
                     className={cn(
@@ -484,17 +534,17 @@ export default function QuoteApprovalPage() {
                 <div className="space-y-3 bg-muted/30 p-3 rounded-lg">
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Sous-total :</span>
-                    <span className="text-sm font-medium">{formatPrice(mockQuoteData.subtotal)}</span>
+                    <span className="text-sm font-medium">{formatPrice(currentQuoteData.subtotal)}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm">TVA (20%) :</span>
-                    <span className="text-sm font-medium">{formatPrice(mockQuoteData.tax)}</span>
+                    <span className="text-sm">Taxes (15%) :</span>
+                    <span className="text-sm font-medium">{formatPrice(currentQuoteData.tax)}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between items-center pt-2">
                     <span className="text-base sm:text-base-550 font-bold">Total :</span>
                     <span className="text-lg sm:text-base-650 font-bold text-primary">
-                      {formatPrice(mockQuoteData.total)}
+                      {formatPrice(currentQuoteData.total)}
                     </span>
                   </div>
                 </div>
@@ -503,7 +553,7 @@ export default function QuoteApprovalPage() {
           </Card>
 
           {/* Notes Card - Mobile-optimized text */}
-          {mockQuoteData.notes && (
+          {currentQuoteData.notes && (
             <Card className="border-border shadow-sm overflow-hidden">
               <CardHeader className="pb-3 sm:pb-4">
                 <CardTitle className="text-lg sm:text-base-650 font-semibold">
@@ -515,7 +565,7 @@ export default function QuoteApprovalPage() {
                   "text-sm sm:text-base-300 text-muted-foreground",
                   "leading-relaxed break-words"
                 )}>
-                  {mockQuoteData.notes}
+                  {currentQuoteData.notes}
                 </p>
               </CardContent>
             </Card>

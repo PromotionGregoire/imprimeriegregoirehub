@@ -53,6 +53,7 @@ const App = () => {
             <Route path="/approve/submission/:token" element={<SubmissionApprovalPage />} />
             <Route path="/approve/quote/:token" element={<QuoteApprovalPage />} />
             <Route path="/quote-demo" element={<QuoteApprovalPage />} />
+            <Route path="/quote-demo/:token" element={<QuoteApprovalPage />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <DashboardLayout />
