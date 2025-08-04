@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.get-public-proof-details]
 verify_jwt = false
+
+[functions.handle-proof-decision]
+verify_jwt = false

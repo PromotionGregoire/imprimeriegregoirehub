@@ -114,15 +114,15 @@ const ProofApprovalPage = () => {
       setProcessing(true);
       setError('');
       
-      const response = await fetch('https://ytcrplsistsxfaxkfqqp.supabase.co/functions/v1/approve-proof', {
+      const response = await fetch('https://ytcrplsistsxfaxkfqqp.supabase.co/functions/v1/handle-proof-decision', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          approvalToken: token,
-          approverName: clientName.trim(),
-          confirmationWord: 'ACCEPTER'
+          token: token,
+          decision: 'approved',
+          clientName: clientName.trim()
         }),
       });
 
@@ -156,15 +156,16 @@ const ProofApprovalPage = () => {
       setProcessing(true);
       setError('');
       
-      const response = await fetch('https://ytcrplsistsxfaxkfqqp.supabase.co/functions/v1/request-proof-modification', {
+      const response = await fetch('https://ytcrplsistsxfaxkfqqp.supabase.co/functions/v1/handle-proof-decision', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          approvalToken: token,
-          clientComments: modificationComments.trim(),
-          clientName: clientName.trim()
+          token: token,
+          decision: 'rejected',
+          clientName: clientName.trim(),
+          comments: modificationComments.trim()
         }),
       });
 
