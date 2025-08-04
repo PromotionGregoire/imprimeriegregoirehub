@@ -361,7 +361,7 @@ export default function ProofApprovalPage() {
                     "text-sm font-medium text-right leading-tight",
                     "break-words max-w-[200px] sm:max-w-none"
                   )}>
-                    {proofData.orders?.submissions?.clients?.business_name}
+                     {proofData.orders?.submissions?.clients?.business_name}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-3">
@@ -376,7 +376,7 @@ export default function ProofApprovalPage() {
                     "text-sm font-medium text-right",
                     "break-words"
                   )}>
-                    {proofData.orders?.submissions?.clients?.contact_name}
+                     {proofData.orders?.submissions?.clients?.contact_name}
                   </span>
                 </div>
                 <div className="flex items-start justify-between gap-3">
@@ -391,7 +391,7 @@ export default function ProofApprovalPage() {
                     "text-sm font-medium text-right leading-tight",
                     "break-all max-w-[180px] sm:max-w-none"
                   )}>
-                    {proofData.orders?.submissions?.clients?.contact_email}
+                    {proofData.orders?.submissions?.clients?.email}
                   </span>
                 </div>
               </div>
