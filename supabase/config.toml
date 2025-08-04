@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.get-proof-by-token]
 verify_jwt = false
+
+[functions.get-public-proof-details]
+verify_jwt = false
