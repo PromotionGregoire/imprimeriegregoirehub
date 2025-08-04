@@ -36,7 +36,7 @@ export const useQuoteByToken = (token: string | undefined) => {
         .from('submissions')
         .select(`
           *,
-          clients (
+          clients!inner (
             business_name,
             contact_name,
             email,
