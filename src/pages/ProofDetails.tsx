@@ -221,15 +221,17 @@ const ProofDetails = () => {
 
   // Helper function to determine if client approval section should be visible
   const shouldShowClientApprovalSection = () => {
-    // Show if proof has been sent to client (has validation_token) OR has specific statuses
+    // Show if proof has tokens (ready to be sent) OR has been sent to client
     const validStatuses = ['Envoyée au client', 'Modification demandée', 'Approuvée'];
-    return proof.validation_token || validStatuses.includes(proof.status);
+    return proof.approval_token || proof.validation_token || validStatuses.includes(proof.status);
   };
 
   // Helper function to get the approval URL
   const getApprovalUrl = () => {
-    if (!proof.validation_token) return null;
-    return `${window.location.origin}/approve/proof/${proof.validation_token}`;
+    // Use validation_token if available (for sent proofs), otherwise use approval_token
+    const token = proof.validation_token || proof.approval_token;
+    if (!token) return null;
+    return `${window.location.origin}/approve/proof/${token}`;
   };
 
   // Copy link to clipboard
@@ -502,12 +504,23 @@ const ProofDetails = () => {
               </div>
             )}
             
-            {/* If no validation token exists */}
+            {/* If no tokens exist */}
             {!getApprovalUrl() && (
               <div className="text-center py-4 text-muted-foreground">
                 <p className="text-sm">
-                  Aucun lien d'approbation disponible. Envoyez d'abord l'épreuve au client.
+                  Aucun lien d'approbation disponible. Créez d'abord une épreuve.
                 </p>
+              </div>
+            )}
+            
+            {/* Status indicator */}
+            {getApprovalUrl() && (
+              <div className="text-xs text-muted-foreground">
+                {proof.validation_token ? (
+                  <span className="text-green-600">✓ Épreuve envoyée au client</span>
+                ) : (
+                  <span className="text-amber-600">⏳ Épreuve prête à envoyer</span>
+                )}
               </div>
             )}
           </CardContent>
