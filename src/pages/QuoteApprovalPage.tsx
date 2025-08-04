@@ -163,78 +163,90 @@ export default function QuoteApprovalPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Mobile-optimized container with safe areas */}
       <div className={cn(
         "mx-auto max-w-4xl",
-        "px-4 py-8 sm:px-6 md:px-8",
+        "px-4 py-6 sm:px-6 md:px-8",
+        "pb-safe-area-inset-bottom", // Safe area for mobile
         "animate-fade-in"
       )}>
         
-        {/* Header Section - Base Web Typography */}
-        <div className="text-center mb-8 space-y-3">
-          <h1 className="text-base-950 font-semibold text-foreground">
+        {/* Header Section - Mobile-first typography */}
+        <div className="text-center mb-6 space-y-2 px-2">
+          <h1 className={cn(
+            "text-2xl sm:text-base-950 font-semibold text-foreground",
+            "leading-tight" // Better line height for mobile
+          )}>
             Approbation de Devis
           </h1>
-          <p className="text-base-300 text-muted-foreground max-w-2xl mx-auto">
+          <p className={cn(
+            "text-sm sm:text-base-300 text-muted-foreground",
+            "max-w-xl mx-auto leading-relaxed px-4"
+          )}>
             Veuillez examiner attentivement les détails ci-dessous et nous faire part de votre décision
           </p>
         </div>
 
-        {/* Quote Details Grid */}
-        <div className="grid gap-6 mb-8">
+        {/* Quote Details Grid - Mobile-optimized spacing */}
+        <div className="space-y-4 sm:space-y-6">
           
-          {/* Quote Information Card */}
-          <Card className="border-border shadow-sm">
-            <CardHeader className="pb-4">
+          {/* Quote Information Card - Mobile-first layout */}
+          <Card className="border-border shadow-sm overflow-hidden">
+            <CardHeader className="pb-3 sm:pb-4">
               <CardTitle className={cn(
-                "flex items-center gap-3",
-                "text-base-650 font-semibold"
+                "flex items-center gap-2 sm:gap-3",
+                "text-lg sm:text-base-650 font-semibold",
+                "leading-tight"
               )}>
                 <div className={cn(
-                  "h-10 w-10 rounded-lg",
-                  "bg-primary/10 flex items-center justify-center"
+                  "h-8 w-8 sm:h-10 sm:w-10 rounded-lg",
+                  "bg-primary/10 flex items-center justify-center flex-shrink-0"
                 )}>
-                  <FileText className="h-5 w-5 text-primary" />
+                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </div>
-                Informations du Devis
+                <span className="truncate">Informations du Devis</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-base-200 text-muted-foreground">Numéro :</span>
-                    <span className="text-base-300 font-medium">{mockQuoteData.quoteNumber}</span>
+            <CardContent className="px-4 sm:px-6">
+              {/* Mobile-stacked layout */}
+              <div className="space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm text-muted-foreground flex-shrink-0">Numéro :</span>
+                    <span className="text-sm font-medium text-right truncate">{mockQuoteData.quoteNumber}</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-base-200 text-muted-foreground flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm text-muted-foreground flex items-center gap-1 flex-shrink-0">
+                      <Calendar className="h-3 w-3" />
                       Créé le :
                     </span>
-                    <span className="text-base-300 font-medium">{mockQuoteData.createdDate}</span>
+                    <span className="text-sm font-medium text-right">{mockQuoteData.createdDate}</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-base-200 text-muted-foreground flex items-center gap-2">
-                      <AlertCircle className="h-4 w-4" />
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm text-muted-foreground flex items-center gap-1 flex-shrink-0">
+                      <AlertCircle className="h-3 w-3" />
                       Valide jusqu'au :
                     </span>
-                    <Badge variant="outline" className="text-warning border-warning">
+                    <Badge variant="outline" className="text-xs text-warning border-warning">
                       {mockQuoteData.validUntil}
                     </Badge>
                   </div>
-                </div>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-base-200 text-muted-foreground">Statut :</span>
-                    <Badge variant="secondary" className="bg-info-light text-info">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm text-muted-foreground flex-shrink-0">Statut :</span>
+                    <Badge variant="secondary" className="text-xs bg-info-light text-info">
                       {mockQuoteData.status}
                     </Badge>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-base-200 text-muted-foreground flex items-center gap-2">
+                  {/* Prominent total on mobile */}
+                  <div className={cn(
+                    "flex items-center justify-between gap-2 pt-2",
+                    "border-t border-border"
+                  )}>
+                    <span className="text-base font-medium flex items-center gap-1">
                       <Euro className="h-4 w-4" />
-                      Montant total :
+                      Total :
                     </span>
-                    <span className="text-base-550 font-bold text-primary">
+                    <span className="text-lg sm:text-base-550 font-bold text-primary">
                       {formatPrice(mockQuoteData.total)}
                     </span>
                   </div>
@@ -243,105 +255,121 @@ export default function QuoteApprovalPage() {
             </CardContent>
           </Card>
 
-          {/* Client Information Card */}
-          <Card className="border-border shadow-sm">
-            <CardHeader className="pb-4">
+          {/* Client Information Card - Mobile-optimized */}
+          <Card className="border-border shadow-sm overflow-hidden">
+            <CardHeader className="pb-3 sm:pb-4">
               <CardTitle className={cn(
-                "flex items-center gap-3",
-                "text-base-650 font-semibold"
+                "flex items-center gap-2 sm:gap-3",
+                "text-lg sm:text-base-650 font-semibold",
+                "leading-tight"
               )}>
                 <div className={cn(
-                  "h-10 w-10 rounded-lg",
-                  "bg-primary/10 flex items-center justify-center"
+                  "h-8 w-8 sm:h-10 sm:w-10 rounded-lg",
+                  "bg-primary/10 flex items-center justify-center flex-shrink-0"
                 )}>
-                  <Building2 className="h-5 w-5 text-primary" />
+                  <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </div>
-                Informations Client
+                <span className="truncate">Informations Client</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-base-200 text-muted-foreground flex items-center gap-2">
-                      <Building2 className="h-4 w-4" />
-                      Entreprise :
-                    </span>
-                    <span className="text-base-300 font-medium">{mockQuoteData.clientName}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-base-200 text-muted-foreground flex items-center gap-2">
-                      <User className="h-4 w-4" />
-                      Contact :
-                    </span>
-                    <span className="text-base-300 font-medium">{mockQuoteData.contactPerson}</span>
-                  </div>
+            <CardContent className="px-4 sm:px-6">
+              <div className="space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <span className="text-sm text-muted-foreground flex items-center gap-1 flex-shrink-0">
+                    <Building2 className="h-3 w-3" />
+                    Entreprise :
+                  </span>
+                  <span className="text-sm font-medium text-right leading-tight">
+                    {mockQuoteData.clientName}
+                  </span>
                 </div>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-base-200 text-muted-foreground flex items-center gap-2">
-                      <Mail className="h-4 w-4" />
-                      Email :
-                    </span>
-                    <span className="text-base-300 font-medium">{mockQuoteData.email}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-base-200 text-muted-foreground flex items-center gap-2">
-                      <Phone className="h-4 w-4" />
-                      Téléphone :
-                    </span>
-                    <span className="text-base-300 font-medium">{mockQuoteData.phone}</span>
-                  </div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm text-muted-foreground flex items-center gap-1 flex-shrink-0">
+                    <User className="h-3 w-3" />
+                    Contact :
+                  </span>
+                  <span className="text-sm font-medium text-right">{mockQuoteData.contactPerson}</span>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm text-muted-foreground flex items-center gap-1 flex-shrink-0">
+                    <Mail className="h-3 w-3" />
+                    Email :
+                  </span>
+                  <span className="text-sm font-medium text-right break-all">
+                    {mockQuoteData.email}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm text-muted-foreground flex items-center gap-1 flex-shrink-0">
+                    <Phone className="h-3 w-3" />
+                    Téléphone :
+                  </span>
+                  <span className="text-sm font-medium text-right font-mono">
+                    {mockQuoteData.phone}
+                  </span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Quote Items Card */}
-          <Card className="border-border shadow-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-base-650 font-semibold">
+          {/* Quote Items Card - Mobile-optimized scrollable */}
+          <Card className="border-border shadow-sm overflow-hidden">
+            <CardHeader className="pb-3 sm:pb-4">
+              <CardTitle className="text-lg sm:text-base-650 font-semibold">
                 Détail des Articles
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+            <CardContent className="px-4 sm:px-6">
+              <div className="space-y-3">
                 {mockQuoteData.items.map((item, index) => (
                   <div 
                     key={item.id} 
                     className={cn(
-                      "flex justify-between items-start p-4",
+                      "p-3 sm:p-4",
                       "bg-muted/50 rounded-lg border border-border",
-                      "transition-colors duration-200"
+                      "transition-colors duration-200",
+                      "overflow-hidden" // Prevent content overflow
                     )}
                   >
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-base-300 font-medium mb-1">{item.description}</h4>
-                      <p className="text-base-200 text-muted-foreground">
-                        Quantité : {item.quantity.toLocaleString('fr-FR')} × {formatPrice(item.unitPrice)}
-                      </p>
-                    </div>
-                    <div className="text-right ml-4">
-                      <p className="text-base-400 font-bold">{formatPrice(item.total)}</p>
+                    <div className="space-y-2">
+                      <h4 className={cn(
+                        "text-sm sm:text-base-300 font-medium",
+                        "leading-tight text-foreground"
+                      )}>
+                        {item.description}
+                      </h4>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs sm:text-base-200 text-muted-foreground">
+                          Qté : {item.quantity.toLocaleString('fr-FR')}
+                        </p>
+                        <div className="text-right">
+                          <p className="text-sm font-medium">{formatPrice(item.unitPrice)}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between pt-1 border-t border-border/50">
+                        <span className="text-xs font-medium text-muted-foreground">Sous-total</span>
+                        <p className="text-base font-bold text-primary">{formatPrice(item.total)}</p>
+                      </div>
                     </div>
                   </div>
                 ))}
                 
                 <Separator className="my-4" />
                 
-                <div className="space-y-3">
+                {/* Mobile-optimized totals */}
+                <div className="space-y-3 bg-muted/30 p-3 rounded-lg">
                   <div className="flex justify-between items-center">
-                    <span className="text-base-300">Sous-total :</span>
-                    <span className="text-base-300 font-medium">{formatPrice(mockQuoteData.subtotal)}</span>
+                    <span className="text-sm">Sous-total :</span>
+                    <span className="text-sm font-medium">{formatPrice(mockQuoteData.subtotal)}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-base-300">TVA (20%) :</span>
-                    <span className="text-base-300 font-medium">{formatPrice(mockQuoteData.tax)}</span>
+                    <span className="text-sm">TVA (20%) :</span>
+                    <span className="text-sm font-medium">{formatPrice(mockQuoteData.tax)}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between items-center pt-2">
-                    <span className="text-base-550 font-bold">Total :</span>
-                    <span className="text-base-650 font-bold text-primary">
+                    <span className="text-base sm:text-base-550 font-bold">Total :</span>
+                    <span className="text-lg sm:text-base-650 font-bold text-primary">
                       {formatPrice(mockQuoteData.total)}
                     </span>
                   </div>
@@ -350,16 +378,19 @@ export default function QuoteApprovalPage() {
             </CardContent>
           </Card>
 
-          {/* Notes Card */}
+          {/* Notes Card - Mobile-optimized text */}
           {mockQuoteData.notes && (
-            <Card className="border-border shadow-sm">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-base-650 font-semibold">
+            <Card className="border-border shadow-sm overflow-hidden">
+              <CardHeader className="pb-3 sm:pb-4">
+                <CardTitle className="text-lg sm:text-base-650 font-semibold">
                   Notes et Conditions
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-base-300 text-muted-foreground leading-relaxed">
+              <CardContent className="px-4 sm:px-6">
+                <p className={cn(
+                  "text-sm sm:text-base-300 text-muted-foreground",
+                  "leading-relaxed break-words"
+                )}>
                   {mockQuoteData.notes}
                 </p>
               </CardContent>
@@ -367,16 +398,16 @@ export default function QuoteApprovalPage() {
           )}
         </div>
 
-        {/* Decision Section */}
-        <Card className="border-border shadow-sm">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base-650 font-semibold">
+        {/* Decision Section - Mobile-optimized */}
+        <Card className="border-border shadow-sm mt-6 overflow-hidden">
+          <CardHeader className="pb-3 sm:pb-4">
+            <CardTitle className="text-lg sm:text-base-650 font-semibold">
               Votre Décision
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="px-4 sm:px-6 space-y-5">
             <div>
-              <label htmlFor="comments" className="block text-base-300 font-medium mb-3">
+              <label htmlFor="comments" className="block text-sm font-medium mb-3">
                 Commentaires <span className="text-negative">*</span>
               </label>
               <Textarea
@@ -387,35 +418,39 @@ export default function QuoteApprovalPage() {
                 rows={4}
                 className={cn(
                   "w-full resize-none",
-                  "text-base-300 leading-relaxed",
-                  "border-border focus-visible:ring-primary"
+                  "text-sm sm:text-base-300 leading-relaxed",
+                  "border-border focus-visible:ring-primary",
+                  "min-h-[100px]" // Ensure sufficient height on mobile
                 )}
               />
-              <p className="text-base-200 text-muted-foreground mt-2">
+              <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
                 * Ce champ est obligatoire pour procéder à l'approbation ou au refus
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
+            {/* Mobile-first button layout */}
+            <div className="space-y-3 sm:space-y-0 sm:flex sm:gap-4">
               <Button
                 onClick={handleApprove}
                 disabled={isApproving || isDeclining}
                 size="large"
                 className={cn(
-                  "flex-1 min-h-[48px]",
+                  "w-full sm:flex-1",
+                  "min-h-[48px] sm:min-h-[48px]", // Touch-friendly height
                   "bg-positive hover:bg-positive/90 text-white",
                   "shadow-sm hover:shadow-md transition-all duration-200",
-                  "disabled:opacity-50"
+                  "disabled:opacity-50",
+                  "text-sm sm:text-base font-medium"
                 )}
               >
                 {isApproving ? (
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-center justify-center gap-2">
                     <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     Approbation en cours...
                   </span>
                 ) : (
-                  <span className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5" />
+                  <span className="flex items-center justify-center gap-2">
+                    <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5" />
                     Approuver le Devis
                   </span>
                 )}
@@ -427,19 +462,21 @@ export default function QuoteApprovalPage() {
                 variant="destructive"
                 size="large"
                 className={cn(
-                  "flex-1 min-h-[48px]",
+                  "w-full sm:flex-1",
+                  "min-h-[48px] sm:min-h-[48px]", // Touch-friendly height
                   "shadow-sm hover:shadow-md transition-all duration-200",
-                  "disabled:opacity-50"
+                  "disabled:opacity-50",
+                  "text-sm sm:text-base font-medium"
                 )}
               >
                 {isDeclining ? (
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-center justify-center gap-2">
                     <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     Refus en cours...
                   </span>
                 ) : (
-                  <span className="flex items-center gap-2">
-                    <XCircle className="h-5 w-5" />
+                  <span className="flex items-center justify-center gap-2">
+                    <XCircle className="h-4 w-4 sm:h-5 sm:w-5" />
                     Refuser le Devis
                   </span>
                 )}
@@ -448,20 +485,31 @@ export default function QuoteApprovalPage() {
           </CardContent>
         </Card>
 
-        {/* Footer Contact */}
-        <div className="text-center mt-8 p-6 bg-muted/30 rounded-lg border border-border">
-          <p className="text-base-200 text-muted-foreground">
-            Pour toute question concernant ce devis, contactez-nous au{' '}
+        {/* Footer Contact - Mobile-optimized */}
+        <div className={cn(
+          "mt-6 p-4 sm:p-6",
+          "bg-muted/30 rounded-lg border border-border",
+          "text-center"
+        )}>
+          <p className="text-xs sm:text-base-200 text-muted-foreground leading-relaxed">
+            Pour toute question concernant ce devis :<br className="sm:hidden" />
             <a 
               href="tel:+33123456789" 
-              className="text-primary hover:text-primary/80 font-medium transition-colors"
+              className={cn(
+                "text-primary hover:text-primary/80 font-medium",
+                "transition-colors inline-block mt-1 sm:mt-0 sm:ml-1"
+              )}
             >
               01 23 45 67 89
             </a>
-            {' '}ou par email à{' '}
+            <span className="hidden sm:inline"> ou </span>
+            <br className="sm:hidden" />
             <a 
               href="mailto:contact@imprimerie-gregoire.fr" 
-              className="text-primary hover:text-primary/80 font-medium transition-colors"
+              className={cn(
+                "text-primary hover:text-primary/80 font-medium",
+                "transition-colors inline-block mt-1 sm:mt-0 break-all"
+              )}
             >
               contact@imprimerie-gregoire.fr
             </a>
