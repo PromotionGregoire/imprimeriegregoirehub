@@ -788,6 +788,10 @@ export type Database = {
           orders: Json
         }[]
       }
+      get_user_role: {
+        Args: { user_uuid: string }
+        Returns: string
+      }
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
