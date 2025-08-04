@@ -113,7 +113,7 @@ export function SubmissionStatusTimeline({
           const isCurrent = stepState === 'current'
           
           return (
-            <React.Fragment key={step.key}>
+            <div key={step.key}>
               <div className="flex flex-col items-center relative z-10">
                 {/* Circle with icon */}
                 <div
@@ -167,7 +167,7 @@ export function SubmissionStatusTimeline({
                   />
                 </div>
               )}
-            </React.Fragment>
+            </div>
           )
         })}
       </div>

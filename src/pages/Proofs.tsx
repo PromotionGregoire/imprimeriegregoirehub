@@ -83,7 +83,7 @@ const Proofs = () => {
               "shadow-sm hover:shadow-md",
               "whitespace-nowrap"
             )}
-            onClick={() => navigate('/dashboard/create-submission')}
+            onClick={() => navigate('/dashboard/orders')} // Rediriger vers les commandes pour choisir une commande
           >
             <Plus className="h-4 w-4 flex-shrink-0" />
             <span className="hidden sm:inline">Nouvelle Épreuve</span>
