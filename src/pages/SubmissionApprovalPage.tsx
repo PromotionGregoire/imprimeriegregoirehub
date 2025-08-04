@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { createClient } from '@supabase/supabase-js';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,11 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+
+// Créer un client public pour les pages non authentifiées
+const supabaseUrl = 'https://ytcrplsistsxfaxkfqqp.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0Y3JwbHNpc3RzeGZheGtmcXFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM4ODMwNjcsImV4cCI6MjA2OTQ1OTA2N30.rzKPK9GPPOUbZvTaqequy7KK2pBwG7wvxBAfAW-rwoE';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 interface SubmissionData {
   id: string;
@@ -66,37 +71,88 @@ export default function SubmissionApprovalPage() {
     console.log('Recherche de la soumission avec le token:', token);
 
     try {
+      // D'abord, essayer une requête simple
+      const { data: simpleData, error: simpleError } = await supabase
+        .from('submissions')
+        .select('*')
+        .eq('acceptance_token', token)
+        .single();
+
+      console.log('Requête simple:', { simpleData, simpleError });
+
+      if (simpleError) {
+        console.error('Erreur requête simple:', simpleError);
+      }
+
+      // Ensuite, essayer avec les relations
       const { data, error } = await supabase
         .from('submissions')
         .select(`
           *,
-          clients (
+          clients!inner (
             business_name,
             contact_name,
             email,
             phone
           ),
-          submission_items (*)
+          submission_items (
+            description,
+            quantity,
+            unit_price,
+            total_price
+          )
         `)
         .eq('acceptance_token', token)
         .single();
 
-      console.log('Résultat de la requête:', { data, error });
+      console.log('Requête complète:', { data, error });
 
-      if (error || !data) {
-        console.error('Erreur ou pas de données:', error);
+      if (error) {
+        console.error('Erreur détaillée:', error);
+        
+        // Si erreur de permissions, essayer sans authentification
+        if (error.code === 'PGRST301') {
+          console.log('Tentative sans authentification...');
+          // La requête devrait déjà être sans auth, mais vérifier
+        }
+        
         toast({
           title: "❌ Erreur",
-          description: "Soumission introuvable ou lien invalide",
+          description: error.message || "Soumission introuvable ou lien invalide",
           variant: "destructive"
         });
         setLoading(false);
         return;
       }
 
-      setSubmission(data as any);
+      if (!data) {
+        console.log('Aucune donnée retournée');
+        toast({
+          title: "❌ Erreur",
+          description: "Soumission introuvable",
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Vérifier la structure des données
+      console.log('Données reçues:', data);
+      
+      // S'assurer que valid_until existe, sinon le calculer
+      const submissionData = {
+        ...data,
+        valid_until: data.valid_until || new Date(new Date(data.created_at).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString()
+      };
+
+      setSubmission(submissionData as any);
     } catch (error) {
-      console.error('Erreur lors de la récupération:', error);
+      console.error('Erreur catch:', error);
+      toast({
+        title: "❌ Erreur",
+        description: "Une erreur est survenue lors du chargement",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
