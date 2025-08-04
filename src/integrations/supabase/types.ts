@@ -623,6 +623,7 @@ export type Database = {
       }
       submissions: {
         Row: {
+          acceptance_token: string
           approval_token: string | null
           approved_by: string | null
           client_id: string
@@ -637,6 +638,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          acceptance_token?: string
           approval_token?: string | null
           approved_by?: string | null
           client_id: string
@@ -651,6 +653,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          acceptance_token?: string
           approval_token?: string | null
           approved_by?: string | null
           client_id?: string
