@@ -77,7 +77,7 @@ const handler = async (req: Request): Promise<Response> => {
             clients (
               business_name,
               contact_name,
-              contact_email
+              email
             )
           )
         )
