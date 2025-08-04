@@ -35,11 +35,9 @@ export const CreateEmployeeModal = ({ isOpen, onClose, onEmployeeCreated }: Crea
 
     try {
       // Call edge function to create user with admin privileges
+      // The temporary password will be generated securely by the backend
       const { data, error } = await supabase.functions.invoke('create-employee', {
-        body: {
-          ...formData,
-          password: 'Gregoire328!'
-        }
+        body: formData
       });
 
       if (error) {
@@ -48,7 +46,7 @@ export const CreateEmployeeModal = ({ isOpen, onClose, onEmployeeCreated }: Crea
 
       toast({
         title: "Employé créé avec succès",
-        description: `${formData.full_name} a été ajouté avec le mot de passe temporaire: Gregoire328!`,
+        description: `${formData.full_name} a été ajouté. Mot de passe temporaire: ${data.temporary_password}`,
       });
 
       setFormData({

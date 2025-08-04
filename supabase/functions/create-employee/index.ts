@@ -9,13 +9,32 @@ const corsHeaders = {
 interface CreateEmployeeRequest {
   full_name: string;
   email: string;
-  password: string;
   job_title?: string;
   employment_status?: string;
   role: 'EMPLOYEE' | 'ACCOUNTANT' | 'ADMIN';
   hire_date?: string;
   emergency_contact_name?: string;
   emergency_contact_phone?: string;
+}
+
+// Generate a secure temporary password
+function generateSecurePassword(): string {
+  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&*';
+  let password = '';
+  
+  // Ensure at least one character from each required category
+  password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)]; // Uppercase
+  password += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)]; // Lowercase
+  password += '0123456789'[Math.floor(Math.random() * 10)]; // Number
+  password += '@#$%&*'[Math.floor(Math.random() * 6)]; // Special character
+  
+  // Fill the rest randomly
+  for (let i = 4; i < 12; i++) {
+    password += charset[Math.floor(Math.random() * charset.length)];
+  }
+  
+  // Shuffle the password
+  return password.split('').sort(() => 0.5 - Math.random()).join('');
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -77,16 +96,19 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('Request data received:', { ...requestData, password: '[REDACTED]' });
 
     // Validate required fields
-    if (!requestData.full_name || !requestData.email || !requestData.password) {
-      throw new Error('Missing required fields: full_name, email, and password are required');
+    if (!requestData.full_name || !requestData.email) {
+      throw new Error('Missing required fields: full_name and email are required');
     }
 
-    console.log('Creating employee with data:', { ...requestData, password: '[REDACTED]' });
+    // Generate secure temporary password
+    const temporaryPassword = generateSecurePassword();
+
+    console.log('Creating employee with data:', { ...requestData, temporaryPassword: '[REDACTED]' });
 
     // Create the auth user using admin client
     const { data: newUser, error: createUserError } = await supabaseAdmin.auth.admin.createUser({
       email: requestData.email,
-      password: requestData.password,
+      password: temporaryPassword,
       email_confirm: true,
       user_metadata: {
         full_name: requestData.full_name
@@ -132,7 +154,8 @@ const handler = async (req: Request): Promise<Response> => {
       JSON.stringify({ 
         success: true, 
         user_id: newUser.user.id,
-        message: 'Employee created successfully'
+        temporary_password: temporaryPassword,
+        message: 'Employee created successfully with secure temporary password'
       }),
       {
         status: 200,

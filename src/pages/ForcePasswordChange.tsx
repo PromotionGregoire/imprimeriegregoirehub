@@ -56,8 +56,12 @@ const ForcePasswordChange = () => {
       return;
     }
 
-    // Check if current password is correct
-    if (currentPassword !== 'Gregoire328!') {
+    // Validate current password with backend
+    const { data: validationData, error: validationError } = await supabase.functions.invoke('validate-current-password', {
+      body: { currentPassword }
+    });
+
+    if (validationError || !validationData?.isValid) {
       setError('Le mot de passe actuel est incorrect');
       setLoading(false);
       return;
@@ -134,7 +138,7 @@ const ForcePasswordChange = () => {
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 required
-                placeholder="Entrez Gregoire328!"
+                placeholder="Entrez votre mot de passe temporaire"
               />
             </div>
 
