@@ -10,6 +10,8 @@ import {
   Hr,
   Row,
   Column,
+  Button,
+  Link,
 } from 'npm:@react-email/components@0.0.22';
 import * as React from 'npm:react@18.3.1';
 
@@ -18,6 +20,7 @@ interface SubmissionNotificationEmailProps {
   businessName: string;
   submissionNumber: string;
   totalPrice: number;
+  approvalUrl: string;
   items: Array<{
     product_name: string;
     description?: string;
@@ -32,6 +35,7 @@ export const SubmissionNotificationEmail = ({
   submissionNumber,
   totalPrice,
   items,
+  approvalUrl,
 }: SubmissionNotificationEmailProps) => (
   <Html>
     <Head />
@@ -95,9 +99,30 @@ export const SubmissionNotificationEmail = ({
             Cette soumission est valide pour une période de 30 jours. N'hésitez pas à nous contacter si vous avez des questions ou si vous souhaitez modifier certains éléments.
           </Text>
 
-          <Text style={paragraph}>
-            Pour accepter cette soumission ou pour toute question, vous pouvez nous répondre directement à cet email ou nous contacter au <strong>(418) 555-0123</strong>.
-          </Text>
+          <Section style={buttonSection}>
+            <Button style={approvalButton} href={approvalUrl}>
+              ✓ Examiner et accepter la soumission
+            </Button>
+          </Section>
+
+          <Section style={linkSection}>
+            <Text style={linkText}>
+              Ou copiez ce lien dans votre navigateur:
+            </Text>
+            <Link href={approvalUrl} style={linkUrl}>
+              {approvalUrl}
+            </Link>
+          </Section>
+
+          <Section style={contactInfo}>
+            <Text style={contactText}>
+              Pour toute question, vous pouvez:
+            </Text>
+            <Text style={contactDetails}>
+              • Nous répondre directement à ce courriel<br />
+              • Nous contacter au <strong>(418) 555-0123</strong>
+            </Text>
+          </Section>
         </Section>
 
         <Section style={footer}>
@@ -111,6 +136,9 @@ export const SubmissionNotificationEmail = ({
             123 Rue de l'Impression, Québec, QC G1V 0A6<br />
             Téléphone: (418) 555-0123<br />
             Email: info@promotiongregoire.com
+          </Text>
+          <Text style={securityNote}>
+            Ce lien est unique et sécurisé pour cette soumission.
           </Text>
         </Section>
       </Container>
@@ -259,4 +287,71 @@ const footerContact = {
   color: '#6b7280',
   lineHeight: '1.4',
   margin: '0',
+};
+
+const buttonSection = {
+  textAlign: 'center' as const,
+  margin: '32px 0',
+};
+
+const approvalButton = {
+  backgroundColor: '#5a7a51',
+  borderRadius: '6px',
+  color: '#ffffff',
+  fontSize: '16px',
+  fontWeight: 'bold',
+  textDecoration: 'none',
+  textAlign: 'center' as const,
+  display: 'inline-block',
+  padding: '15px 40px',
+  margin: '0',
+};
+
+const linkSection = {
+  textAlign: 'center' as const,
+  margin: '24px 0',
+  padding: '16px',
+  backgroundColor: '#f9fafb',
+  borderRadius: '6px',
+};
+
+const linkText = {
+  fontSize: '14px',
+  color: '#6b7280',
+  margin: '0 0 8px',
+};
+
+const linkUrl = {
+  fontSize: '13px',
+  color: '#5a7a51',
+  wordBreak: 'break-all' as const,
+  textDecoration: 'underline',
+};
+
+const contactInfo = {
+  backgroundColor: '#f0f0f0',
+  padding: '16px',
+  borderRadius: '6px',
+  margin: '24px 0',
+};
+
+const contactText = {
+  fontSize: '14px',
+  color: '#374151',
+  margin: '0 0 8px',
+};
+
+const contactDetails = {
+  fontSize: '14px',
+  color: '#374151',
+  lineHeight: '1.4',
+  margin: '0',
+};
+
+const securityNote = {
+  fontSize: '12px',
+  color: '#9ca3af',
+  fontStyle: 'italic',
+  textAlign: 'center' as const,
+  margin: '16px 0 0',
 };

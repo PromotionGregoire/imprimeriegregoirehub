@@ -18,6 +18,7 @@ interface SubmissionNotificationRequest {
   submissionId: string;
   submissionNumber: string;
   totalPrice: number;
+  acceptanceToken: string;
   items: Array<{
     product_name: string;
     description?: string;
@@ -39,10 +40,14 @@ serve(async (req) => {
       submissionId,
       submissionNumber,
       totalPrice,
+      acceptanceToken,
       items
     }: SubmissionNotificationRequest = await req.json();
 
     console.log(`Sending submission notification to: ${clientEmail} for submission ${submissionNumber}`);
+
+    // Créer l'URL d'approbation
+    const approvalUrl = `https://ytcrplsistsxfaxkfqqp.lovable.app/approve/submission/${acceptanceToken}`;
 
     // Render the email template
     const html = await renderAsync(
@@ -52,6 +57,7 @@ serve(async (req) => {
         submissionNumber,
         totalPrice,
         items,
+        approvalUrl,
       })
     );
 
