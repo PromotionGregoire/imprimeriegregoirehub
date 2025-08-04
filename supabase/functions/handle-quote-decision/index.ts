@@ -159,7 +159,9 @@ serve(async (req: Request) => {
               version: 1,
               status: 'A preparer',
               file_url: null,
-              uploaded_by: null
+              uploaded_by: null,
+              approval_token: crypto.randomUUID(),
+              validation_token: crypto.randomUUID()
             })
             .select('id')
             .single();
