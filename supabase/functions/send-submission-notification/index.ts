@@ -47,7 +47,7 @@ serve(async (req) => {
     console.log(`Sending submission notification to: ${clientEmail} for submission ${submissionNumber}`);
 
     // Créer l'URL d'approbation avec le domaine personnalisé
-    const APP_URL = 'https://client.promotiongregoire.ca';
+    const APP_URL = 'https://client.promotiongregoire.com';
     const approvalUrl = `${APP_URL}/approve/submission/${acceptanceToken}`;
 
     // Render the email template
