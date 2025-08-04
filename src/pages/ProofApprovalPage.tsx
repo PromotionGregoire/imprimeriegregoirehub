@@ -8,7 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { CheckCircle, XCircle, FileText, Building2, User, Mail, AlertCircle, Loader2, Download, Eye, Clock, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import logoGregoire from '@/assets/logo-imprimerie-gregoire.png';
-import { useProofByToken } from '@/hooks/useProofByToken';
+import { usePublicProofData } from '@/hooks/usePublicProofData';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -22,7 +22,7 @@ export default function ProofApprovalPage() {
   const { toast } = useToast();
   
   // Récupérer les données de l'épreuve
-  const { data: response, isLoading, error } = useProofByToken(token);
+  const { data: response, isLoading, error } = usePublicProofData(token);
   
   const proofData = response?.proof;
   const proofHistory = response?.proofHistory || [];
