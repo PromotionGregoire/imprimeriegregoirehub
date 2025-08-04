@@ -48,7 +48,7 @@ const handler = async (req: Request): Promise<Response> => {
       .limit(1)
       .single();
 
-    const adminEmail = 'info@promotiongregoire.ca'; // Default admin email
+    const adminEmail = 'info@promotiongregoire.com'; // Default admin email
 
     // Send notification to employee
     const employeeEmailResponse = await resend.emails.send({

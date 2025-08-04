@@ -41,7 +41,7 @@ const handler = async (req: Request): Promise<Response> => {
       return acc;
     }, {} as Record<string, string>) || {};
 
-    const ADMIN_EMAIL = configMap.admin_email || 'info@promotiongregoire.ca';
+    const ADMIN_EMAIL = configMap.admin_email || 'info@promotiongregoire.com';
     const DEVELOPER_EMAIL = configMap.developer_email || 'Frank@laboite.agency';
     const PROOF_PENDING_HOURS = parseInt(configMap.proof_pending_hours || '48');
     const SUBMISSION_DRAFT_DAYS = parseInt(configMap.submission_draft_days || '7');

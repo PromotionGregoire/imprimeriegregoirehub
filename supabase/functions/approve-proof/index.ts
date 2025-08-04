@@ -187,7 +187,7 @@ serve(async (req) => {
     try {
       await resend.emails.send({
         from: 'Promotion Grégoire <info@promotiongregoire.com>',
-        to: ['info@promotiongregoire.ca'],
+        to: ['info@promotiongregoire.com'],
         subject: `🚀 Production à démarrer - ${orderNumber} approuvée`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
