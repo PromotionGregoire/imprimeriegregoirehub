@@ -726,7 +726,6 @@ export type Database = {
           created_at: string | null
           employee_full_name: string | null
           employee_job_title: string | null
-          formatted_date: string | null
           id: string | null
           metadata: Json | null
           order_id: string | null

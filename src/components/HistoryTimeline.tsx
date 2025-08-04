@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Clock, User, Upload, Send, MessageSquare, CheckCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface HistoryTimelineProps {
   orderId: string;
@@ -16,7 +18,6 @@ interface HistoryEvent {
   proof_id: string | null;
   client_action: boolean;
   created_at: string;
-  formatted_date: string;
   author_name: string;
   employee_full_name: string | null;
   employee_job_title: string | null;
@@ -131,7 +132,7 @@ export const HistoryTimeline = ({ orderId }: HistoryTimelineProps) => {
                   </p>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="text-xs text-muted-foreground">
-                      {event.formatted_date}
+                      {format(new Date(event.created_at), 'dd MMM yyyy - HH:mm', { locale: fr })}
                     </span>
                     <span className="text-xs text-muted-foreground">•</span>
                     <div className="flex items-center gap-1">
