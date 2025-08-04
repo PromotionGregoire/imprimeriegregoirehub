@@ -24,6 +24,7 @@ import Suppliers from "./pages/Suppliers";
 import SupplierDetails from "./pages/SupplierDetails";
 import AdminEmployees from "./pages/AdminEmployees";
 import ProofApproval from "./pages/ProofApproval";
+import ProofApprovalPage from "./pages/ProofApprovalPage";
 import ForcePasswordChange from "./pages/ForcePasswordChange";
 import DashboardLayout from "./components/DashboardLayout";
 
@@ -40,7 +41,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/epreuve/:token" element={<ProofApproval />} />
-            <Route path="/approve/proof/:token" element={<ProofApproval />} />
+            <Route path="/approve/proof/:token" element={<ProofApprovalPage />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <DashboardLayout />
