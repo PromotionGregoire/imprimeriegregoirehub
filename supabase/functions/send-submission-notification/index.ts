@@ -46,8 +46,9 @@ serve(async (req) => {
 
     console.log(`Sending submission notification to: ${clientEmail} for submission ${submissionNumber}`);
 
-    // Créer l'URL d'approbation
-    const approvalUrl = `https://ytcrplsistsxfaxkfqqp.lovable.app/approve/submission/${acceptanceToken}`;
+    // Créer l'URL d'approbation avec le domaine personnalisé
+    const APP_URL = 'https://client.promotiongregoire.ca';
+    const approvalUrl = `${APP_URL}/approve/submission/${acceptanceToken}`;
 
     // Render the email template
     const html = await renderAsync(
