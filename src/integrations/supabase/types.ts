@@ -234,6 +234,30 @@ export type Database = {
           },
         ]
       }
+      monitoring_config: {
+        Row: {
+          description: string | null
+          id: string
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          key: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           client_id: string
@@ -724,6 +748,36 @@ export type Database = {
           updated_at?: string
           website_1?: string | null
           website_2?: string | null
+        }
+        Relationships: []
+      }
+      system_logs: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          level: string
+          message: string
+          metadata: Json | null
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          level: string
+          message: string
+          metadata?: Json | null
+          type: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          level?: string
+          message?: string
+          metadata?: Json | null
+          type?: string
         }
         Relationships: []
       }
