@@ -33,14 +33,18 @@ import DashboardLayout from "./components/DashboardLayout";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
+const App = () => {
+  console.log('Routes loaded - Approval routes should be available');
+  console.log('SubmissionApprovalPage imported:', SubmissionApprovalPage);
+  
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/epreuve/:token" element={<ProofApproval />} />
@@ -79,5 +83,6 @@ const App = () => (
     </AuthProvider>
   </QueryClientProvider>
 );
+};
 
 export default App;
