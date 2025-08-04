@@ -430,9 +430,45 @@ const ProofDetails = () => {
 
                     {proof.status === 'Envoyée au client' && (
                       <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                        <p className="text-sm text-blue-800">
+                        <p className="text-sm text-blue-800 mb-3">
                           ✅ Épreuve envoyée au client. En attente de leur réponse.
                         </p>
+                        {proof.approval_token && (
+                          <div className="space-y-2">
+                            <p className="text-xs text-blue-700 font-medium">Lien de validation client :</p>
+                            <div className="flex gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                asChild
+                                className="text-xs"
+                              >
+                                <a 
+                                  href={`/epreuve/${proof.approval_token}`}
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                >
+                                  <ExternalLink className="w-3 h-3 mr-1" />
+                                  Voir la page client
+                                </a>
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                className="text-xs"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(`${window.location.origin}/epreuve/${proof.approval_token}`);
+                                  toast({
+                                    title: "Lien copié",
+                                    description: "Le lien de validation a été copié dans le presse-papiers.",
+                                  });
+                                }}
+                              >
+                                Copier le lien
+                              </Button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </>
