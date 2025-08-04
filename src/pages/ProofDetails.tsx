@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Upload, Send, FileText, Download, Clock, User, Package, ExternalLink, Receipt, Copy, Mail, Check } from 'lucide-react';
+import { ArrowLeft, Upload, Send, FileText, Download, Clock, User, Package, ExternalLink, Receipt, Copy, Mail, Check, MessageCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -219,44 +220,7 @@ const ProofDetails = () => {
     return <StatusBadge status={status} type="proof" size="medium" />;
   };
 
-  // Helper function to determine if client approval section should be visible
-  const shouldShowClientApprovalSection = () => {
-    // Show if proof has tokens (ready to be sent) OR has been sent to client
-    const validStatuses = ['Envoyée au client', 'Modification demandée', 'Approuvée'];
-    return proof.approval_token || proof.validation_token || validStatuses.includes(proof.status);
-  };
 
-  // Helper function to get the approval URL
-  const getApprovalUrl = () => {
-    // Use validation_token if available (for sent proofs), otherwise use approval_token
-    const token = proof.validation_token || proof.approval_token;
-    if (!token) return null;
-    return `${window.location.origin}/approve/proof/${token}`;
-  };
-
-  // Copy link to clipboard
-  const handleCopyLink = async () => {
-    const url = getApprovalUrl();
-    if (!url) return;
-    
-    try {
-      await navigator.clipboard.writeText(url);
-      setLinkCopied(true);
-      toast({
-        title: '✅ Lien copié',
-        description: 'Le lien d\'approbation a été copié dans le presse-papiers.',
-      });
-      
-      // Reset the copied state after 2 seconds
-      setTimeout(() => setLinkCopied(false), 2000);
-    } catch (error) {
-      toast({
-        title: '❌ Erreur',
-        description: 'Impossible de copier le lien.',
-        variant: 'destructive',
-      });
-    }
-  };
 
   // Resend email mutation
   const resendEmail = useMutation({
@@ -439,50 +403,62 @@ const ProofDetails = () => {
         </Card>
       </div>
 
-      {/* Client Approval Section - Only show if proof has been sent to client */}
-      {shouldShowClientApprovalSection() && (
-        <Card>
+      {/* Client Approval Section - TOUJOURS VISIBLE SI ÉPREUVE EXISTE */}
+      {proof && (
+        <Card className="border-2 border-primary/20">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-lg">
               <Mail className="h-5 w-5 text-primary" />
-              Lien de Validation Client
+              Lien d'approbation client
             </CardTitle>
             <CardDescription>
-              Gérer et visualiser le lien d'approbation envoyé au client
+              Partagez ce lien avec le client pour qu'il puisse approuver l'épreuve
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Approval URL Display */}
-            {getApprovalUrl() && (
-              <div className="space-y-3">
-                <Label htmlFor="approval-url">URL d'approbation</Label>
-                <div className="flex items-center gap-2 p-3 bg-muted/30 border rounded-lg">
-                  <div className="flex-1 min-w-0">
-                    <a
-                      href={getApprovalUrl()!}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-primary hover:underline break-all"
-                      id="approval-url"
-                    >
-                      {getApprovalUrl()}
-                    </a>
+            {(proof.approval_token || proof.validation_token) ? (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Lien d'approbation client</Label>
+                  <div className="flex items-center gap-2 p-3 bg-primary/5 border-2 border-primary/20 rounded-lg">
+                    <input
+                      type="text"
+                      readOnly
+                      value={`${window.location.origin}/approve/proof/${proof.validation_token || proof.approval_token}`}
+                      className="flex-1 bg-transparent border-none outline-none text-sm font-mono"
+                    />
+                    <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                   </div>
-                  <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 </div>
                 
-                {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <Button
-                    onClick={handleCopyLink}
+                    onClick={async () => {
+                      const url = `${window.location.origin}/approve/proof/${proof.validation_token || proof.approval_token}`;
+                      try {
+                        await navigator.clipboard.writeText(url);
+                        setLinkCopied(true);
+                        toast({
+                          title: "✅ Lien copié!",
+                          description: "Le lien a été copié dans le presse-papiers",
+                        });
+                        setTimeout(() => setLinkCopied(false), 2000);
+                      } catch (error) {
+                        toast({
+                          title: "❌ Erreur",
+                          description: "Impossible de copier le lien",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
                     variant="outline"
-                    className="flex-1 sm:flex-none"
                     disabled={linkCopied}
+                    className="border-primary/20 hover:bg-primary/10"
                   >
                     {linkCopied ? (
                       <>
                         <Check className="w-4 h-4 mr-2 text-green-600" />
-                        Copié !
+                        Copié!
                       </>
                     ) : (
                       <>
@@ -493,35 +469,70 @@ const ProofDetails = () => {
                   </Button>
                   
                   <Button
+                    variant="outline"
+                    asChild
+                    className="border-primary/20 hover:bg-primary/10"
+                  >
+                    <a
+                      href={`${window.location.origin}/approve/proof/${proof.validation_token || proof.approval_token}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      Ouvrir la page
+                    </a>
+                  </Button>
+                  
+                  <Button
                     onClick={() => resendEmail.mutate()}
-                    disabled={resendEmail.isPending}
-                    className="flex-1 sm:flex-none"
+                    disabled={resendEmail.isPending || proof.status !== 'Envoyée au client'}
+                    className="bg-primary hover:bg-primary/90"
                   >
                     <Send className="w-4 h-4 mr-2" />
-                    {resendEmail.isPending ? 'Envoi...' : 'Renvoyer le courriel'}
+                    {resendEmail.isPending ? 'Envoi...' : 'Renvoyer par courriel'}
                   </Button>
                 </div>
+                
+                <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
+                  {proof.status === 'Envoyée au client' ? (
+                    <>
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                      <span className="text-sm text-green-700">
+                        Épreuve envoyée au client - En attente de réponse
+                      </span>
+                    </>
+                  ) : proof.status === 'Approuvée' ? (
+                    <>
+                      <Check className="w-4 h-4 text-green-600" />
+                      <span className="text-sm text-green-700">
+                        Épreuve approuvée par le client
+                      </span>
+                    </>
+                  ) : proof.status === 'Modification demandée' ? (
+                    <>
+                      <MessageCircle className="w-4 h-4 text-orange-600" />
+                      <span className="text-sm text-orange-700">
+                        Le client a demandé des modifications
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <Clock className="w-4 h-4 text-blue-600" />
+                      <span className="text-sm text-blue-700">
+                        Épreuve prête à envoyer au client
+                      </span>
+                    </>
+                  )}
+                </div>
               </div>
-            )}
-            
-            {/* If no tokens exist */}
-            {!getApprovalUrl() && (
-              <div className="text-center py-4 text-muted-foreground">
-                <p className="text-sm">
-                  Aucun lien d'approbation disponible. Créez d'abord une épreuve.
-                </p>
-              </div>
-            )}
-            
-            {/* Status indicator */}
-            {getApprovalUrl() && (
-              <div className="text-xs text-muted-foreground">
-                {proof.validation_token ? (
-                  <span className="text-green-600">✓ Épreuve envoyée au client</span>
-                ) : (
-                  <span className="text-amber-600">⏳ Épreuve prête à envoyer</span>
-                )}
-              </div>
+            ) : (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Une erreur s'est produite lors de la création de l'épreuve. 
+                  Les jetons d'approbation sont manquants. Veuillez contacter le support.
+                </AlertDescription>
+              </Alert>
             )}
           </CardContent>
         </Card>
