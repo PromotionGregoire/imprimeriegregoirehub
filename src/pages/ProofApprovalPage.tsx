@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { CheckCircle, XCircle, FileText, Building2, User, Mail, AlertCircle, Loader2, Download, Eye } from 'lucide-react';
+import { CheckCircle, XCircle, FileText, Building2, User, Mail, AlertCircle, Loader2, Download, Eye, Clock, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import logoGregoire from '@/assets/logo-imprimerie-gregoire.png';
 import { useProofByToken } from '@/hooks/useProofByToken';
@@ -22,7 +22,11 @@ export default function ProofApprovalPage() {
   const { toast } = useToast();
   
   // Récupérer les données de l'épreuve
-  const { data: proofData, isLoading, error } = useProofByToken(token);
+  const { data: response, isLoading, error } = useProofByToken(token);
+  
+  const proofData = response?.proof;
+  const proofHistory = response?.proofHistory || [];
+  const orderHistory = response?.orderHistory || [];
 
   const handleApprove = async () => {
     if (!comments.trim()) {
@@ -43,7 +47,7 @@ export default function ProofApprovalPage() {
             token,
             decision: 'approved',
             comments,
-            clientName: proofData.client?.contact_name || proofData.order?.clients?.contact_name
+            clientName: proofData.orders?.submissions?.clients?.contact_name
           }
         });
 
@@ -97,7 +101,7 @@ export default function ProofApprovalPage() {
             token,
             decision: 'rejected',
             comments,
-            clientName: proofData.client?.contact_name || proofData.order?.clients?.contact_name
+            clientName: proofData.orders?.submissions?.clients?.contact_name
           }
         });
 
@@ -282,7 +286,7 @@ export default function ProofApprovalPage() {
                   "text-xs sm:text-sm text-muted-foreground mt-1",
                   "leading-relaxed"
                 )}>
-                  Commande #{proofData.order?.order_number} - Version {proofData.version}
+                  Commande #{proofData.orders?.order_number} - Version {proofData.version}
                 </p>
               </div>
             </div>
@@ -357,7 +361,7 @@ export default function ProofApprovalPage() {
                     "text-sm font-medium text-right leading-tight",
                     "break-words max-w-[200px] sm:max-w-none"
                   )}>
-                    {proofData.client?.business_name}
+                    {proofData.orders?.submissions?.clients?.business_name}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-3">
@@ -372,7 +376,7 @@ export default function ProofApprovalPage() {
                     "text-sm font-medium text-right",
                     "break-words"
                   )}>
-                    {proofData.client?.contact_name}
+                    {proofData.orders?.submissions?.clients?.contact_name}
                   </span>
                 </div>
                 <div className="flex items-start justify-between gap-3">
@@ -387,7 +391,7 @@ export default function ProofApprovalPage() {
                     "text-sm font-medium text-right leading-tight",
                     "break-all max-w-[180px] sm:max-w-none"
                   )}>
-                    {proofData.client?.contact_email}
+                    {proofData.orders?.submissions?.clients?.contact_email}
                   </span>
                 </div>
               </div>
@@ -482,6 +486,122 @@ export default function ProofApprovalPage() {
                   <p>Aucun fichier d'épreuve disponible</p>
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Historique des commentaires */}
+          {proofHistory.length > 0 && (
+            <Card className="border-border shadow-sm overflow-hidden">
+              <CardHeader className="pb-3 sm:pb-4">
+                <CardTitle className={cn(
+                  "flex items-center gap-2 sm:gap-3",
+                  "text-lg font-semibold",
+                  "leading-tight"
+                )}>
+                  <div className={cn(
+                    "h-8 w-8 sm:h-10 sm:w-10 rounded-lg",
+                    "bg-primary/10 flex items-center justify-center flex-shrink-0"
+                  )}>
+                    <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                  </div>
+                  <span className="truncate">
+                    Historique des commentaires
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 sm:px-6 space-y-4">
+                {proofHistory.map((historyItem) => (
+                  <div
+                    key={historyItem.id}
+                    className="border border-border rounded-lg p-4 bg-muted/30"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-xs">
+                          Version {historyItem.version}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(historyItem.created_at).toLocaleDateString('fr-FR')}
+                        </span>
+                      </div>
+                      <Badge 
+                        variant={historyItem.status === 'Approuvée' ? 'default' : 'destructive'}
+                        className="text-xs"
+                      >
+                        {historyItem.status}
+                      </Badge>
+                    </div>
+                    {historyItem.client_comments && (
+                      <p className="text-sm text-foreground leading-relaxed">
+                        "{historyItem.client_comments}"
+                      </p>
+                    )}
+                    {historyItem.approved_by_name && (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Par: {historyItem.approved_by_name}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Journal de bord */}
+          <Card className="border-border shadow-sm overflow-hidden">
+            <CardHeader className="pb-3 sm:pb-4">
+              <CardTitle className={cn(
+                "flex items-center gap-2 sm:gap-3",
+                "text-lg font-semibold",
+                "leading-tight"
+              )}>
+                <div className={cn(
+                  "h-8 w-8 sm:h-10 sm:w-10 rounded-lg",
+                  "bg-primary/10 flex items-center justify-center flex-shrink-0"
+                )}>
+                  <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                </div>
+                <span className="truncate">
+                  Journal de bord
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 sm:px-6">
+              <div className="space-y-3 max-h-80 overflow-y-auto">
+                {orderHistory.map((historyItem) => (
+                  <div
+                    key={historyItem.id}
+                    className="flex gap-3 pb-3 border-b border-border last:border-b-0"
+                  >
+                    <div className="flex-shrink-0 w-2 h-2 bg-primary rounded-full mt-2"></div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <p className="text-sm font-medium text-foreground">
+                          {historyItem.action_description}
+                        </p>
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          {historyItem.formatted_date}
+                        </span>
+                      </div>
+                      {historyItem.created_by_name && (
+                        <p className="text-xs text-muted-foreground">
+                          Par: {historyItem.created_by_name}
+                        </p>
+                      )}
+                      {historyItem.client_action && (
+                        <Badge variant="secondary" className="text-xs mt-1">
+                          Action client
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {orderHistory.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    Aucun historique disponible
+                  </p>
+                )}
+              </div>
             </CardContent>
           </Card>
 

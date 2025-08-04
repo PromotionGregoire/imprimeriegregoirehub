@@ -33,8 +33,26 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Fetching proof with token:', token);
 
-    // Find the proof by approval token
-    const { data: proof, error: proofError } = await supabase
+    // Find the latest proof by approval token - any version can have the token
+    const { data: tokenProof, error: tokenError } = await supabase
+      .from('proofs')
+      .select('order_id')
+      .eq('approval_token', token)
+      .single();
+
+    if (tokenError || !tokenProof) {
+      console.error('Token not found:', tokenError);
+      return new Response(
+        JSON.stringify({ error: 'Token invalide ou épreuve non trouvée' }),
+        {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    // Get the latest proof version for this order
+    const { data: latestProof, error: proofError } = await supabase
       .from('proofs')
       .select(`
         id,
@@ -45,6 +63,7 @@ const handler = async (req: Request): Promise<Response> => {
         approved_at,
         approved_by_name,
         created_at,
+        order_id,
         orders (
           order_number,
           total_price,
@@ -60,13 +79,15 @@ const handler = async (req: Request): Promise<Response> => {
           )
         )
       `)
-      .eq('approval_token', token)
+      .eq('order_id', tokenProof.order_id)
+      .order('version', { ascending: false })
+      .limit(1)
       .single();
 
-    if (proofError || !proof) {
-      console.error('Proof not found:', proofError);
+    if (proofError || !latestProof) {
+      console.error('Latest proof not found:', proofError);
       return new Response(
-        JSON.stringify({ error: 'Épreuve non trouvée ou token invalide' }),
+        JSON.stringify({ error: 'Dernière version de l\'épreuve non trouvée' }),
         {
           status: 404,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -74,12 +95,38 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log('Proof found successfully');
+    // Get all proof comments from previous versions for this order
+    const { data: proofHistory, error: historyError } = await supabase
+      .from('proofs')
+      .select(`
+        id,
+        version,
+        status,
+        client_comments,
+        approved_at,
+        approved_by_name,
+        created_at
+      `)
+      .eq('order_id', tokenProof.order_id)
+      .not('client_comments', 'is', null)
+      .neq('client_comments', '')
+      .order('version', { ascending: false });
+
+    // Get order history for this proof
+    const { data: orderHistory, error: orderHistoryError } = await supabase
+      .from('v_ordre_historique')
+      .select('*')
+      .eq('order_id', tokenProof.order_id)
+      .order('created_at', { ascending: false });
+
+    console.log('Latest proof found successfully, version:', latestProof.version);
 
     return new Response(
       JSON.stringify({ 
         success: true,
-        proof
+        proof: latestProof,
+        proofHistory: proofHistory || [],
+        orderHistory: orderHistory || []
       }),
       {
         status: 200,
