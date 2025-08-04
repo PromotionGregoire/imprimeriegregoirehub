@@ -6,32 +6,20 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAllOrderHistory, HistoryItem } from '@/hooks/useOrderHistory';
+import { ACTION_LABELS, getActionLabel } from '@/constants/translations';
 import { Search, Filter, Calendar, User, FileText } from 'lucide-react';
 
 const actionTypeColors = {
-  upload_epreuve: 'bg-blue-500 hover:bg-blue-600',
-  send_epreuve: 'bg-green-500 hover:bg-green-600',
-  approve_epreuve: 'bg-emerald-600 hover:bg-emerald-700',
-  reject_epreuve: 'bg-orange-500 hover:bg-orange-600',
+  upload_proof: 'bg-blue-500 hover:bg-blue-600',
+  send_proof: 'bg-green-500 hover:bg-green-600',
+  approve_proof: 'bg-emerald-600 hover:bg-emerald-700',
+  reject_proof: 'bg-orange-500 hover:bg-orange-600',
   add_comment: 'bg-gray-500 hover:bg-gray-600',
-  changement_statut_epreuve: 'bg-purple-500 hover:bg-purple-600',
+  change_proof_status: 'bg-purple-500 hover:bg-purple-600',
   send_reminder: 'bg-yellow-500 hover:bg-yellow-600',
   start_production: 'bg-indigo-500 hover:bg-indigo-600',
   update_order: 'bg-cyan-500 hover:bg-cyan-600',
-  view_epreuve: 'bg-teal-500 hover:bg-teal-600'
-};
-
-const actionTypeLabels = {
-  upload_epreuve: 'Épreuve téléchargée',
-  send_epreuve: 'Épreuve envoyée',
-  approve_epreuve: 'Épreuve approuvée',
-  reject_epreuve: 'Modification demandée',
-  add_comment: 'Commentaire ajouté',
-  changement_statut_epreuve: 'Statut modifié',
-  send_reminder: 'Rappel envoyé',
-  start_production: 'Production lancée',
-  update_order: 'Commande mise à jour',
-  view_epreuve: 'Épreuve consultée'
+  view_proof: 'bg-teal-500 hover:bg-teal-600'
 };
 
 export function HistoryTable() {
@@ -99,7 +87,7 @@ export function HistoryTable() {
             <SelectItem value="all">Tous les types</SelectItem>
             {uniqueActionTypes.map(type => (
               <SelectItem key={type} value={type}>
-                {actionTypeLabels[type as keyof typeof actionTypeLabels] || type}
+                {getActionLabel(type as any) || type}
               </SelectItem>
             ))}
           </SelectContent>
@@ -168,7 +156,7 @@ export function HistoryTable() {
                       <Badge 
                         className={`text-white ${actionTypeColors[item.action_type as keyof typeof actionTypeColors] || 'bg-gray-500'}`}
                       >
-                        {actionTypeLabels[item.action_type as keyof typeof actionTypeLabels] || item.action_type}
+                        {getActionLabel(item.action_type as any)}
                       </Badge>
                     </TableCell>
                     <TableCell className="max-w-xs">
