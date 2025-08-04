@@ -24,7 +24,10 @@ const ModernToggle = ({
   return (
     <div 
       className="flex items-center justify-between py-3"
-      onClick={(e) => e.stopPropagation()} // Empêcher la propagation sur tout le conteneur
+      onClick={(e) => {
+        console.log('ModernToggle container clicked');
+        e.stopPropagation(); // Empêcher la propagation sur tout le conteneur
+      }}
     >
       <div className="flex-1">
         <Label 

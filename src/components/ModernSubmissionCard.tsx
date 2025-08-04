@@ -35,6 +35,7 @@ const ModernSubmissionCard = ({ submission, onClick }: ModernSubmissionCardProps
   };
 
   const handleAcceptSubmission = async (checked: boolean) => {
+    console.log('handleAcceptSubmission called with:', checked);
     if (!checked) return;
     
     const confirmed = window.confirm(
