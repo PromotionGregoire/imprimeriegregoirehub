@@ -1,685 +1,574 @@
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { 
-  Check, 
-  MessageCircle, 
-  FileText, 
-  Building, 
-  Calendar, 
-  DollarSign, 
-  AlertCircle, 
-  ZoomIn, 
-  ZoomOut, 
-  RotateCcw, 
-  Download,
-  User,
-  Package,
-  Mail
-} from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { CheckCircle, XCircle, FileText, Building2, User, Mail, AlertCircle, Loader2, Download, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import logoGregoire from '@/assets/logo-imprimerie-gregoire.png';
+import { useProofByToken } from '@/hooks/useProofByToken';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
-interface ProofDetails {
-  proof: {
-    id: string;
-    version: number;
-    status: string;
-    file_url: string;
-    created_at: string;
-  };
-  order: {
-    id: string;
-    order_number: string;
-    total_price: number;
-    status: string;
-  };
-  submission: {
-    id: string;
-    submission_number: string;
-    items: Array<{
-      id: string;
-      product_name: string;
-      quantity: number;
-      unit_price: number;
-      description: string;
-    }>;
-  };
-  client: {
-    business_name: string;
-    contact_name: string;
-    contact_email: string;
-  };
-}
-
-const ProofApprovalPage = () => {
+export default function ProofApprovalPage() {
   const { token } = useParams<{ token: string }>();
-  const [proofData, setProofData] = useState<ProofDetails | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>('');
-  const [action, setAction] = useState<'view' | 'approve' | 'modify'>('view');
-  const [clientName, setClientName] = useState('');
-  const [modificationComments, setModificationComments] = useState('');
-  const [processing, setProcessing] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [showConfirmApproval, setShowConfirmApproval] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(1);
-
-  useEffect(() => {
-    if (token) {
-      fetchProofData();
-    }
-  }, [token]);
-
-  const fetchProofData = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      
-      const response = await fetch(
-        `https://ytcrplsistsxfaxkfqqp.supabase.co/functions/v1/get-public-proof-details?token=${token}`
-      );
-      
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Erreur lors du chargement de l\'épreuve');
-      }
-
-      setProofData(data);
-      setClientName(data.client?.contact_name || '');
-    } catch (err: any) {
-      console.error('Error fetching proof data:', err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [comments, setComments] = useState('');
+  const [isApproving, setIsApproving] = useState(false);
+  const [isDeclining, setIsDeclining] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [decision, setDecision] = useState<'approved' | 'rejected' | null>(null);
+  const { toast } = useToast();
+  
+  // Récupérer les données de l'épreuve
+  const { data: proofData, isLoading, error } = useProofByToken(token);
 
   const handleApprove = async () => {
-    if (!clientName.trim()) {
-      setError('Veuillez entrer votre nom pour confirmer l\'approbation');
+    if (!comments.trim()) {
+      toast({
+        title: "Commentaire requis",
+        description: "Veuillez ajouter un commentaire avant d'approuver.",
+        variant: "destructive",
+      });
       return;
     }
-
+    
+    setIsApproving(true);
+    
     try {
-      setProcessing(true);
-      setError('');
-      
-      const response = await fetch('https://ytcrplsistsxfaxkfqqp.supabase.co/functions/v1/handle-proof-decision', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          token: token,
-          decision: 'approved',
-          clientName: clientName.trim()
-        }),
-      });
+      if (proofData && token) {
+        const { data, error } = await supabase.functions.invoke('handle-proof-decision', {
+          body: {
+            token,
+            decision: 'approved',
+            comments,
+            clientName: proofData.client?.contact_name || proofData.order?.clients?.contact_name
+          }
+        });
 
-      const data = await response.json();
+        if (error) {
+          console.error('Erreur lors de l\'approbation:', error);
+          toast({
+            title: "Erreur",
+            description: "Erreur lors de l'approbation de l'épreuve",
+            variant: "destructive",
+          });
+          return;
+        }
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Erreur lors de l\'approbation');
+        console.log('Épreuve approuvée avec succès:', data);
+        toast({
+          title: "Épreuve approuvée",
+          description: "L'épreuve a été approuvée avec succès",
+        });
       }
-
-      setSuccess(true);
-      setAction('view');
-      setShowConfirmApproval(false);
       
-      // Refresh proof data to show updated status
-      await fetchProofData();
-    } catch (err: any) {
-      console.error('Error approving proof:', err);
-      setError(err.message);
+      setDecision('approved');
+      setIsSubmitted(true);
+    } catch (error) {
+      console.error('Erreur:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur inattendue s'est produite",
+        variant: "destructive",
+      });
     } finally {
-      setProcessing(false);
+      setIsApproving(false);
     }
   };
 
-  const handleRequestModification = async () => {
-    if (!clientName.trim() || !modificationComments.trim()) {
-      setError('Veuillez entrer votre nom et vos commentaires');
+  const handleDecline = async () => {
+    if (!comments.trim()) {
+      toast({
+        title: "Commentaire requis",
+        description: "Veuillez expliquer la raison du refus.",
+        variant: "destructive",
+      });
       return;
     }
-
+    
+    setIsDeclining(true);
+    
     try {
-      setProcessing(true);
-      setError('');
-      
-      const response = await fetch('https://ytcrplsistsxfaxkfqqp.supabase.co/functions/v1/handle-proof-decision', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          token: token,
-          decision: 'rejected',
-          clientName: clientName.trim(),
-          comments: modificationComments.trim()
-        }),
-      });
+      if (proofData && token) {
+        const { data, error } = await supabase.functions.invoke('handle-proof-decision', {
+          body: {
+            token,
+            decision: 'rejected',
+            comments,
+            clientName: proofData.client?.contact_name || proofData.order?.clients?.contact_name
+          }
+        });
 
-      const data = await response.json();
+        if (error) {
+          console.error('Erreur lors du refus:', error);
+          toast({
+            title: "Erreur",
+            description: "Erreur lors du refus de l'épreuve",
+            variant: "destructive",
+          });
+          return;
+        }
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Erreur lors de l\'envoi des modifications');
+        console.log('Épreuve refusée avec succès:', data);
+        toast({
+          title: "Épreuve refusée",
+          description: "L'épreuve a été refusée",
+        });
       }
-
-      setSuccess(true);
-      setAction('view');
       
-      // Refresh proof data to show updated status
-      await fetchProofData();
-    } catch (err: any) {
-      console.error('Error requesting modification:', err);
-      setError(err.message);
+      setDecision('rejected');
+      setIsSubmitted(true);
+    } catch (error) {
+      console.error('Erreur:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur inattendue s'est produite",
+        variant: "destructive",
+      });
     } finally {
-      setProcessing(false);
+      setIsDeclining(false);
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'Approuvée':
-        return (
-          <Badge className="bg-green-100 text-green-800 border-green-200 hover:bg-green-100">
-            <Check className="w-3 h-3 mr-1" />
-            Approuvée
-          </Badge>
-        );
-      case 'Modification demandée':
-        return (
-          <Badge className="bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-100">
-            <MessageCircle className="w-3 h-3 mr-1" />
-            Modification demandée
-          </Badge>
-        );
-      case 'Envoyée au client':
-        return (
-          <Badge className="bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100">
-            <Mail className="w-3 h-3 mr-1" />
-            En attente de validation
-          </Badge>
-        );
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
-    }
+  const getFileExtension = (url: string) => {
+    return url.split('.').pop()?.toLowerCase() || '';
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-CA', {
-      style: 'currency',
-      currency: 'CAD',
-    }).format(price);
+  const isPDF = (url: string) => {
+    return getFileExtension(url) === 'pdf';
   };
 
-  // Loading state
-  if (loading) {
+  const isImage = (url: string) => {
+    const ext = getFileExtension(url);
+    return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
+  };
+
+  // Afficher un loading si on récupère les données
+  if (token && isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="space-y-8">
-            <Skeleton className="h-24 w-full rounded-2xl" />
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-6">
-                <Skeleton className="h-96 w-full rounded-2xl" />
-                <Skeleton className="h-32 w-full rounded-2xl" />
-              </div>
-              <div className="space-y-6">
-                <Skeleton className="h-48 w-full rounded-2xl" />
-                <Skeleton className="h-32 w-full rounded-2xl" />
-              </div>
-            </div>
-          </div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+          <p className="text-muted-foreground">Chargement de l'épreuve...</p>
         </div>
       </div>
     );
   }
 
-  // Error state
-  if (error && !proofData) {
+  // Afficher une erreur si l'épreuve n'est pas trouvée
+  if (token && (error || !proofData)) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center px-4">
-        <Card className="max-w-md w-full border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
-          <CardContent className="p-8 text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <AlertCircle className="h-8 w-8 text-red-600" />
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-3">Épreuve non trouvée</h1>
-            <p className="text-gray-600 mb-6 leading-relaxed">{error}</p>
-            <div className="p-4 bg-gray-50 rounded-xl">
-              <p className="text-sm text-gray-500">
-                Veuillez vérifier que le lien est correct ou contactez notre équipe si le problème persiste.
-              </p>
-            </div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="max-w-md mx-4">
+          <CardContent className="p-6 text-center space-y-4">
+            <XCircle className="h-12 w-12 text-negative mx-auto" />
+            <h1 className="text-lg font-semibold">Épreuve non trouvée</h1>
+            <p className="text-muted-foreground">
+              L'épreuve demandée n'existe pas ou le lien a expiré.
+            </p>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  if (!proofData) return null;
+  if (isSubmitted) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className={cn(
+          "mx-auto max-w-2xl",
+          "px-4 py-8 sm:px-6 md:px-8"
+        )}>
+          <Card className={cn(
+            "text-center border-border shadow-sm",
+            "animate-scale-in overflow-hidden"
+          )}>
+            <CardContent className="p-8 space-y-6">
+              {decision === 'approved' ? (
+                <>
+                  <div className="flex justify-center">
+                    <div className={cn(
+                      "h-16 w-16 rounded-full",
+                      "bg-primary/10 flex items-center justify-center"
+                    )}>
+                      <CheckCircle className="h-8 w-8 text-primary" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <h1 className="text-xl font-semibold text-primary">
+                      Épreuve Approuvée
+                    </h1>
+                    <p className="text-muted-foreground max-w-md mx-auto">
+                      Merci d'avoir approuvé l'épreuve. Nous commencerons la production finale et vous tiendrons informé de l'avancement.
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex justify-center">
+                    <div className={cn(
+                      "h-16 w-16 rounded-full",
+                      "bg-red-100 flex items-center justify-center"
+                    )}>
+                      <XCircle className="h-8 w-8 text-red-600" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <h1 className="text-xl font-semibold text-red-600">
+                      Épreuve Refusée
+                    </h1>
+                    <p className="text-muted-foreground max-w-md mx-auto">
+                      Nous avons bien reçu votre refus. Notre équipe préparera une nouvelle version selon vos commentaires.
+                    </p>
+                  </div>
+                </>
+              )}
+              
+              <div className={cn(
+                "bg-muted rounded-lg p-4",
+                "border border-border"
+              )}>
+                <p className="font-medium mb-2">Votre commentaire :</p>
+                <p className="text-muted-foreground italic leading-relaxed">
+                  "{comments}"
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
-  const isActionDisabled = proofData.proof.status === 'Approuvée' || proofData.proof.status === 'Modification demandée';
+  if (!proofData) {
+    return null;
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 shadow-sm sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="min-h-screen bg-background">
+      {/* Header with Logo */}
+      <div className={cn(
+        "bg-background/95 backdrop-blur-sm border-b border-border",
+        "sticky top-0 z-50 shadow-sm"
+      )}>
+        <div className={cn(
+          "mx-auto max-w-4xl",
+          "px-4 py-4 sm:px-6 sm:py-6 md:px-8"
+        )}>
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="flex items-center gap-4">
-              <div className="p-2 bg-primary/10 rounded-xl">
+            {/* Logo and Branding */}
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className={cn(
+                "flex-shrink-0 p-2 sm:p-3",
+                "bg-primary/10 rounded-xl border border-primary/20",
+                "transition-all duration-200 hover:bg-primary/15"
+              )}>
                 <img 
-                  src="/logo-imprimerie-gregoire.png" 
+                  src={logoGregoire} 
                   alt="Imprimerie Grégoire" 
-                  className="h-10 w-auto"
+                  className="h-8 w-auto sm:h-10 md:h-12"
                 />
               </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
-                  Validation de votre épreuve
+              <div className="min-w-0 flex-1">
+                <h1 className={cn(
+                  "text-xl sm:text-2xl md:text-3xl font-bold text-foreground",
+                  "leading-tight tracking-tight"
+                )}>
+                  Approbation d'Épreuve
                 </h1>
-                <p className="text-gray-600 mt-1">
-                  Commande #{proofData.order.order_number} • Version {proofData.proof.version}
+                <p className={cn(
+                  "text-xs sm:text-sm text-muted-foreground mt-1",
+                  "leading-relaxed"
+                )}>
+                  Commande #{proofData.order?.order_number} - Version {proofData.version}
                 </p>
               </div>
             </div>
-            <div className="sm:ml-auto">
-              {getStatusBadge(proofData.proof.status)}
+            
+            {/* Status Badge */}
+            <div className="flex-shrink-0">
+              <Badge 
+                variant="secondary" 
+                className={cn(
+                  "bg-blue-100 text-blue-800 border-blue-200",
+                  "px-3 py-1 text-xs sm:text-sm font-medium"
+                )}
+              >
+                {proofData.status}
+              </Badge>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Success Message */}
-        {success && (
-          <Alert className="mb-8 border-green-200 bg-green-50/80 backdrop-blur-sm rounded-2xl">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                <Check className="h-4 w-4 text-green-600" />
-              </div>
-              <AlertDescription className="text-green-800 font-medium">
-                {proofData.proof.status === 'Approuvée' 
-                  ? 'Parfait ! Votre épreuve a été approuvée. La production va maintenant commencer.'
-                  : 'Vos commentaires ont bien été transmis à notre équipe. Nous vous enverrons une nouvelle épreuve sous peu.'
-                }
-              </AlertDescription>
-            </div>
-          </Alert>
-        )}
+      {/* Main Content Container */}
+      <div className={cn(
+        "mx-auto max-w-4xl",
+        "px-4 py-6 sm:px-6 md:px-8",
+        "pb-safe-area-inset-bottom",
+        "animate-fade-in"
+      )}>
+        
+        {/* Subtitle Section */}
+        <div className="text-center mb-6 space-y-2 px-2">
+          <p className={cn(
+            "text-sm sm:text-base text-muted-foreground",
+            "max-w-xl mx-auto leading-relaxed"
+          )}>
+            Veuillez examiner l'épreuve ci-dessous et nous faire part de votre décision
+          </p>
+        </div>
 
-        {/* Error Message */}
-        {error && (
-          <Alert className="mb-8 border-red-200 bg-red-50/80 backdrop-blur-sm rounded-2xl">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                <AlertCircle className="h-4 w-4 text-red-600" />
-              </div>
-              <AlertDescription className="text-red-800 font-medium">{error}</AlertDescription>
-            </div>
-          </Alert>
-        )}
-
-        {/* Instructions */}
-        {!isActionDisabled && (
-          <Card className="mb-8 border-0 shadow-lg bg-blue-50/80 backdrop-blur-sm rounded-2xl">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
-                  <FileText className="h-5 w-5 text-blue-600" />
+        {/* Content Grid */}
+        <div className="space-y-4 sm:space-y-6">
+          
+          {/* Client Information Card */}
+          <Card className="border-border shadow-sm overflow-hidden">
+            <CardHeader className="pb-3 sm:pb-4">
+              <CardTitle className={cn(
+                "flex items-center gap-2 sm:gap-3",
+                "text-lg font-semibold",
+                "leading-tight"
+              )}>
+                <div className={cn(
+                  "h-8 w-8 sm:h-10 sm:w-10 rounded-lg",
+                  "bg-primary/10 flex items-center justify-center flex-shrink-0"
+                )}>
+                  <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </div>
-                <div>
-                  <h3 className="font-semibold text-blue-900 mb-2">Instructions importantes</h3>
-                  <p className="text-blue-800 leading-relaxed">
-                    Veuillez examiner attentivement l'épreuve ci-dessous. Une fois approuvée, 
-                    aucune modification ne sera possible et la production commencera immédiatement.
-                  </p>
+                <span className="truncate">
+                  Informations Client
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 sm:px-6">
+              <div className="space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <span className={cn(
+                    "text-sm text-muted-foreground flex items-center gap-1 flex-shrink-0",
+                    "whitespace-nowrap"
+                  )}>
+                    <Building2 className="h-3 w-3" />
+                    Entreprise :
+                  </span>
+                  <span className={cn(
+                    "text-sm font-medium text-right leading-tight",
+                    "break-words max-w-[200px] sm:max-w-none"
+                  )}>
+                    {proofData.client?.business_name}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className={cn(
+                    "text-sm text-muted-foreground flex items-center gap-1 flex-shrink-0",
+                    "whitespace-nowrap"
+                  )}>
+                    <User className="h-3 w-3" />
+                    Contact :
+                  </span>
+                  <span className={cn(
+                    "text-sm font-medium text-right",
+                    "break-words"
+                  )}>
+                    {proofData.client?.contact_name}
+                  </span>
+                </div>
+                <div className="flex items-start justify-between gap-3">
+                  <span className={cn(
+                    "text-sm text-muted-foreground flex items-center gap-1 flex-shrink-0",
+                    "whitespace-nowrap"
+                  )}>
+                    <Mail className="h-3 w-3" />
+                    Email :
+                  </span>
+                  <span className={cn(
+                    "text-sm font-medium text-right leading-tight",
+                    "break-all max-w-[180px] sm:max-w-none"
+                  )}>
+                    {proofData.client?.contact_email}
+                  </span>
                 </div>
               </div>
             </CardContent>
           </Card>
-        )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Proof Viewer */}
-            <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm rounded-2xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-gray-50 to-blue-50 border-b border-gray-100">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl font-semibold text-gray-900">
-                    Aperçu de l'épreuve
-                  </CardTitle>
-                  <div className="flex items-center gap-2 bg-white rounded-xl p-1 shadow-sm">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setZoomLevel(Math.max(0.5, zoomLevel - 0.25))}
-                      disabled={zoomLevel <= 0.5}
-                      className="h-8 w-8 p-0"
-                    >
-                      <ZoomOut className="h-4 w-4" />
-                    </Button>
-                    <span className="text-sm text-gray-600 min-w-[60px] text-center font-medium">
-                      {Math.round(zoomLevel * 100)}%
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setZoomLevel(Math.min(2, zoomLevel + 0.25))}
-                      disabled={zoomLevel >= 2}
-                      className="h-8 w-8 p-0"
-                    >
-                      <ZoomIn className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setZoomLevel(1)}
-                      className="h-8 w-8 p-0"
-                    >
-                      <RotateCcw className="h-4 w-4" />
-                    </Button>
-                  </div>
+          {/* Proof Preview Card */}
+          <Card className="border-border shadow-sm overflow-hidden">
+            <CardHeader className="pb-3 sm:pb-4">
+              <CardTitle className={cn(
+                "flex items-center gap-2 sm:gap-3",
+                "text-lg font-semibold",
+                "leading-tight"
+              )}>
+                <div className={cn(
+                  "h-8 w-8 sm:h-10 sm:w-10 rounded-lg",
+                  "bg-primary/10 flex items-center justify-center flex-shrink-0"
+                )}>
+                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="border-0 overflow-auto bg-gradient-to-br from-gray-50 to-gray-100" style={{ maxHeight: '70vh' }}>
-                  {proofData.proof.file_url ? (
-                    <div className="flex justify-center p-8">
-                      <img
-                        src={proofData.proof.file_url}
-                        alt="Épreuve"
-                        className="max-w-full rounded-xl shadow-lg"
-                        style={{ 
-                          transform: `scale(${zoomLevel})`,
-                          transformOrigin: 'top center',
-                          transition: 'transform 0.3s ease'
-                        }}
+                <span className="truncate">
+                  Aperçu de l'Épreuve
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 sm:px-6">
+              {proofData.file_url ? (
+                <div className="space-y-4">
+                  {/* File Preview */}
+                  <div className="border border-border rounded-lg overflow-hidden bg-muted/50">
+                    {isImage(proofData.file_url) ? (
+                      <img 
+                        src={proofData.file_url}
+                        alt={`Épreuve version ${proofData.version}`}
+                        className="w-full h-auto max-h-[600px] object-contain"
                       />
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center h-64 text-gray-500">
-                      <div className="text-center">
-                        <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <FileText className="h-8 w-8" />
+                    ) : isPDF(proofData.file_url) ? (
+                      <div className="aspect-[4/3] flex items-center justify-center bg-muted">
+                        <div className="text-center space-y-4">
+                          <FileText className="h-16 w-16 text-muted-foreground mx-auto" />
+                          <div>
+                            <p className="text-lg font-medium">Document PDF</p>
+                            <p className="text-sm text-muted-foreground">
+                              Cliquez sur "Télécharger" pour voir le fichier complet
+                            </p>
+                          </div>
                         </div>
-                        <p className="font-medium">Aucun fichier d'épreuve disponible</p>
                       </div>
-                    </div>
-                  )}
-                </div>
-                
-                {/* Download Button */}
-                {proofData.proof.file_url && (
-                  <div className="p-6 bg-gray-50 border-t border-gray-100">
-                    <Button variant="outline" asChild className="w-full rounded-xl">
-                      <a href={proofData.proof.file_url} target="_blank" rel="noopener noreferrer">
-                        <Download className="h-4 w-4 mr-2" />
-                        Télécharger l'épreuve en haute qualité
-                      </a>
+                    ) : (
+                      <div className="aspect-[4/3] flex items-center justify-center bg-muted">
+                        <div className="text-center space-y-4">
+                          <FileText className="h-16 w-16 text-muted-foreground mx-auto" />
+                          <div>
+                            <p className="text-lg font-medium">Fichier non prévisualisable</p>
+                            <p className="text-sm text-muted-foreground">
+                              Cliquez sur "Télécharger" pour voir le fichier
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* File Actions */}
+                  <div className="flex gap-2 justify-center">
+                    <Button
+                      variant="outline"
+                      onClick={() => window.open(proofData.file_url, '_blank')}
+                      className="flex items-center gap-2"
+                    >
+                      <Eye className="h-4 w-4" />
+                      Voir en plein écran
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = proofData.file_url;
+                        link.download = `epreuve-v${proofData.version}.${getFileExtension(proofData.file_url)}`;
+                        link.click();
+                      }}
+                      className="flex items-center gap-2"
+                    >
+                      <Download className="h-4 w-4" />
+                      Télécharger
                     </Button>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Actions */}
-            {!isActionDisabled && (
-              <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm rounded-2xl">
-                <CardHeader>
-                  <CardTitle className="text-xl font-semibold text-gray-900">Votre décision</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {action === 'view' && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <Button
-                        onClick={() => setShowConfirmApproval(true)}
-                        className="h-14 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium"
-                        size="lg"
-                      >
-                        <Check className="h-5 w-5 mr-2" />
-                        Approuver et Lancer la Production
-                      </Button>
-                      
-                      <Button
-                        onClick={() => setAction('modify')}
-                        variant="outline"
-                        className="h-14 border-2 border-orange-200 hover:bg-orange-50 text-orange-700 rounded-xl font-medium"
-                        size="lg"
-                      >
-                        <MessageCircle className="h-5 w-5 mr-2" />
-                        Demander des modifications
-                      </Button>
-                    </div>
-                  )}
-
-                  {/* Approval Confirmation */}
-                  {showConfirmApproval && (
-                    <Card className="border-2 border-green-200 bg-green-50/50 rounded-xl">
-                      <CardContent className="p-6 space-y-6">
-                        <div className="flex items-start gap-4">
-                          <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center shrink-0">
-                            <Check className="h-5 w-5 text-green-600" />
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-green-900 mb-2">Confirmation d'approbation</h3>
-                            <p className="text-green-800 leading-relaxed">
-                              Êtes-vous certain de vouloir approuver cette épreuve ? Aucune modification ne sera possible après cette étape.
-                            </p>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="approver-name" className="text-green-800 font-medium">
-                            Votre nom (pour confirmation)
-                          </Label>
-                          <Input
-                            id="approver-name"
-                            type="text"
-                            value={clientName}
-                            onChange={(e) => setClientName(e.target.value)}
-                            className="border-green-300 focus:border-green-500 focus:ring-green-500 rounded-xl"
-                            placeholder="Entrez votre nom complet"
-                          />
-                        </div>
-
-                        <div className="flex gap-3">
-                          <Button
-                            onClick={handleApprove}
-                            disabled={processing || !clientName.trim()}
-                            className="bg-green-600 hover:bg-green-700 text-white rounded-xl"
-                          >
-                            {processing ? 'Approbation en cours...' : 'Confirmer l\'approbation'}
-                          </Button>
-                          <Button
-                            onClick={() => setShowConfirmApproval(false)}
-                            variant="outline"
-                            className="rounded-xl"
-                          >
-                            Annuler
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-
-                  {/* Modification Request Form */}
-                  {action === 'modify' && (
-                    <Card className="border-2 border-orange-200 bg-orange-50/50 rounded-xl">
-                      <CardContent className="p-6 space-y-6">
-                        <div className="flex items-start gap-4">
-                          <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center shrink-0">
-                            <MessageCircle className="h-5 w-5 text-orange-600" />
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-orange-900 mb-2">Demande de modifications</h3>
-                            <p className="text-orange-800 leading-relaxed">
-                              Décrivez précisément les modifications souhaitées. Plus vous serez détaillé, plus nous pourrons répondre efficacement à vos attentes.
-                            </p>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="modifier-name" className="text-orange-800 font-medium">
-                              Votre nom
-                            </Label>
-                            <Input
-                              id="modifier-name"
-                              type="text"
-                              value={clientName}
-                              onChange={(e) => setClientName(e.target.value)}
-                              className="border-orange-300 focus:border-orange-500 focus:ring-orange-500 rounded-xl"
-                              placeholder="Entrez votre nom complet"
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="modification-comments" className="text-orange-800 font-medium">
-                              Vos commentaires ou corrections
-                            </Label>
-                            <Textarea
-                              id="modification-comments"
-                              value={modificationComments}
-                              onChange={(e) => setModificationComments(e.target.value)}
-                              placeholder="Décrivez les modifications souhaitées en détail..."
-                              className="min-h-[120px] border-orange-300 focus:border-orange-500 focus:ring-orange-500 rounded-xl resize-none"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="flex gap-3">
-                          <Button
-                            onClick={handleRequestModification}
-                            disabled={processing || !modificationComments.trim() || !clientName.trim()}
-                            className="bg-orange-600 hover:bg-orange-700 text-white rounded-xl"
-                          >
-                            {processing ? 'Envoi en cours...' : 'Envoyer les modifications'}
-                          </Button>
-                          <Button
-                            onClick={() => setAction('view')}
-                            variant="outline"
-                            className="rounded-xl"
-                          >
-                            Retour
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Order Information */}
-            <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <Package className="h-5 w-5 text-blue-600" />
-                  Détails de la commande
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                    <Building className="h-4 w-4 text-gray-600" />
-                    <div>
-                      <p className="text-sm text-gray-600">Entreprise</p>
-                      <p className="font-medium text-gray-900">{proofData.client.business_name}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                    <User className="h-4 w-4 text-gray-600" />
-                    <div>
-                      <p className="text-sm text-gray-600">Contact</p>
-                      <p className="font-medium text-gray-900">{proofData.client.contact_name}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                    <Calendar className="h-4 w-4 text-gray-600" />
-                    <div>
-                      <p className="text-sm text-gray-600">Date d'épreuve</p>
-                      <p className="font-medium text-gray-900">
-                        {format(new Date(proofData.proof.created_at), 'dd MMMM yyyy', { locale: fr })}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                    <DollarSign className="h-4 w-4 text-gray-600" />
-                    <div>
-                      <p className="text-sm text-gray-600">Montant total</p>
-                      <p className="font-medium text-gray-900">{formatPrice(proofData.order.total_price)}</p>
-                    </div>
-                  </div>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Product Information */}
-            <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-green-600" />
-                  Produits commandés
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {proofData.submission.items.map((item) => (
-                  <div key={item.id} className="p-4 bg-gray-50 rounded-xl">
-                    <h4 className="font-medium text-gray-900 mb-2">{item.product_name}</h4>
-                    <div className="space-y-1 text-sm text-gray-600">
-                      <p>Quantité: <span className="font-medium">{item.quantity}</span></p>
-                      <p>Prix unitaire: <span className="font-medium">{formatPrice(item.unit_price)}</span></p>
-                      {item.description && (
-                        <p className="text-gray-500 italic">{item.description}</p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            {/* Help Card */}
-            <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <MessageCircle className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <h3 className="font-semibold text-blue-900 mb-2">Besoin d'aide ?</h3>
-                  <p className="text-blue-800 text-sm leading-relaxed mb-4">
-                    Notre équipe est là pour vous accompagner dans le processus de validation.
-                  </p>
-                  <Button variant="outline" className="border-blue-200 text-blue-700 hover:bg-blue-50 rounded-xl">
-                    Nous contacter
-                  </Button>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                  <p>Aucun fichier d'épreuve disponible</p>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Decision Section */}
+          <Card className="border-border shadow-sm overflow-hidden">
+            <CardHeader className="pb-3 sm:pb-4">
+              <CardTitle className={cn(
+                "flex items-center gap-2 sm:gap-3",
+                "text-lg font-semibold",
+                "leading-tight"
+              )}>
+                <div className={cn(
+                  "h-8 w-8 sm:h-10 sm:w-10 rounded-lg",
+                  "bg-primary/10 flex items-center justify-center flex-shrink-0"
+                )}>
+                  <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                </div>
+                <span className="truncate">
+                  Votre Décision
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 sm:px-6 space-y-4">
+              {/* Comments Textarea */}
+              <div className="space-y-2">
+                <label htmlFor="comments" className="text-sm font-medium">
+                  Commentaires *
+                </label>
+                <Textarea
+                  id="comments"
+                  value={comments}
+                  onChange={(e) => setComments(e.target.value)}
+                  placeholder="Veuillez partager vos commentaires sur l'épreuve..."
+                  className="min-h-[100px] resize-none"
+                  maxLength={500}
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>* Champ obligatoire</span>
+                  <span>{comments.length}/500</span>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button
+                  onClick={handleDecline}
+                  disabled={isDeclining || isApproving}
+                  variant="outline"
+                  className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
+                >
+                  {isDeclining ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Refus en cours...
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="h-4 w-4 mr-2" />
+                      Refuser l'épreuve
+                    </>
+                  )}
+                </Button>
+                
+                <Button
+                  onClick={handleApprove}
+                  disabled={isApproving || isDeclining}
+                  className="flex-1 bg-primary hover:bg-primary/90"
+                >
+                  {isApproving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Approbation...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Approuver l'épreuve
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
   );
-};
-
-export default ProofApprovalPage;
+}
