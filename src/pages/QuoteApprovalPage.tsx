@@ -103,7 +103,7 @@ export default function QuoteApprovalPage() {
         )}>
           <Card className={cn(
             "text-center border-border shadow-sm",
-            "animate-scale-in"
+            "animate-scale-in overflow-hidden"
           )}>
             <CardContent className="p-8 space-y-6">
               {decision === 'approved' ? (
@@ -111,13 +111,13 @@ export default function QuoteApprovalPage() {
                   <div className="flex justify-center">
                     <div className={cn(
                       "h-16 w-16 rounded-full",
-                      "bg-positive-light flex items-center justify-center"
+                      "bg-primary/10 flex items-center justify-center"
                     )}>
-                      <CheckCircle className="h-8 w-8 text-positive" />
+                      <CheckCircle className="h-8 w-8 text-primary" />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <h1 className="text-base-750 font-semibold text-positive">
+                    <h1 className="text-base-750 font-semibold text-primary">
                       Devis Approuvé
                     </h1>
                     <p className="text-base-300 text-muted-foreground max-w-md mx-auto">
@@ -487,7 +487,7 @@ export default function QuoteApprovalPage() {
                 className={cn(
                   "w-full sm:flex-1",
                   "min-h-[48px] sm:min-h-[48px]", // Touch-friendly height
-                  "bg-positive hover:bg-positive/90 text-white",
+                  "bg-primary hover:bg-primary/90 text-primary-foreground",
                   "shadow-sm hover:shadow-md transition-all duration-200",
                   "disabled:opacity-50",
                   "text-sm sm:text-base font-medium"
