@@ -58,9 +58,12 @@ export default function SubmissionApprovalPage() {
 
   const fetchSubmission = async () => {
     if (!token) {
+      console.log('Pas de token fourni');
       setLoading(false);
       return;
     }
+
+    console.log('Recherche de la soumission avec le token:', token);
 
     try {
       const { data, error } = await supabase
@@ -78,8 +81,10 @@ export default function SubmissionApprovalPage() {
         .eq('acceptance_token', token)
         .single();
 
+      console.log('Résultat de la requête:', { data, error });
+
       if (error || !data) {
-        console.error('Erreur:', error);
+        console.error('Erreur ou pas de données:', error);
         toast({
           title: "❌ Erreur",
           description: "Soumission introuvable ou lien invalide",
@@ -91,7 +96,7 @@ export default function SubmissionApprovalPage() {
 
       setSubmission(data as any);
     } catch (error) {
-      console.error('Erreur:', error);
+      console.error('Erreur lors de la récupération:', error);
     } finally {
       setLoading(false);
     }
