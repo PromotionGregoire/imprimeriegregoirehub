@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { CheckCircle, XCircle, FileText, Calendar, Euro, Building2, User, Phone, Mail, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import logoGregoire from '@/assets/logo-imprimerie-gregoire.png';
 
 // Mock data - replace with actual API call
 const mockQuoteData = {
@@ -163,7 +164,62 @@ export default function QuoteApprovalPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Mobile-optimized container with safe areas */}
+      {/* Header with Logo - Uber Design Pattern */}
+      <div className={cn(
+        "bg-background/95 backdrop-blur-sm border-b border-border",
+        "sticky top-0 z-50 shadow-sm"
+      )}>
+        <div className={cn(
+          "mx-auto max-w-4xl",
+          "px-4 py-4 sm:px-6 sm:py-6 md:px-8"
+        )}>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            {/* Logo and Branding */}
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className={cn(
+                "flex-shrink-0 p-2 sm:p-3",
+                "bg-primary/10 rounded-xl border border-primary/20",
+                "transition-all duration-200 hover:bg-primary/15"
+              )}>
+                <img 
+                  src={logoGregoire} 
+                  alt="Imprimerie Grégoire" 
+                  className="h-8 w-auto sm:h-10 md:h-12"
+                />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h1 className={cn(
+                  "text-xl sm:text-2xl md:text-3xl font-bold text-foreground",
+                  "leading-tight tracking-tight"
+                )}>
+                  Approbation de Devis
+                </h1>
+                <p className={cn(
+                  "text-xs sm:text-sm text-muted-foreground mt-1",
+                  "leading-relaxed"
+                )}>
+                  Devis #{mockQuoteData.quoteNumber}
+                </p>
+              </div>
+            </div>
+            
+            {/* Status Badge - Mobile responsive */}
+            <div className="flex-shrink-0">
+              <Badge 
+                variant="secondary" 
+                className={cn(
+                  "bg-info-light text-info border-info/20",
+                  "px-3 py-1 text-xs sm:text-sm font-medium"
+                )}
+              >
+                {mockQuoteData.status}
+              </Badge>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Container */}
       <div className={cn(
         "mx-auto max-w-4xl",
         "px-4 py-6 sm:px-6 md:px-8",
@@ -171,17 +227,11 @@ export default function QuoteApprovalPage() {
         "animate-fade-in"
       )}>
         
-        {/* Header Section - Mobile-first typography */}
+        {/* Subtitle Section */}
         <div className="text-center mb-6 space-y-2 px-2">
-          <h1 className={cn(
-            "text-2xl sm:text-base-950 font-semibold text-foreground",
-            "leading-tight" // Better line height for mobile
-          )}>
-            Approbation de Devis
-          </h1>
           <p className={cn(
             "text-sm sm:text-base-300 text-muted-foreground",
-            "max-w-xl mx-auto leading-relaxed px-4"
+            "max-w-xl mx-auto leading-relaxed"
           )}>
             Veuillez examiner attentivement les détails ci-dessous et nous faire part de votre décision
           </p>
