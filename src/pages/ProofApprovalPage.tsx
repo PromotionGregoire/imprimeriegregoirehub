@@ -28,6 +28,10 @@ export default function ProofApprovalPage() {
   const proofHistory = response?.proofHistory || [];
   const orderHistory = response?.orderHistory || [];
 
+  // Debug pour voir la structure des données
+  console.log('Proof data structure:', proofData);
+  console.log('Client data:', proofData?.orders?.submissions?.clients);
+
   const handleApprove = async () => {
     if (!comments.trim()) {
       toast({
