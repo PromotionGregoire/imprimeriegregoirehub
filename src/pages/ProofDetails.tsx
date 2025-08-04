@@ -14,6 +14,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { HistoryTimeline } from '@/components/HistoryTimeline';
 
 const ProofDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -686,28 +687,11 @@ const ProofDetails = () => {
             <CardHeader>
               <CardTitle>Historique des modifications</CardTitle>
               <CardDescription>
-                Historique des versions et actions sur cette épreuve
+                Historique complet des actions pour cette commande
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-start space-x-3 text-sm">
-                  <div className="text-gray-500 whitespace-nowrap">
-                    {format(new Date(proof.created_at), 'dd MMM yyyy - HH:mm', { locale: fr })}
-                  </div>
-                  <div className="text-gray-900">Épreuve créée</div>
-                </div>
-                {proof.updated_at !== proof.created_at && (
-                  <div className="flex items-start space-x-3 text-sm">
-                    <div className="text-gray-500 whitespace-nowrap">
-                      {format(new Date(proof.updated_at), 'dd MMM yyyy - HH:mm', { locale: fr })}
-                    </div>
-                    <div className="text-gray-900">
-                      Dernière modification - Version {proof.version}
-                    </div>
-                  </div>
-                )}
-              </div>
+              <HistoryTimeline orderId={proof.orders.id} />
             </CardContent>
           </Card>
         </TabsContent>

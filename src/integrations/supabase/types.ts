@@ -717,7 +717,38 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      v_order_history_details: {
+        Row: {
+          action_description: string | null
+          action_type: string | null
+          author_name: string | null
+          client_action: boolean | null
+          created_at: string | null
+          employee_full_name: string | null
+          employee_job_title: string | null
+          formatted_date: string | null
+          id: string | null
+          metadata: Json | null
+          order_id: string | null
+          proof_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ordre_historique_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordre_historique_proof_id_fkey"
+            columns: ["proof_id"]
+            isOneToOne: false
+            referencedRelation: "proofs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       add_ordre_history: {
