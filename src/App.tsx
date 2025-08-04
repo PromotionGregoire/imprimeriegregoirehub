@@ -54,6 +54,7 @@ const App = () => {
             <Route path="/approve/quote/:token" element={<QuoteApprovalPage />} />
             <Route path="/quote-demo" element={<QuoteApprovalPage />} />
             <Route path="/quote-demo/:token" element={<QuoteApprovalPage />} />
+            <Route path="/admin/history" element={<AdminHistory />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <DashboardLayout />
