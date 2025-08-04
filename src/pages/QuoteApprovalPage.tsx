@@ -9,6 +9,8 @@ import { CheckCircle, XCircle, FileText, Calendar, Euro, Building2, User, Phone,
 import { cn } from '@/lib/utils';
 import logoGregoire from '@/assets/logo-imprimerie-gregoire.png';
 import { useQuoteByToken } from '@/hooks/useQuoteByToken';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 // Mock data - replace with actual API call
 const mockQuoteData = {
@@ -56,9 +58,10 @@ export default function QuoteApprovalPage() {
   const [isDeclining, setIsDeclining] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [decision, setDecision] = useState<'approved' | 'declined' | null>(null);
+  const { toast } = useToast();
   
   // Récupérer les données réelles si un token est fourni
-  const { data: quoteData, isLoading, error } = useQuoteByToken(token);
+  const { data: quoteData, isLoading, error, refetch } = useQuoteByToken(token);
   
   // Utiliser les données réelles ou mockées
   const currentQuoteData = quoteData || mockQuoteData;
@@ -66,46 +69,112 @@ export default function QuoteApprovalPage() {
 
   const handleApprove = async () => {
     if (!comments.trim()) {
-      alert('Veuillez ajouter un commentaire avant d\'approuver.');
+      toast({
+        title: "Commentaire requis",
+        description: "Veuillez ajouter un commentaire avant d'approuver.",
+        variant: "destructive",
+      });
       return;
     }
     
     setIsApproving(true);
     
-    if (isRealData && token) {
-      // TODO: Implémenter l'appel API réel pour approuver
-      // await approveQuote(token, comments);
-      console.log('Approving quote with token:', token, 'Comments:', comments);
-    }
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsApproving(false);
+    try {
+      if (isRealData && token) {
+        const { data, error } = await supabase.functions.invoke('handle-quote-decision', {
+          body: {
+            token,
+            decision: 'approved',
+            comments,
+            clientName: currentQuoteData.contactPerson,
+            clientEmail: currentQuoteData.email
+          }
+        });
+
+        if (error) {
+          console.error('Erreur lors de l\'approbation:', error);
+          toast({
+            title: "Erreur",
+            description: "Erreur lors de l'approbation du devis",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        console.log('Devis approuvé avec succès:', data);
+        toast({
+          title: "Devis approuvé",
+          description: `Le devis ${data.submissionNumber} a été approuvé avec succès`,
+        });
+      }
+      
       setDecision('approved');
       setIsSubmitted(true);
-    }, 1500);
+    } catch (error) {
+      console.error('Erreur:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur inattendue s'est produite",
+        variant: "destructive",
+      });
+    } finally {
+      setIsApproving(false);
+    }
   };
 
   const handleDecline = async () => {
     if (!comments.trim()) {
-      alert('Veuillez expliquer la raison du refus.');
+      toast({
+        title: "Commentaire requis",
+        description: "Veuillez expliquer la raison du refus.",
+        variant: "destructive",
+      });
       return;
     }
     
     setIsDeclining(true);
     
-    if (isRealData && token) {
-      // TODO: Implémenter l'appel API réel pour refuser
-      // await declineQuote(token, comments);
-      console.log('Declining quote with token:', token, 'Comments:', comments);
-    }
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsDeclining(false);
+    try {
+      if (isRealData && token) {
+        const { data, error } = await supabase.functions.invoke('handle-quote-decision', {
+          body: {
+            token,
+            decision: 'declined',
+            comments,
+            clientName: currentQuoteData.contactPerson,
+            clientEmail: currentQuoteData.email
+          }
+        });
+
+        if (error) {
+          console.error('Erreur lors du refus:', error);
+          toast({
+            title: "Erreur",
+            description: "Erreur lors du refus du devis",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        console.log('Devis refusé avec succès:', data);
+        toast({
+          title: "Devis refusé",
+          description: `Le devis ${data.submissionNumber} a été refusé`,
+        });
+      }
+      
       setDecision('declined');
       setIsSubmitted(true);
-    }, 1500);
+    } catch (error) {
+      console.error('Erreur:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur inattendue s'est produite",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeclining(false);
+    }
   };
 
   const formatPrice = (price: number) => {
