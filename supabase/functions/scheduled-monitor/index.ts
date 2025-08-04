@@ -404,37 +404,98 @@ async function checkStuckOrders(supabase: any, days: number): Promise<MonitorRes
 
 // Envoyer l'email d'alerte
 async function sendAlertEmail(resend: any, issues: MonitorResult[], adminEmail: string) {
+  // Déterminer le niveau d'alerte le plus élevé
+  const hasError = issues.some(i => i.status === 'error');
+  const hasWarning = issues.some(i => i.status === 'warning');
+  
+  // Déterminer les destinataires selon le niveau
+  let recipients: string[] = [];
+  
+  if (hasError) {
+    // Alertes critiques : admin + dev
+    recipients = ['info@promotiongregoire.ca', 'Frank@laboite.agency'];
+  } else if (hasWarning) {
+    // Avertissements : admin seulement
+    recipients = ['info@promotiongregoire.ca'];
+  } else {
+    // Info seulement : pas d'email par défaut
+    return;
+  }
+
+  // Personnaliser le sujet selon le niveau
+  const subjectPrefix = hasError ? '🚨 URGENT' : '⚠️ Attention';
+
   const htmlContent = `
 <!DOCTYPE html>
 <html>
 <head>
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
         .container { max-width: 600px; margin: 0 auto; }
-        .header { background: #dc2626; color: white; padding: 20px; border-radius: 8px 8px 0 0; }
+        .header { 
+            background: ${hasError ? '#dc2626' : '#f59e0b'}; 
+            color: white; 
+            padding: 20px; 
+            border-radius: 8px 8px 0 0; 
+        }
         .content { background: #f3f4f6; padding: 20px; border-radius: 0 0 8px 8px; }
-        .issue { background: white; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #dc2626; }
-        .issue h3 { margin: 0 0 10px 0; color: #dc2626; }
+        .issue { 
+            background: white; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 8px; 
+            border-left: 4px solid ${hasError ? '#dc2626' : '#f59e0b'}; 
+        }
+        .issue h3 { margin: 0 0 10px 0; color: ${hasError ? '#dc2626' : '#f59e0b'}; }
         .details { background: #f9f9f9; padding: 10px; border-radius: 4px; margin-top: 10px; font-size: 12px; }
-        .button { display: inline-block; padding: 12px 24px; background: #3b82f6; color: white; text-decoration: none; border-radius: 6px; margin-top: 20px; }
-        .success { border-left-color: #16a34a; }
-        .warning { border-left-color: #ea580c; }
-        .error { border-left-color: #dc2626; }
+        .button { 
+            display: inline-block; 
+            padding: 12px 24px; 
+            background: #3b82f6; 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 6px; 
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .status-error { color: #dc2626; font-weight: bold; }
+        .status-warning { color: #f59e0b; font-weight: bold; }
+        .urgent-notice {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .footer { 
+            margin-top: 20px; 
+            padding-top: 20px; 
+            border-top: 1px solid #e5e7eb; 
+            font-size: 12px; 
+            color: #6b7280; 
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>⚠️ Action Requise - PromoFlow Hub</h1>
-            <p>Rapport de monitoring du ${new Date().toLocaleString('fr-CA')}</p>
+            <h1 style="margin: 0;">${subjectPrefix} - PromoFlow Hub</h1>
+            <p style="margin: 10px 0 0 0;">Rapport de monitoring du ${new Date().toLocaleString('fr-CA')}</p>
         </div>
         <div class="content">
-            <p>Le système de monitoring a détecté <strong>${issues.length} problème(s)</strong> nécessitant votre attention :</p>
+            ${hasError ? '<div class="urgent-notice">⚠️ Action immédiate requise</div>' : ''}
+            
+            <p style="font-size: 16px;">
+                Le système de monitoring a détecté <strong>${issues.length} problème(s)</strong> 
+                nécessitant votre attention :
+            </p>
             
             ${issues.map(issue => `
-                <div class="issue ${issue.status}">
+                <div class="issue">
                     <h3>${issue.check}</h3>
-                    <p><strong>Statut:</strong> ${issue.status.toUpperCase()}</p>
+                    <p><strong>Statut:</strong> <span class="status-${issue.status}">${issue.status.toUpperCase()}</span></p>
                     <p><strong>Message:</strong> ${issue.message}</p>
                     ${issue.details ? `
                         <div class="details">
@@ -445,15 +506,22 @@ async function sendAlertEmail(resend: any, issues: MonitorResult[], adminEmail: 
                 </div>
             `).join('')}
             
-            <a href="https://lovable.dev/projects/75366268-51f4-4ea3-8dfc-05ac18fb6cac" class="button">
-                🔍 Accéder au Dashboard PromoFlow
-            </a>
+            <div style="text-align: center;">
+                <a href="https://lovable.dev/projects/75366268-51f4-4ea3-8dfc-05ac18fb6cac" class="button">
+                    🔍 Accéder au Dashboard PromoFlow
+                </a>
+            </div>
             
-            <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
-            <p style="color: #666; font-size: 12px;">
-                Cet email a été envoyé automatiquement par le système de monitoring PromoFlow.<br>
-                Pour modifier les paramètres d'alerte, connectez-vous au dashboard d'administration.
-            </p>
+            <div class="footer">
+                <p>Cet email a été envoyé automatiquement par le système de monitoring PromoFlow.</p>
+                <p>
+                    ${hasError 
+                      ? 'Copie envoyée au développeur (Frank@laboite.agency) en raison du niveau critique.'
+                      : 'Email envoyé uniquement à l\'administrateur.'
+                    }
+                </p>
+                <p>Pour modifier les paramètres d'alerte, connectez-vous au dashboard d'administration.</p>
+            </div>
         </div>
     </div>
 </body>
@@ -463,12 +531,12 @@ async function sendAlertEmail(resend: any, issues: MonitorResult[], adminEmail: 
   try {
     const emailResponse = await resend.emails.send({
       from: 'PromoFlow Monitor <noreply@promotiongregoire.com>',
-      to: [adminEmail],
-      subject: `⚠️ PromoFlow Hub - ${issues.length} problème(s) détecté(s)`,
+      to: recipients,
+      subject: `${subjectPrefix} PromoFlow Hub - ${issues.length} problème(s) détecté(s)`,
       html: htmlContent,
     });
 
-    console.log('Email d\'alerte envoyé:', emailResponse);
+    console.log(`Email d'alerte envoyé à: ${recipients.join(', ')}`, emailResponse);
   } catch (error) {
     console.error('Erreur envoi email d\'alerte:', error);
   }

@@ -9,7 +9,8 @@ import {
   Settings,
   Clock,
   Filter,
-  Play
+  Play,
+  Mail
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -241,6 +242,41 @@ export default function AdminMonitoring() {
               )}
             </div>
           ))}
+        </div>
+      </Card>
+
+      {/* Section Destinataires des Alertes */}
+      <Card className="p-6">
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Mail className="h-5 w-5" />
+          Destinataires des Alertes
+        </h2>
+        
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Email Admin */}
+            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <h3 className="font-medium text-blue-900 mb-1">Administrateur</h3>
+              <p className="text-sm text-blue-700">Reçoit toutes les alertes</p>
+              <p className="font-mono text-sm mt-2">info@promotiongregoire.ca</p>
+            </div>
+            
+            {/* Email Dev */}
+            <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+              <h3 className="font-medium text-red-900 mb-1">Développeur</h3>
+              <p className="text-sm text-red-700">Reçoit uniquement les alertes critiques</p>
+              <p className="font-mono text-sm mt-2">Frank@laboite.agency</p>
+            </div>
+          </div>
+          
+          <div className="text-sm text-gray-600 mt-4 bg-gray-50 p-4 rounded-lg">
+            <h4 className="font-medium mb-2">Règles d'envoi :</h4>
+            <div className="space-y-1">
+              <p>🚨 <strong>Alertes critiques (Erreurs)</strong> : Admin + Développeur</p>
+              <p>⚠️ <strong>Avertissements</strong> : Admin seulement</p>
+              <p>ℹ️ <strong>Informations</strong> : Pas d'email (logs seulement)</p>
+            </div>
+          </div>
         </div>
       </Card>
 
