@@ -28,6 +28,7 @@ import AdminMonitoring from "./pages/AdminMonitoring";
 import ProofApproval from "./pages/ProofApproval";
 import ProofApprovalPage from "./pages/ProofApprovalPage";
 import SubmissionApprovalPage from "./pages/SubmissionApprovalPage";
+import QuoteApprovalPage from "./pages/QuoteApprovalPage";
 import ForcePasswordChange from "./pages/ForcePasswordChange";
 import DashboardLayout from "./components/DashboardLayout";
 
@@ -50,6 +51,7 @@ const App = () => {
             <Route path="/epreuve/:token" element={<ProofApproval />} />
             <Route path="/approve/proof/:token" element={<ProofApprovalPage />} />
             <Route path="/approve/submission/:token" element={<SubmissionApprovalPage />} />
+            <Route path="/approve/quote/:token" element={<QuoteApprovalPage />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <DashboardLayout />
