@@ -221,8 +221,9 @@ const ProofDetails = () => {
 
   // Helper function to determine if client approval section should be visible
   const shouldShowClientApprovalSection = () => {
+    // Show if proof has been sent to client (has validation_token) OR has specific statuses
     const validStatuses = ['Envoyée au client', 'Modification demandée', 'Approuvée'];
-    return validStatuses.includes(proof.status);
+    return proof.validation_token || validStatuses.includes(proof.status);
   };
 
   // Helper function to get the approval URL
