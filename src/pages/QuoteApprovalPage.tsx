@@ -240,72 +240,7 @@ export default function QuoteApprovalPage() {
         {/* Quote Details Grid - Mobile-optimized spacing */}
         <div className="space-y-4 sm:space-y-6">
           
-          {/* Quote Information Card - Mobile-first layout */}
-          <Card className="border-border shadow-sm overflow-hidden">
-            <CardHeader className="pb-3 sm:pb-4">
-              <CardTitle className={cn(
-                "flex items-center gap-2 sm:gap-3",
-                "text-lg sm:text-base-650 font-semibold",
-                "leading-tight"
-              )}>
-                <div className={cn(
-                  "h-8 w-8 sm:h-10 sm:w-10 rounded-lg",
-                  "bg-primary/10 flex items-center justify-center flex-shrink-0"
-                )}>
-                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                </div>
-                <span className="truncate">Informations du Devis</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-4 sm:px-6">
-              {/* Mobile-stacked layout */}
-              <div className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm text-muted-foreground flex-shrink-0">Numéro :</span>
-                    <span className="text-sm font-medium text-right truncate">{mockQuoteData.quoteNumber}</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm text-muted-foreground flex items-center gap-1 flex-shrink-0">
-                      <Calendar className="h-3 w-3" />
-                      Créé le :
-                    </span>
-                    <span className="text-sm font-medium text-right">{mockQuoteData.createdDate}</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm text-muted-foreground flex items-center gap-1 flex-shrink-0">
-                      <AlertCircle className="h-3 w-3" />
-                      Valide jusqu'au :
-                    </span>
-                    <Badge variant="outline" className="text-xs text-warning border-warning">
-                      {mockQuoteData.validUntil}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm text-muted-foreground flex-shrink-0">Statut :</span>
-                    <Badge variant="secondary" className="text-xs bg-info-light text-info">
-                      {mockQuoteData.status}
-                    </Badge>
-                  </div>
-                  {/* Prominent total on mobile */}
-                  <div className={cn(
-                    "flex items-center justify-between gap-2 pt-2",
-                    "border-t border-border"
-                  )}>
-                    <span className="text-base font-medium flex items-center gap-1">
-                      <Euro className="h-4 w-4" />
-                      Total :
-                    </span>
-                    <span className="text-lg sm:text-base-550 font-bold text-primary">
-                      {formatPrice(mockQuoteData.total)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Client Information Card - Mobile-optimized */}
+          {/* Client Information Card - First priority (Uber UX pattern) */}
           <Card className="border-border shadow-sm overflow-hidden">
             <CardHeader className="pb-3 sm:pb-4">
               <CardTitle className={cn(
@@ -319,44 +254,183 @@ export default function QuoteApprovalPage() {
                 )}>
                   <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </div>
-                <span className="truncate">Informations Client</span>
+                <span className={cn(
+                  "truncate",
+                  "hyphens-none" // Prevent hyphenation
+                )}>
+                  Informations Client
+                </span>
               </CardTitle>
             </CardHeader>
             <CardContent className="px-4 sm:px-6">
               <div className="space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                  <span className="text-sm text-muted-foreground flex items-center gap-1 flex-shrink-0">
+                <div className="flex items-start justify-between gap-3">
+                  <span className={cn(
+                    "text-sm text-muted-foreground flex items-center gap-1 flex-shrink-0",
+                    "hyphens-none whitespace-nowrap"
+                  )}>
                     <Building2 className="h-3 w-3" />
                     Entreprise :
                   </span>
-                  <span className="text-sm font-medium text-right leading-tight">
+                  <span className={cn(
+                    "text-sm font-medium text-right leading-tight",
+                    "hyphens-none break-words max-w-[200px] sm:max-w-none"
+                  )}>
                     {mockQuoteData.clientName}
                   </span>
                 </div>
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm text-muted-foreground flex items-center gap-1 flex-shrink-0">
+                <div className="flex items-center justify-between gap-3">
+                  <span className={cn(
+                    "text-sm text-muted-foreground flex items-center gap-1 flex-shrink-0",
+                    "hyphens-none whitespace-nowrap"
+                  )}>
                     <User className="h-3 w-3" />
                     Contact :
                   </span>
-                  <span className="text-sm font-medium text-right">{mockQuoteData.contactPerson}</span>
+                  <span className={cn(
+                    "text-sm font-medium text-right",
+                    "hyphens-none break-words"
+                  )}>
+                    {mockQuoteData.contactPerson}
+                  </span>
                 </div>
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm text-muted-foreground flex items-center gap-1 flex-shrink-0">
+                <div className="flex items-start justify-between gap-3">
+                  <span className={cn(
+                    "text-sm text-muted-foreground flex items-center gap-1 flex-shrink-0",
+                    "hyphens-none whitespace-nowrap"
+                  )}>
                     <Mail className="h-3 w-3" />
                     Email :
                   </span>
-                  <span className="text-sm font-medium text-right break-all">
+                  <span className={cn(
+                    "text-sm font-medium text-right leading-tight",
+                    "hyphens-none break-all max-w-[180px] sm:max-w-none"
+                  )}>
                     {mockQuoteData.email}
                   </span>
                 </div>
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm text-muted-foreground flex items-center gap-1 flex-shrink-0">
+                <div className="flex items-center justify-between gap-3">
+                  <span className={cn(
+                    "text-sm text-muted-foreground flex items-center gap-1 flex-shrink-0",
+                    "hyphens-none whitespace-nowrap"
+                  )}>
                     <Phone className="h-3 w-3" />
                     Téléphone :
                   </span>
-                  <span className="text-sm font-medium text-right font-mono">
+                  <span className={cn(
+                    "text-sm font-medium text-right font-mono",
+                    "hyphens-none whitespace-nowrap"
+                  )}>
                     {mockQuoteData.phone}
                   </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Quote Information Card - Second priority */}
+          <Card className="border-border shadow-sm overflow-hidden">
+            <CardHeader className="pb-3 sm:pb-4">
+              <CardTitle className={cn(
+                "flex items-center gap-2 sm:gap-3",
+                "text-lg sm:text-base-650 font-semibold",
+                "leading-tight"
+              )}>
+                <div className={cn(
+                  "h-8 w-8 sm:h-10 sm:w-10 rounded-lg",
+                  "bg-primary/10 flex items-center justify-center flex-shrink-0"
+                )}>
+                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                </div>
+                <span className={cn(
+                  "truncate",
+                  "hyphens-none" // Prevent hyphenation
+                )}>
+                  Informations du Devis
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 sm:px-6">
+              {/* Mobile-stacked layout */}
+              <div className="space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={cn(
+                      "text-sm text-muted-foreground flex-shrink-0",
+                      "hyphens-none whitespace-nowrap"
+                    )}>
+                      Numéro :
+                    </span>
+                    <span className={cn(
+                      "text-sm font-medium text-right",
+                      "hyphens-none font-mono"
+                    )}>
+                      {mockQuoteData.quoteNumber}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={cn(
+                      "text-sm text-muted-foreground flex items-center gap-1 flex-shrink-0",
+                      "hyphens-none whitespace-nowrap"
+                    )}>
+                      <Calendar className="h-3 w-3" />
+                      Créé le :
+                    </span>
+                    <span className={cn(
+                      "text-sm font-medium text-right",
+                      "hyphens-none whitespace-nowrap"
+                    )}>
+                      {mockQuoteData.createdDate}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={cn(
+                      "text-sm text-muted-foreground flex items-center gap-1 flex-shrink-0",
+                      "hyphens-none whitespace-nowrap"
+                    )}>
+                      <AlertCircle className="h-3 w-3" />
+                      Valide jusqu'au :
+                    </span>
+                    <Badge variant="outline" className={cn(
+                      "text-xs text-warning border-warning",
+                      "hyphens-none whitespace-nowrap"
+                    )}>
+                      {mockQuoteData.validUntil}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={cn(
+                      "text-sm text-muted-foreground flex-shrink-0",
+                      "hyphens-none whitespace-nowrap"
+                    )}>
+                      Statut :
+                    </span>
+                    <Badge variant="secondary" className={cn(
+                      "text-xs bg-info-light text-info",
+                      "hyphens-none whitespace-nowrap"
+                    )}>
+                      {mockQuoteData.status}
+                    </Badge>
+                  </div>
+                  {/* Prominent total on mobile */}
+                  <div className={cn(
+                    "flex items-center justify-between gap-2 pt-2",
+                    "border-t border-border"
+                  )}>
+                    <span className={cn(
+                      "text-base font-medium flex items-center gap-1",
+                      "hyphens-none whitespace-nowrap"
+                    )}>
+                      <Euro className="h-4 w-4" />
+                      Total :
+                    </span>
+                    <span className={cn(
+                      "text-lg sm:text-base-550 font-bold text-primary",
+                      "hyphens-none whitespace-nowrap font-mono"
+                    )}>
+                      {formatPrice(mockQuoteData.total)}
+                    </span>
+                  </div>
                 </div>
               </div>
             </CardContent>
