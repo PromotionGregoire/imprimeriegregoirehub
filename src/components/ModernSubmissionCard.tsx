@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,9 +13,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { SubmissionStatusTimeline } from './SubmissionStatusTimeline';
 import ModernToggle from './ModernToggle';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { useQueryClient } from '@tanstack/react-query';
+import { useProofToggle } from '@/hooks/useProofToggle';
 
 interface ModernSubmissionCardProps {
   submission: any;
@@ -23,10 +21,8 @@ interface ModernSubmissionCardProps {
 }
 
 const ModernSubmissionCard = ({ submission, onClick }: ModernSubmissionCardProps) => {
-  const [accepting, setAccepting] = useState(false);
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
+  const proofToggle = useProofToggle(submission.id);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-CA', {
@@ -51,38 +47,7 @@ const ModernSubmissionCard = ({ submission, onClick }: ModernSubmissionCardProps
     
     if (!confirmed) return;
     
-    try {
-      setAccepting(true);
-      
-      // Appeler l'edge function
-      const { data, error } = await supabase.functions.invoke('accept-submission', {
-        body: { submissionId: submission.id }
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "✅ Soumission acceptée",
-        description: `${data.message}. L'épreuve a été créée automatiquement.`,
-      });
-
-      // Recharger les données
-      await queryClient.invalidateQueries({ queryKey: ['submission', submission.id] });
-      
-      // Naviguer vers la page de l'épreuve créée
-      if (data.proof?.id) {
-        navigate(`/dashboard/proofs/${data.proof.id}`);
-      }
-    } catch (error) {
-      console.error('Erreur lors de l\'acceptation de la soumission:', error);
-      toast({
-        title: "❌ Erreur",
-        description: error.message || "Impossible d'accepter la soumission",
-        variant: "destructive",
-      });
-    } finally {
-      setAccepting(false);
-    }
+    proofToggle.mutate({ isAccepted: true });
   };
 
   return (
@@ -152,7 +117,7 @@ const ModernSubmissionCard = ({ submission, onClick }: ModernSubmissionCardProps
             label="Accepter la Soumission"
             checked={submission.status === 'Acceptée'}
             onCheckedChange={handleAcceptSubmission}
-            disabled={submission.status === 'Acceptée' || accepting}
+            disabled={submission.status === 'Acceptée' || proofToggle.isPending}
           />
         </div>
 
