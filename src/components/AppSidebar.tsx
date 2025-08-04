@@ -69,6 +69,7 @@ export function AppSidebar() {
   const adminItems = currentUserProfile?.role === 'ADMIN' ? [
     { title: "Gestion des Employés", url: "/dashboard/admin/employees", icon: UserCog },
     { title: "Historique des Actions", url: "/dashboard/admin/history", icon: Activity },
+    { title: "Monitoring", url: "/dashboard/admin/monitoring", icon: Activity },
   ] : [];
 
   const handleSignOut = async () => {
