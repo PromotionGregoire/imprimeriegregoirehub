@@ -41,12 +41,12 @@ const handler = async (req: Request): Promise<Response> => {
       return acc;
     }, {} as Record<string, string>) || {};
 
-    const ADMIN_EMAIL = configMap.admin_email || 'Frank@laboite.agency';
+    const ADMIN_EMAIL = configMap.admin_email || 'info@promotiongregoire.ca';
+    const DEVELOPER_EMAIL = configMap.developer_email || 'Frank@laboite.agency';
     const PROOF_PENDING_HOURS = parseInt(configMap.proof_pending_hours || '48');
     const SUBMISSION_DRAFT_DAYS = parseInt(configMap.submission_draft_days || '7');
     const STORAGE_WARNING_PERCENT = parseInt(configMap.storage_warning_percent || '80');
     const STORAGE_CRITICAL_PERCENT = parseInt(configMap.storage_critical_percent || '90');
-    const EMAIL_ERROR_THRESHOLD = parseInt(configMap.email_error_threshold || '10');
     const ORDER_STUCK_DAYS = parseInt(configMap.order_stuck_days || '30');
 
     // 1. Vérifier les épreuves en attente depuis plus de X heures
@@ -76,7 +76,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Envoyer un email si des actions sont requises
     const criticalIssues = results.filter(r => r.requiresAction);
     if (criticalIssues.length > 0) {
-      await sendAlertEmail(resend, criticalIssues, ADMIN_EMAIL);
+      await sendAlertEmail(resend, criticalIssues, ADMIN_EMAIL, DEVELOPER_EMAIL);
     }
 
     // Logger les résultats
@@ -403,37 +403,37 @@ async function checkStuckOrders(supabase: any, days: number): Promise<MonitorRes
 }
 
 // Envoyer l'email d'alerte
-async function sendAlertEmail(resend: any, issues: MonitorResult[], adminEmail: string) {
-  // Déterminer le niveau d'alerte le plus élevé
-  const hasError = issues.some(i => i.status === 'error');
-  const hasWarning = issues.some(i => i.status === 'warning');
+async function sendAlertEmail(resend: any, issues: MonitorResult[], adminEmail: string, developerEmail: string) {
+  // Séparer les problèmes critiques et les avertissements
+  const criticalIssues = issues.filter(i => i.status === 'error');
+  const warningIssues = issues.filter(i => i.status === 'warning');
+  const hasCritical = criticalIssues.length > 0;
   
   // Déterminer les destinataires selon le niveau
   let recipients: string[] = [];
   
-  if (hasError) {
-    // Alertes critiques : admin + dev
-    recipients = ['info@promotiongregoire.ca', 'Frank@laboite.agency'];
-  } else if (hasWarning) {
-    // Avertissements : admin seulement
-    recipients = ['info@promotiongregoire.ca'];
+  if (hasCritical) {
+    // Alertes critiques : envoyer à l'admin ET au développeur
+    recipients = [adminEmail, developerEmail];
+    console.log('Alerte CRITIQUE - Envoi à admin + dev');
   } else {
-    // Info seulement : pas d'email par défaut
-    return;
+    // Avertissements seulement : envoyer uniquement à l'admin
+    recipients = [adminEmail];
+    console.log('Avertissement - Envoi à admin seulement');
   }
 
-  // Personnaliser le sujet selon le niveau
-  const subjectPrefix = hasError ? '🚨 URGENT' : '⚠️ Attention';
-
+  const subjectPrefix = hasCritical ? '🚨 URGENT' : '⚠️ Attention';
+  const headerColor = hasCritical ? '#dc2626' : '#f59e0b';
+  
   const htmlContent = `
 <!DOCTYPE html>
 <html>
 <head>
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
-        .container { max-width: 600px; margin: 0 auto; }
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
         .header { 
-            background: ${hasError ? '#dc2626' : '#f59e0b'}; 
+            background: ${headerColor}; 
             color: white; 
             padding: 20px; 
             border-radius: 8px 8px 0 0; 
@@ -444,10 +444,11 @@ async function sendAlertEmail(resend: any, issues: MonitorResult[], adminEmail: 
             padding: 15px; 
             margin: 10px 0; 
             border-radius: 8px; 
-            border-left: 4px solid ${hasError ? '#dc2626' : '#f59e0b'}; 
+            border-left: 4px solid ${headerColor}; 
         }
-        .issue h3 { margin: 0 0 10px 0; color: ${hasError ? '#dc2626' : '#f59e0b'}; }
-        .details { background: #f9f9f9; padding: 10px; border-radius: 4px; margin-top: 10px; font-size: 12px; }
+        .issue h3 { margin: 0 0 10px 0; color: ${headerColor}; }
+        .status-error { color: #dc2626; font-weight: bold; }
+        .status-warning { color: #f59e0b; font-weight: bold; }
         .button { 
             display: inline-block; 
             padding: 12px 24px; 
@@ -458,8 +459,13 @@ async function sendAlertEmail(resend: any, issues: MonitorResult[], adminEmail: 
             margin-top: 20px;
             font-weight: bold;
         }
-        .status-error { color: #dc2626; font-weight: bold; }
-        .status-warning { color: #f59e0b; font-weight: bold; }
+        .footer { 
+            margin-top: 20px; 
+            padding-top: 20px; 
+            border-top: 1px solid #e5e7eb; 
+            font-size: 12px; 
+            color: #6b7280; 
+        }
         .urgent-notice {
             background: #fee2e2;
             border: 1px solid #fecaca;
@@ -469,58 +475,75 @@ async function sendAlertEmail(resend: any, issues: MonitorResult[], adminEmail: 
             margin: 10px 0;
             font-weight: bold;
         }
-        .footer { 
-            margin-top: 20px; 
-            padding-top: 20px; 
-            border-top: 1px solid #e5e7eb; 
-            font-size: 12px; 
-            color: #6b7280; 
+        .section-title {
+            color: ${headerColor};
+            border-bottom: 2px solid ${headerColor};
+            padding-bottom: 5px;
+            margin: 20px 0 10px 0;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1 style="margin: 0;">${subjectPrefix} - PromoFlow Hub</h1>
-            <p style="margin: 10px 0 0 0;">Rapport de monitoring du ${new Date().toLocaleString('fr-CA')}</p>
+            <h1 style="margin: 0;">${subjectPrefix} - PromoFlow</h1>
+            <p style="margin: 10px 0 0 0;">${new Date().toLocaleString('fr-CA')}</p>
         </div>
         <div class="content">
-            ${hasError ? '<div class="urgent-notice">⚠️ Action immédiate requise</div>' : ''}
+            ${hasCritical ? '<div class="urgent-notice">⚠️ Des problèmes critiques nécessitent une action immédiate</div>' : ''}
             
             <p style="font-size: 16px;">
-                Le système de monitoring a détecté <strong>${issues.length} problème(s)</strong> 
-                nécessitant votre attention :
+                Le système de monitoring a détecté <strong>${issues.length} problème(s)</strong> :
             </p>
             
-            ${issues.map(issue => `
+            ${criticalIssues.length > 0 ? '<h2 class="section-title">🚨 Problèmes Critiques</h2>' : ''}
+            ${criticalIssues.map(issue => `
                 <div class="issue">
                     <h3>${issue.check}</h3>
-                    <p><strong>Statut:</strong> <span class="status-${issue.status}">${issue.status.toUpperCase()}</span></p>
+                    <p><strong>Statut:</strong> <span class="status-error">ERREUR</span></p>
                     <p><strong>Message:</strong> ${issue.message}</p>
                     ${issue.details ? `
-                        <div class="details">
-                            <strong>Détails:</strong><br>
-                            <pre>${JSON.stringify(issue.details, null, 2)}</pre>
-                        </div>
+                        <details style="margin-top: 10px;">
+                            <summary style="cursor: pointer; color: #3b82f6;">Voir les détails</summary>
+                            <pre style="background: #f3f4f6; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px;">${JSON.stringify(issue.details, null, 2)}</pre>
+                        </details>
+                    ` : ''}
+                </div>
+            `).join('')}
+            
+            ${warningIssues.length > 0 ? '<h2 class="section-title">⚠️ Avertissements</h2>' : ''}
+            ${warningIssues.map(issue => `
+                <div class="issue">
+                    <h3>${issue.check}</h3>
+                    <p><strong>Statut:</strong> <span class="status-warning">AVERTISSEMENT</span></p>
+                    <p><strong>Message:</strong> ${issue.message}</p>
+                    ${issue.details ? `
+                        <details style="margin-top: 10px;">
+                            <summary style="cursor: pointer; color: #3b82f6;">Voir les détails</summary>
+                            <pre style="background: #f3f4f6; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px;">${JSON.stringify(issue.details, null, 2)}</pre>
+                        </details>
                     ` : ''}
                 </div>
             `).join('')}
             
             <div style="text-align: center;">
-                <a href="https://lovable.dev/projects/75366268-51f4-4ea3-8dfc-05ac18fb6cac" class="button">
-                    🔍 Accéder au Dashboard PromoFlow
+                <a href="https://hub.promotiongregoire.com/dashboard/admin/monitoring" class="button">
+                    Accéder au Dashboard de Monitoring
                 </a>
             </div>
             
             <div class="footer">
-                <p>Cet email a été envoyé automatiquement par le système de monitoring PromoFlow.</p>
-                <p>
-                    ${hasError 
-                      ? 'Copie envoyée au développeur (Frank@laboite.agency) en raison du niveau critique.'
-                      : 'Email envoyé uniquement à l\'administrateur.'
+                <p><strong>Destinataires de cet email :</strong></p>
+                <ul style="margin: 5px 0;">
+                    ${recipients.map(email => `<li>${email}</li>`).join('')}
+                </ul>
+                <p style="margin-top: 10px;">
+                    ${hasCritical 
+                      ? '🚨 Le développeur a été inclus car des erreurs critiques ont été détectées.'
+                      : '⚠️ Avertissements seulement - Email envoyé uniquement à l\'administrateur.'
                     }
                 </p>
-                <p>Pour modifier les paramètres d'alerte, connectez-vous au dashboard d'administration.</p>
+                <p>Pour modifier les paramètres, accédez à la configuration dans l'interface d'administration.</p>
             </div>
         </div>
     </div>
@@ -529,16 +552,27 @@ async function sendAlertEmail(resend: any, issues: MonitorResult[], adminEmail: 
   `;
 
   try {
-    const emailResponse = await resend.emails.send({
-      from: 'PromoFlow Monitor <noreply@promotiongregoire.com>',
-      to: recipients,
-      subject: `${subjectPrefix} PromoFlow Hub - ${issues.length} problème(s) détecté(s)`,
-      html: htmlContent,
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${Deno.env.get('RESEND_API_KEY')}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'PromoFlow Monitor <noreply@promotiongregoire.com>',
+        to: recipients,
+        subject: `${subjectPrefix} PromoFlow - ${criticalIssues.length} critique(s), ${warningIssues.length} avertissement(s)`,
+        html: htmlContent,
+      }),
     });
 
-    console.log(`Email d'alerte envoyé à: ${recipients.join(', ')}`, emailResponse);
+    if (!response.ok) {
+      console.error('Failed to send alert email:', await response.text());
+    } else {
+      console.log(`Email envoyé avec succès à : ${recipients.join(', ')}`);
+    }
   } catch (error) {
-    console.error('Erreur envoi email d\'alerte:', error);
+    console.error('Error sending alert email:', error);
   }
 }
 

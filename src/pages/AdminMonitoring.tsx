@@ -10,7 +10,9 @@ import {
   Clock,
   Filter,
   Play,
-  Mail
+  Mail,
+  User,
+  Code
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -256,26 +258,38 @@ export default function AdminMonitoring() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Email Admin */}
             <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <h3 className="font-medium text-blue-900 mb-1">Administrateur</h3>
-              <p className="text-sm text-blue-700">Reçoit toutes les alertes</p>
-              <p className="font-mono text-sm mt-2">info@promotiongregoire.ca</p>
+              <div className="flex items-center gap-2 mb-2">
+                <User className="h-4 w-4 text-blue-600" />
+                <h3 className="font-medium text-blue-900">Administrateur</h3>
+              </div>
+              <p className="text-sm text-blue-700 mb-2">Reçoit toutes les alertes (erreurs + avertissements)</p>
+              <p className="font-mono text-sm bg-white px-2 py-1 rounded">
+                {config.find(c => c.key === 'admin_email')?.value || 'info@promotiongregoire.ca'}
+              </p>
             </div>
             
             {/* Email Dev */}
             <div className="p-4 bg-red-50 rounded-lg border border-red-200">
-              <h3 className="font-medium text-red-900 mb-1">Développeur</h3>
-              <p className="text-sm text-red-700">Reçoit uniquement les alertes critiques</p>
-              <p className="font-mono text-sm mt-2">Frank@laboite.agency</p>
+              <div className="flex items-center gap-2 mb-2">
+                <Code className="h-4 w-4 text-red-600" />
+                <h3 className="font-medium text-red-900">Développeur</h3>
+              </div>
+              <p className="text-sm text-red-700 mb-2">Reçoit uniquement les alertes critiques (erreurs)</p>
+              <p className="font-mono text-sm bg-white px-2 py-1 rounded">
+                {config.find(c => c.key === 'developer_email')?.value || 'Frank@laboite.agency'}
+              </p>
             </div>
           </div>
           
-          <div className="text-sm text-gray-600 mt-4 bg-gray-50 p-4 rounded-lg">
-            <h4 className="font-medium mb-2">Règles d'envoi :</h4>
-            <div className="space-y-1">
-              <p>🚨 <strong>Alertes critiques (Erreurs)</strong> : Admin + Développeur</p>
-              <p>⚠️ <strong>Avertissements</strong> : Admin seulement</p>
-              <p>ℹ️ <strong>Informations</strong> : Pas d'email (logs seulement)</p>
-            </div>
+          <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+            <p className="text-sm text-gray-600">
+              <span className="font-medium">Logique d'envoi :</span>
+            </p>
+            <ul className="text-sm text-gray-600 mt-2 space-y-1">
+              <li>• 🚨 <strong>Erreurs critiques</strong> → Admin + Développeur</li>
+              <li>• ⚠️ <strong>Avertissements</strong> → Admin seulement</li>
+              <li>• ℹ️ <strong>Informations</strong> → Logs seulement (pas d'email)</li>
+            </ul>
           </div>
         </div>
       </Card>
