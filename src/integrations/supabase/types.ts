@@ -180,6 +180,54 @@ export type Database = {
           },
         ]
       }
+      epreuve_commentaires: {
+        Row: {
+          client_name: string | null
+          commentaire: string
+          created_at: string
+          created_by_client: boolean | null
+          id: string
+          is_modification_request: boolean | null
+          order_id: string
+          proof_id: string
+        }
+        Insert: {
+          client_name?: string | null
+          commentaire: string
+          created_at?: string
+          created_by_client?: boolean | null
+          id?: string
+          is_modification_request?: boolean | null
+          order_id: string
+          proof_id: string
+        }
+        Update: {
+          client_name?: string | null
+          commentaire?: string
+          created_at?: string
+          created_by_client?: boolean | null
+          id?: string
+          is_modification_request?: boolean | null
+          order_id?: string
+          proof_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "epreuve_commentaires_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "epreuve_commentaires_proof_id_fkey"
+            columns: ["proof_id"]
+            isOneToOne: false
+            referencedRelation: "proofs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           client_id: string
@@ -224,6 +272,57 @@ export type Database = {
             columns: ["submission_id"]
             isOneToOne: false
             referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ordre_historique: {
+        Row: {
+          action_description: string
+          action_type: string
+          client_action: boolean | null
+          created_at: string
+          created_by: string | null
+          id: string
+          metadata: Json | null
+          order_id: string
+          proof_id: string | null
+        }
+        Insert: {
+          action_description: string
+          action_type: string
+          client_action?: boolean | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          metadata?: Json | null
+          order_id: string
+          proof_id?: string | null
+        }
+        Update: {
+          action_description?: string
+          action_type?: string
+          client_action?: boolean | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          metadata?: Json | null
+          order_id?: string
+          proof_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ordre_historique_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordre_historique_proof_id_fkey"
+            columns: ["proof_id"]
+            isOneToOne: false
+            referencedRelation: "proofs"
             referencedColumns: ["id"]
           },
         ]
@@ -398,9 +497,11 @@ export type Database = {
           created_at: string
           file_url: string | null
           id: string
+          is_active: boolean | null
           order_id: string
           status: string
           updated_at: string
+          validation_token: string | null
           version: number
         }
         Insert: {
@@ -411,9 +512,11 @@ export type Database = {
           created_at?: string
           file_url?: string | null
           id?: string
+          is_active?: boolean | null
           order_id: string
           status?: string
           updated_at?: string
+          validation_token?: string | null
           version?: number
         }
         Update: {
@@ -424,9 +527,11 @@ export type Database = {
           created_at?: string
           file_url?: string | null
           id?: string
+          is_active?: boolean | null
           order_id?: string
           status?: string
           updated_at?: string
+          validation_token?: string | null
           version?: number
         }
         Relationships: [
@@ -615,6 +720,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_ordre_history: {
+        Args: {
+          p_order_id: string
+          p_action_type: string
+          p_action_description: string
+          p_metadata?: Json
+          p_proof_id?: string
+          p_client_action?: boolean
+        }
+        Returns: string
+      }
       generate_client_number: {
         Args: Record<PropertyKey, never>
         Returns: string
