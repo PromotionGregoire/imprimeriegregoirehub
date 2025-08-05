@@ -38,7 +38,7 @@ interface SubmissionData {
     business_name: string;
     contact_name: string;
     email: string;
-    phone: string;
+    phone_number: string;
   };
   submission_items: Array<{
     description: string;
@@ -93,7 +93,7 @@ export default function SubmissionApprovalPage() {
             business_name,
             contact_name,
             email,
-            phone
+            phone_number
           ),
           submission_items (
             description,
@@ -343,7 +343,7 @@ export default function SubmissionApprovalPage() {
                 </div>
                 <div>
                   <span className="text-muted-foreground">Téléphone:</span>
-                  <p className="font-medium">{submission.clients.phone}</p>
+                  <p className="font-medium">{submission.clients.phone_number}</p>
                 </div>
               </div>
             </div>
@@ -453,8 +453,8 @@ export default function SubmissionApprovalPage() {
                   {submission.clients.email}
                 </a>
                 <span>•</span>
-                <a href={`tel:${submission.clients.phone}`} className="text-primary hover:underline">
-                  {submission.clients.phone}
+                <a href={`tel:${submission.clients.phone_number}`} className="text-primary hover:underline">
+                  {submission.clients.phone_number}
                 </a>
               </div>
             </div>
