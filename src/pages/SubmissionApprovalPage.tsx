@@ -71,51 +71,13 @@ export default function SubmissionApprovalPage() {
     console.log('Recherche de la soumission avec le token:', token);
 
     try {
-      // D'abord, essayer une requête simple
-      const { data: simpleData, error: simpleError } = await supabase
-        .from('submissions')
-        .select('*')
-        .eq('acceptance_token', token)
-        .single();
-
-      console.log('Requête simple:', { simpleData, simpleError });
-
-      if (simpleError) {
-        console.error('Erreur requête simple:', simpleError);
-      }
-
-      // Ensuite, essayer avec les relations
-      const { data, error } = await supabase
-        .from('submissions')
-        .select(`
-          *,
-          clients!inner (
-            business_name,
-            contact_name,
-            email,
-            phone_number
-          ),
-          submission_items (
-            description,
-            quantity,
-            unit_price,
-            total_price
-          )
-        `)
-        .eq('acceptance_token', token)
-        .single();
-
-      console.log('Requête complète:', { data, error });
+      // Use edge function for reliable public access
+      const { data, error } = await supabase.functions.invoke('get-submission-by-token', {
+        body: { token }
+      });
 
       if (error) {
-        console.error('Erreur détaillée:', error);
-        
-        // Si erreur de permissions, essayer sans authentification
-        if (error.code === 'PGRST301') {
-          console.log('Tentative sans authentification...');
-          // La requête devrait déjà être sans auth, mais vérifier
-        }
-        
+        console.error('Erreur edge function:', error);
         toast({
           title: "❌ Erreur",
           description: error.message || "Soumission introuvable ou lien invalide",
@@ -136,7 +98,6 @@ export default function SubmissionApprovalPage() {
         return;
       }
 
-      // Vérifier la structure des données
       console.log('Données reçues:', data);
       
       // S'assurer que valid_until existe, sinon le calculer
