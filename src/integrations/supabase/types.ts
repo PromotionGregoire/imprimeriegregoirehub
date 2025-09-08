@@ -1544,6 +1544,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      mark_invoices_overdue: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       test_history_triggers: {
         Args: Record<PropertyKey, never>
         Returns: {
