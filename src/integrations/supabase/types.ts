@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -869,21 +869,21 @@ export type Database = {
       add_ordre_history: {
         Args:
           | {
-              p_order_id: string
-              p_action_type: string
               p_action_description: string
-              p_metadata?: Json
-              p_proof_id?: string
-              p_client_action?: boolean
-            }
-          | {
-              p_order_id: string
               p_action_type: string
-              p_action_description: string
-              p_metadata?: Json
-              p_proof_id?: string
               p_client_action?: boolean
               p_created_by?: string
+              p_metadata?: Json
+              p_order_id: string
+              p_proof_id?: string
+            }
+          | {
+              p_action_description: string
+              p_action_type: string
+              p_client_action?: boolean
+              p_metadata?: Json
+              p_order_id: string
+              p_proof_id?: string
             }
         Returns: string
       }
@@ -896,7 +896,7 @@ export type Database = {
         Returns: string
       }
       generate_product_code: {
-        Args: { product_name: string; product_category: string }
+        Args: { product_category: string; product_name: string }
         Returns: string
       }
       generate_submission_number: {
@@ -906,12 +906,12 @@ export type Database = {
       get_latest_proofs_by_order: {
         Args: Record<PropertyKey, never>
         Returns: {
+          created_at: string
           id: string
           order_id: string
+          orders: Json
           status: string
           version: number
-          created_at: string
-          orders: Json
         }[]
       }
       get_next_proof_version: {
@@ -921,14 +921,14 @@ export type Database = {
       get_order_history: {
         Args: { p_order_id: string }
         Returns: {
-          id: string
-          action_type: string
           action_description: string
-          formatted_date: string
-          created_by_name: string
+          action_type: string
           client_action: boolean
-          proof_version: number
+          created_by_name: string
+          formatted_date: string
+          id: string
           metadata: Json
+          proof_version: number
         }[]
       }
       get_user_role: {
@@ -942,9 +942,9 @@ export type Database = {
       test_history_triggers: {
         Args: Record<PropertyKey, never>
         Returns: {
+          test_message: string
           test_name: string
           test_result: boolean
-          test_message: string
         }[]
       }
       update_proof_status_enum: {
