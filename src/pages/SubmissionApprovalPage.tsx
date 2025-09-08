@@ -210,7 +210,7 @@ export default function SubmissionApprovalPage() {
   }
 
   const isExpired = new Date(submission.valid_until) < new Date();
-  const canAccept = submission.status === 'En attente' && !isExpired;
+  const canAccept = (submission.status === 'En attente' || submission.status === 'Envoyée') && !isExpired;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
