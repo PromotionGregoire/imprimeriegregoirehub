@@ -20,7 +20,7 @@ import { useSubmissionDetails } from '@/hooks/useSubmissionDetails';
 import { useUpdateSubmission, SubmissionFormData } from '@/hooks/useSubmissions';
 import { useToast } from '@/hooks/use-toast';
 import { AdvancedDatePicker } from '@/components/ui/advanced-date-picker';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const submissionItemSchema = z.object({
@@ -351,7 +351,8 @@ const EditSubmission = () => {
         </h1>
       </div>
 
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 max-w-6xl">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 max-w-6xl">
         {/* Informations Générales */}
         <Card>
           <CardHeader>
@@ -658,6 +659,7 @@ const EditSubmission = () => {
           </Button>
         </div>
       </form>
+      </Form>
     </div>
   );
 };
