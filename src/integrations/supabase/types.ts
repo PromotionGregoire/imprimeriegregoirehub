@@ -1589,6 +1589,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      update_proof_status_for_email: {
+        Args: { approval_token?: string; new_status: string; proof_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       invoice_status: "draft" | "sent" | "partial" | "paid" | "overdue" | "void"
