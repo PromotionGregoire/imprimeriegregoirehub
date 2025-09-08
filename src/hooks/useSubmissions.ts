@@ -25,6 +25,9 @@ export const useCreateSubmission = () => {
 
   return useMutation({
     mutationFn: async ({ submissionData, status }: { submissionData: SubmissionFormData; status: 'Brouillon' | 'Envoyée' }) => {
+      // Generate acceptance token for the submission
+      const acceptanceToken = crypto.randomUUID();
+      
       // Create submission
       const { data: submission, error: submissionError } = await supabase
         .from('submissions')
@@ -33,6 +36,7 @@ export const useCreateSubmission = () => {
           deadline: submissionData.deadline,
           total_price: submissionData.total_price,
           status: status,
+          acceptance_token: acceptanceToken,
           ...(status === 'Envoyée' && { sent_at: new Date().toISOString() })
         }])
         .select()
