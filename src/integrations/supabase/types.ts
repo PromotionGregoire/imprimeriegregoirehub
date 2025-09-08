@@ -352,6 +352,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "invoices_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_ordre_historique"
+            referencedColumns: ["client_id"]
+          },
+          {
             foreignKeyName: "invoices_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -436,6 +443,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_ordre_historique"
+            referencedColumns: ["client_id"]
           },
           {
             foreignKeyName: "orders_submission_id_fkey"
@@ -906,6 +920,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_ordre_historique"
+            referencedColumns: ["client_id"]
+          },
+          {
             foreignKeyName: "projects_manager_id_fkey"
             columns: ["manager_id"]
             isOneToOne: false
@@ -1103,6 +1124,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_ordre_historique"
+            referencedColumns: ["client_id"]
           },
         ]
       }
@@ -1378,13 +1406,6 @@ export type Database = {
           proof_version: number | null
         }
         Relationships: [
-          {
-            foreignKeyName: "orders_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "ordre_historique_order_id_fkey"
             columns: ["order_id"]
