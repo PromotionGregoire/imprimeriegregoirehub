@@ -931,6 +931,36 @@ export type Database = {
           proof_version: number
         }[]
       }
+      get_submission_for_approval: {
+        Args: { p_token: string; p_token_type?: string }
+        Returns: {
+          approved_by: string
+          business_name: string
+          client_id: string
+          contact_name: string
+          created_at: string
+          deadline: string
+          id: string
+          modification_request_notes: string
+          sent_at: string
+          status: string
+          submission_number: string
+          updated_at: string
+          valid_until: string
+        }[]
+      }
+      get_submission_items_for_approval: {
+        Args: { p_token: string; p_token_type?: string }
+        Returns: {
+          created_at: string
+          description: string
+          id: string
+          product_name: string
+          quantity: number
+          submission_id: string
+          updated_at: string
+        }[]
+      }
       get_user_role: {
         Args: { user_uuid: string }
         Returns: string
