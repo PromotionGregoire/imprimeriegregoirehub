@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from './use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -37,10 +37,12 @@ export function useRealtimeUpdates(userId: string) {
 
     if (!clientIds) return; // en attente
 
-    // Construire le filtre IN si on a des clients; sinon, on n'écoute pas
-    const subFilter = clientIds.length
-      ? `client_id=in.(${clientIds.join(',')})`
-      : 'client_id=in.(00000000-0000-0000-0000-000000000000)'; // filtre impossible => silence
+    // Pas d'abonnement si aucun client assigné
+    if (clientIds.length === 0) {
+      return () => {}; // pas d'abonnement si aucun client
+    }
+
+    const subFilter = `client_id=in.(${clientIds.join(',')})`;
 
     // Soumissions (UPDATE)
     const submissionsChannel = supabase
