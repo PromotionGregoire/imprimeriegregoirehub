@@ -223,7 +223,7 @@ serve(async (req) => {
 
     // Send email
     const emailResult = await resend.emails.send({
-      from: fromEmail,
+      from: `Imprimerie Grégoire <${fromEmail}>`,
       to: [client.email],
       reply_to: replyToEmail,
       subject,
