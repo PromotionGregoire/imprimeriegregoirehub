@@ -6,7 +6,7 @@ import { ToastAction } from '@/components/ui/toast';
 
 const SUBMISSION_STATUS = {
   PENDING: "En attente d'approbation",
-  APPROVED: "Approuvée",
+  APPROVED: "Approuvée", 
   REJECTED: "Rejetée",
 } as const;
 
