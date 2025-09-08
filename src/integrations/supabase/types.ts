@@ -314,7 +314,7 @@ export type Database = {
           due_at?: string | null
           id?: string
           issued_at?: string | null
-          number: string
+          number?: string
           order_id?: string | null
           paid_at?: string | null
           status?: Database["public"]["Enums"]["invoice_status"]
