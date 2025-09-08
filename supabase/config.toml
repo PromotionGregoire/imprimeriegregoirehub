@@ -15,6 +15,12 @@ verify_jwt = false
 [functions.handle-proof-decision]
 verify_jwt = false
 
+[functions.send-proof-notification]
+verify_jwt = true
+
+[functions.send-proof-to-client]
+verify_jwt = true
+
 [functions.send-submission-notification]
 verify_jwt = true
 

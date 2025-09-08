@@ -60,17 +60,16 @@ serve(async (req) => {
     // Generate new approval token
     const newApprovalToken = crypto.randomUUID();
 
-    // Update proof status and save approval token
-    const { error: updateError } = await supabase
-      .from('proofs')
-      .update({
-        status: 'Envoyée au client',
-        approval_token: newApprovalToken,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', proofId);
+    // Update proof status and save approval token using database function
+    const { data: updateResult, error: updateError } = await supabase
+      .rpc('update_proof_status_for_email', {
+        proof_id: proofId,
+        new_status: 'Envoyée au client',
+        approval_token: newApprovalToken
+      });
 
-    if (updateError) {
+    if (updateError || !updateResult) {
+      console.error('Update error:', updateError);
       throw new Error('Failed to update proof status');
     }
 
@@ -79,7 +78,7 @@ serve(async (req) => {
     const clientName = proof.orders?.clients?.contact_name;
     const businessName = proof.orders?.clients?.business_name;
     const orderNumber = proof.orders?.order_number;
-    const approvalUrl = `https://promotiongregoire.com/approve/proof/${newApprovalToken}`;
+    const approvalUrl = `https://ytcrplsistsxfaxkfqqp.supabase.co/proof-approval/${proofId}?token=${newApprovalToken}`;
 
     // Send email to client
     const emailResponse = await resend.emails.send({

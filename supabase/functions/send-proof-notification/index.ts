@@ -40,7 +40,7 @@ serve(async (req) => {
     console.log(`Sending proof notification to: ${clientEmail} for proof ${proofId}`);
 
     // Generate the approval link
-    const approvalUrl = `${Deno.env.get('SUPABASE_URL')?.replace('/rest/v1', '')}/proof-approval/${proofId}?token=${approvalToken}`;
+    const approvalUrl = `https://ytcrplsistsxfaxkfqqp.supabase.co/proof-approval/${proofId}?token=${approvalToken}`;
 
     // Render the email template
     const html = await renderAsync(
