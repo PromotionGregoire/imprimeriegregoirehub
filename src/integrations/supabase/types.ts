@@ -931,6 +931,40 @@ export type Database = {
           proof_version: number
         }[]
       }
+      get_proof_file_url: {
+        Args: { p_approval_token: string }
+        Returns: {
+          file_url: string
+        }[]
+      }
+      get_proof_for_approval: {
+        Args: { p_approval_token: string }
+        Returns: {
+          approved_at: string
+          approved_by_name: string
+          business_name: string
+          client_comments: string
+          contact_name: string
+          created_at: string
+          id: string
+          order_id: string
+          order_number: string
+          status: string
+          submission_number: string
+          updated_at: string
+          version: number
+        }[]
+      }
+      get_proof_for_validation: {
+        Args: { p_validation_token: string }
+        Returns: {
+          file_url: string
+          id: string
+          order_id: string
+          status: string
+          version: number
+        }[]
+      }
       get_submission_for_approval: {
         Args: { p_token: string; p_token_type?: string }
         Returns: {

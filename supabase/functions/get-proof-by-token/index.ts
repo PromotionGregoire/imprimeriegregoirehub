@@ -33,15 +33,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Fetching proof with token:', token);
 
-    // Find the latest proof by approval token - any version can have the token
-    const { data: tokenProof, error: tokenError } = await supabase
-      .from('proofs')
-      .select('order_id')
-      .eq('approval_token', token)
-      .single();
+    // Use secure function to get proof data without exposing sensitive information
+    const { data: proofData, error: proofError } = await supabase
+      .rpc('get_proof_for_approval', { p_approval_token: token });
 
-    if (tokenError || !tokenProof) {
-      console.error('Token not found:', tokenError);
+    if (proofError || !proofData || proofData.length === 0) {
+      console.error('Token not found or invalid:', proofError);
       return new Response(
         JSON.stringify({ error: 'Token invalide ou épreuve non trouvée' }),
         {
@@ -51,51 +48,19 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Get the latest proof version for this order
-    const { data: latestProof, error: proofError } = await supabase
-      .from('proofs')
-      .select(`
-        id,
-        status,
-        file_url,
-        version,
-        client_comments,
-        approved_at,
-        approved_by_name,
-        created_at,
-        order_id,
-        orders (
-          order_number,
-          total_price,
-          submission_id,
-          submissions (
-            submission_number,
-            client_id,
-            clients (
-              business_name,
-              contact_name,
-              email
-            )
-          )
-        )
-      `)
-      .eq('order_id', tokenProof.order_id)
-      .order('version', { ascending: false })
-      .limit(1)
-      .single();
+    const proof = proofData[0];
 
-    if (proofError || !latestProof) {
-      console.error('Latest proof not found:', proofError);
-      return new Response(
-        JSON.stringify({ error: 'Dernière version de l\'épreuve non trouvée' }),
-        {
-          status: 404,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
+    // Get file URL separately using secure function
+    const { data: fileData, error: fileError } = await supabase
+      .rpc('get_proof_file_url', { p_approval_token: token });
+
+    const fileUrl = (fileData && fileData.length > 0) ? fileData[0].file_url : null;
+
+    if (fileError) {
+      console.error('Error getting file URL:', fileError);
     }
 
-    // Get all proof comments from previous versions for this order
+    // Get all proof comments from previous versions for this order (authenticated query)
     const { data: proofHistory, error: historyError } = await supabase
       .from('proofs')
       .select(`
@@ -107,7 +72,7 @@ const handler = async (req: Request): Promise<Response> => {
         approved_by_name,
         created_at
       `)
-      .eq('order_id', tokenProof.order_id)
+      .eq('order_id', proof.order_id)
       .not('client_comments', 'is', null)
       .neq('client_comments', '')
       .order('version', { ascending: false });
@@ -116,15 +81,33 @@ const handler = async (req: Request): Promise<Response> => {
     const { data: orderHistory, error: orderHistoryError } = await supabase
       .from('v_ordre_historique')
       .select('*')
-      .eq('order_id', tokenProof.order_id)
+      .eq('order_id', proof.order_id)
       .order('created_at', { ascending: false });
 
-    console.log('Latest proof found successfully, version:', latestProof.version);
+    console.log('Latest proof found successfully, version:', proof.version);
+
+    // Build secure response that excludes sensitive financial information
+    const secureProof = {
+      id: proof.id,
+      status: proof.status,
+      file_url: fileUrl,
+      version: proof.version,
+      client_comments: proof.client_comments,
+      approved_at: proof.approved_at,
+      approved_by_name: proof.approved_by_name,
+      created_at: proof.created_at,
+      order_id: proof.order_id,
+      order_number: proof.order_number,
+      business_name: proof.business_name,
+      contact_name: proof.contact_name,
+      submission_number: proof.submission_number
+      // Explicitly exclude sensitive financial data like total_price
+    };
 
     return new Response(
       JSON.stringify({ 
         success: true,
-        proof: latestProof,
+        proof: secureProof,
         proofHistory: proofHistory || [],
         orderHistory: orderHistory || []
       }),
