@@ -22,6 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AdvancedDatePicker } from '@/components/ui/advanced-date-picker';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { ProductLineItem } from '@/components/ProductLineItem';
+import { validateRequiredFields, displayFieldErrors, scrollToFirstError, clearFieldErrors } from '@/utils/validation';
 
 const submissionItemSchema = z.object({
   product_type: z.string().min(1, 'Le type de produit est requis'),
@@ -241,7 +242,37 @@ const CreateSubmission = () => {
     }
   };
 
-  const onSubmit = (data: FormData) => handleSubmit(data, 'Envoyée');
+  const handleFormSubmit = async (data: FormData) => {
+    const form = document.querySelector('form') as HTMLFormElement;
+    if (form) {
+      const errors = validateRequiredFields(form);
+      
+      if (Object.keys(errors).length > 0) {
+        displayFieldErrors(form, errors);
+        scrollToFirstError(form);
+        return;
+      }
+      
+      // Clear any existing errors on successful validation
+      clearFieldErrors(form);
+    }
+    
+    // If no validation errors, proceed with submission
+    await handleSubmit(data, 'Envoyée');
+  };
+
+  const handleDraftSubmit = async (data: FormData) => {
+    const form = document.querySelector('form') as HTMLFormElement;
+    if (form) {
+      // For draft, we might be more lenient, but still check basic required fields if needed
+      clearFieldErrors(form);
+    }
+    
+    // Save as draft
+    await handleSubmit(data, 'Brouillon');
+  };
+
+  const onSubmit = handleFormSubmit;
 
   // Show loading state if critical data is still loading
   if (clientsLoading) {
@@ -306,19 +337,24 @@ const CreateSubmission = () => {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="client">Client *</Label>
+                  <Label htmlFor="client_id">Client *</Label>
                   {prefilledClientId && clients ? (
                     <Input
+                      id="client_id"
+                      name="client_id"
                       value={clients?.find(c => c.id === prefilledClientId)?.business_name || 'Client introuvable'}
                       disabled
                       className="bg-muted"
+                      aria-required="true"
                     />
                   ) : (
                     <Select
+                      name="client_id"
                       value={watch('client_id')}
                       onValueChange={(value) => setValue('client_id', value)}
+                      required
                     >
-                      <SelectTrigger>
+                      <SelectTrigger id="client_id" aria-required="true">
                         <SelectValue placeholder="Sélectionner un client" />
                       </SelectTrigger>
                       <SelectContent>
@@ -508,7 +544,7 @@ const CreateSubmission = () => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => form.handleSubmit((data) => handleSubmit(data, 'Brouillon'))()}
+              onClick={() => form.handleSubmit(handleDraftSubmit)()}
               disabled={isSubmitting}
             >
               {isSubmitting ? (
