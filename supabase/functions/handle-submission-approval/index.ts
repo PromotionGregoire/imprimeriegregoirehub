@@ -6,7 +6,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface ApprovalRequest { submission_id: string }
+interface ApprovalRequest {
+  submission_id?: string;
+  acceptance_token?: string;
+  client_name?: string;
+}
 interface ApprovalResponse { order_id: string; order_number: string; proof_id?: string }
 
 function hex32() {
@@ -22,9 +26,9 @@ serve(async (req) => {
   }
 
   try {
-    const { submission_id }: ApprovalRequest = await req.json();
-    if (!submission_id) {
-      return new Response(JSON.stringify({ error: 'submission_id is required' }), {
+    const { submission_id, acceptance_token, client_name }: ApprovalRequest = await req.json();
+    if (!submission_id && !acceptance_token) {
+      return new Response(JSON.stringify({ error: 'submission_id OR acceptance_token is required' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
@@ -35,32 +39,39 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    const { data: submission, error: submissionError } = await supabase
+    // 1) Charger la soumission par id OU token public
+    let subQuery = supabase
       .from('submissions')
       .select('id, status, client_id, total_price, submission_number')
-      .eq('id', submission_id)
-      .single();
+      .limit(1);
 
-    if (submissionError || !submission) {
-      console.error('Submission not found:', submissionError);
+    if (submission_id) subQuery = subQuery.eq('id', submission_id);
+    else subQuery = subQuery.eq('acceptance_token', acceptance_token!);
+
+    const { data: submissions, error: subErr } = await subQuery;
+    if (subErr || !submissions || !submissions.length) {
+      console.error('Submission not found:', subErr);
       return new Response(JSON.stringify({ error: 'Submission not found' }), {
         status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
+    const submission = submissions[0];
 
-    const PENDING = new Set([
+    // 2) Valider le statut (robuste aux anciennes valeurs)
+    const normalized = (submission.status || '').trim();
+    const okStatuses = new Set<string>([
       "En attente d'approbation",
-      "En attente d'approbation",
-      "Envoyée",
-      "Envoyee",
-      "pending", "Pending", "PENDING"
+      "En attente d’approbation", // apostrophe typographique
+      'Envoyée', 'Envoyee', // FR variantes
+      'sent', 'SENT',
+      'pending', 'Pending', 'PENDING'
     ]);
 
-    if (!PENDING.has(submission.status)) {
-      if (submission.status === 'Approuvée') {
-        // Already approved -> return existing or create order and proof if missing
+    if (!okStatuses.has(normalized)) {
+      if (normalized === 'Approuvée') {
+        // déjà approuvée -> on continue pour garantir commande + épreuve
       } else {
-        console.warn('Invalid status for approval:', submission.status);
+        console.warn('Invalid submission status for approval:', submission.status);
         return new Response(JSON.stringify({
           error: 'Invalid submission status for approval',
           status: submission.status,
@@ -70,102 +81,116 @@ serve(async (req) => {
         });
       }
     } else {
-      // Approve the submission
-      const { error: updateError } = await supabase
+      // 3) Marquer la soumission approuvée (FR)
+      const { error: updErr } = await supabase
         .from('submissions')
         .update({ status: 'Approuvée', updated_at: new Date().toISOString() })
-        .eq('id', submission_id);
-
-      if (updateError) {
-        console.error('Error updating submission status:', updateError);
+        .eq('id', submission.id);
+      if (updErr) {
+        console.error('Failed to approve submission:', updErr);
         return new Response(JSON.stringify({ error: 'Failed to approve submission' }), {
           status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
     }
 
-    // Find or create order
-    const { data: existingOrder } = await supabase
-      .from('orders')
-      .select('id, order_number')
-      .eq('submission_id', submission_id)
-      .maybeSingle();
+    // 4) Récupérer ou créer la commande
+    let order_id: string | null = null;
+    let order_number: string | null = null;
 
-    let order_id = existingOrder?.id;
-    let order_number = existingOrder?.order_number;
-
-    if (!existingOrder) {
-      const { data: newOrder, error: orderError } = await supabase
+    {
+      const { data: existing } = await supabase
         .from('orders')
-        .insert({
-          submission_id,
-          client_id: submission.client_id,
-          total_price: submission.total_price || 0,
-          status: "En attente de l'épreuve",
-        })
         .select('id, order_number')
-        .single();
+        .eq('submission_id', submission.id)
+        .maybeSingle();
 
-      if (orderError || !newOrder) {
-        console.error('Error creating order:', orderError);
-        return new Response(JSON.stringify({ error: 'Failed to create order' }), {
-          status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
+      if (existing) {
+        order_id = existing.id;
+        order_number = existing.order_number;
+      } else {
+        const { data: newOrder, error: orderErr } = await supabase
+          .from('orders')
+          .insert({
+            submission_id: submission.id,
+            client_id: submission.client_id,
+            total_price: submission.total_price || 0,
+            status: "En attente de l'épreuve",
+          })
+          .select('id, order_number')
+          .single();
+
+        if (orderErr || !newOrder) {
+          console.error('Failed to create order:', orderErr);
+          return new Response(JSON.stringify({ error: 'Failed to create order' }), {
+            status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+        order_id = newOrder.id;
+        order_number = newOrder.order_number;
       }
-
-      order_id = newOrder.id;
-      order_number = newOrder.order_number;
     }
 
-    // Ensure at least one proof exists
-    const { data: hasProof } = await supabase
-      .from('proofs')
-      .select('id')
-      .eq('order_id', order_id!)
-      .limit(1);
-
-    let createdProofId: string | undefined = hasProof?.[0]?.id;
-
-    if (!createdProofId) {
-      // Get next version
-      let nextVersion = 1;
-      const { data: rpcVer } = await supabase.rpc('get_next_proof_version', { p_order_id: order_id! });
-      if (typeof rpcVer === 'number' && rpcVer > 0) nextVersion = rpcVer;
-
-      const { data: proof, error: proofError } = await supabase
+    // 5) Créer la proof v1 si aucune n'existe encore
+    let proof_id: string | null = null;
+    {
+      const { data: anyProof } = await supabase
         .from('proofs')
-        .insert({
+        .select('id, version')
+        .eq('order_id', order_id!)
+        .order('version', { ascending: false })
+        .limit(1);
+
+      if (!anyProof || !anyProof.length) {
+        // Calculer version
+        let nextVersion = 1;
+        const { data: rpcVer } = await supabase.rpc('get_next_proof_version', { p_order_id: order_id! });
+        if (typeof rpcVer === 'number' && rpcVer > 0) nextVersion = rpcVer;
+
+        const payload = {
           order_id: order_id!,
           version: nextVersion,
-          status: 'pending',
+          status: 'En préparation',
           is_active: true,
           approval_token: hex32(),
           validation_token: hex32(),
-        })
-        .select('id')
-        .single();
+          updated_at: new Date().toISOString(),
+        } as const;
 
-      if (proofError || !proof) {
-        console.error('Error creating initial proof:', proofError);
-        return new Response(JSON.stringify({ error: 'Failed to create initial proof' }), {
-          status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
+        const { data: newProof, error: proofErr } = await supabase
+          .from('proofs')
+          .insert(payload)
+          .select('id')
+          .single();
+
+        if (proofErr || !newProof) {
+          console.error('Failed to create initial proof:', proofErr);
+          return new Response(JSON.stringify({ error: 'Failed to create initial proof' }), {
+            status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+        proof_id = newProof.id;
+      } else {
+        proof_id = anyProof[0].id;
       }
-
-      createdProofId = proof.id;
     }
 
-    const response: ApprovalResponse = {
-      order_id: order_id!,
-      order_number: order_number!,
-      proof_id: createdProofId
-    };
+    // 6) Historiser (best-effort, ignore erreurs de contrainte)
+    try {
+      await supabase.rpc('add_ordre_history', {
+        p_order_id: order_id!,
+        p_action_type: 'submission_approved', // peut être filtré par un check, on ignore l'erreur
+        p_action_description: `Soumission ${submission.submission_number} approuvée` + (client_name ? ` par ${client_name}` : ''),
+        p_client_action: true
+      });
+    } catch (e) {
+      console.error('History log failed (ignored):', e);
+    }
 
-    console.log(`Submission ${submission.submission_number} approved -> Order ${order_number} (proof ${createdProofId})`);
-
-    return new Response(JSON.stringify(response), {
-      status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
+    return new Response(
+      JSON.stringify({ order_id, order_number, proof_id } satisfies ApprovalResponse),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
 
   } catch (error) {
     console.error('Unexpected error in handle-submission-approval:', error);
