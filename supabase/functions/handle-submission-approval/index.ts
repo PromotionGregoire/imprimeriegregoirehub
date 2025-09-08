@@ -60,8 +60,8 @@ serve(async (req) => {
     // 2) Valider le statut (robuste aux anciennes valeurs)
     const normalized = (submission.status || '').trim();
     const okStatuses = new Set<string>([
-      "En attente d'approbation",
-      "En attente d’approbation", // apostrophe typographique
+      "En attente d'approbation",  // apostrophe ASCII
+      "En attente d'approbation",  // apostrophe typographique
       'Envoyée', 'Envoyee', // FR variantes
       'sent', 'SENT',
       'pending', 'Pending', 'PENDING'
