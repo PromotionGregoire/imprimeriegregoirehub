@@ -79,9 +79,9 @@ serve(async (req) => {
       })
     );
 
-    // Send the email
+    // Send the email using the default Resend domain until custom domain is verified
     const emailResponse = await resend.emails.send({
-      from: 'Imprimerie Grégoire <info@promotiongregoire.com>',
+      from: 'Imprimerie Grégoire <onboarding@resend.dev>',
       to: [clientEmail],
       subject: `📄 Nouvelle soumission ${submissionNumber} - ${businessName}`,
       html,
