@@ -2,7 +2,12 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
 import { Resend } from "npm:resend@2.0.0";
 
-const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
+// Vérifier la clé API Resend
+const resendApiKey = Deno.env.get('RESEND_API_KEY');
+if (!resendApiKey) {
+  throw new Error('RESEND_API_KEY not configured');
+}
+const resend = new Resend(resendApiKey);
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -77,11 +82,11 @@ serve(async (req) => {
       throw new Error('Erreur lors de l\'approbation de l\'épreuve');
     }
 
-    // Step 2: Update order status to "En production"
+    // Step 2: Update order status to "Épreuve acceptée"
     const { error: orderUpdateError } = await supabase
       .from('orders')
       .update({
-        status: 'En production',
+        status: 'Épreuve acceptée',
         updated_at: new Date().toISOString()
       })
       .eq('id', proof.order_id);
@@ -114,12 +119,12 @@ serve(async (req) => {
       .from('activity_logs')
       .insert({
         action_type: 'order_status_changed',
-        description: `La commande ${orderNumber} est passée en production suite à l'approbation de l'épreuve.`,
+        description: `La commande ${orderNumber} est prête pour production suite à l'approbation de l'épreuve.`,
         client_id: clientId,
         metadata: {
           order_id: proof.order_id,
           proof_id: proof.id,
-          new_status: 'En production',
+          new_status: 'Épreuve acceptée',
           previous_status: proof.orders?.order_status
         }
       });
@@ -134,11 +139,15 @@ serve(async (req) => {
     const contactName = proof.orders?.clients?.contact_name;
 
     // Email to client
+    const fromEmail = Deno.env.get('RESEND_FROM_PROOFS') || 'Imprimerie Grégoire <info@promotiongregoire.com>';
+    const replyToEmail = Deno.env.get('RESEND_REPLY_TO') || 'info@promotiongregoire.com';
+    
     try {
       await resend.emails.send({
-        from: 'Promotion Grégoire <info@promotiongregoire.com>',
+        from: fromEmail,
+        reply_to: replyToEmail,
         to: [clientEmail!],
-        subject: `✅ Épreuve approuvée - Production démarrée pour ${orderNumber}`,
+        subject: `✅ Épreuve approuvée - Commande ${orderNumber} prête pour production`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <h1 style="color: #333; border-bottom: 2px solid #10b981; padding-bottom: 10px;">
@@ -149,7 +158,7 @@ serve(async (req) => {
             
             <div style="background-color: #d1fae5; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <h3 style="margin-top: 0; color: #10b981;">Excellente nouvelle !</h3>
-              <p>Votre épreuve pour la commande <strong>${orderNumber}</strong> a été approuvée et la production a officiellement commencé.</p>
+              <p>Votre épreuve pour la commande <strong>${orderNumber}</strong> a été approuvée et est maintenant prête pour la production.</p>
             </div>
             
             <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
@@ -158,12 +167,12 @@ serve(async (req) => {
               <p><strong>Commande :</strong> ${orderNumber}</p>
               <p><strong>Épreuve :</strong> Version ${proof.version}</p>
               <p><strong>Approuvé par :</strong> ${approverName}</p>
-              <p><strong>Statut :</strong> En production</p>
+              <p><strong>Statut :</strong> Épreuve acceptée</p>
             </div>
             
             <h3 style="color: #333;">Prochaines étapes :</h3>
             <ul style="color: #666;">
-              <li>Votre commande est maintenant en cours de production</li>
+              <li>Votre commande va maintenant être mise en production</li>
               <li>Vous recevrez une notification dès que la production sera terminée</li>
               <li>Notre équipe vous contactera pour la livraison/récupération</li>
             </ul>
@@ -186,8 +195,9 @@ serve(async (req) => {
     // Email to internal team
     try {
       await resend.emails.send({
-        from: 'Promotion Grégoire <info@promotiongregoire.com>',
-        to: ['info@promotiongregoire.com'],
+        from: fromEmail,
+        reply_to: replyToEmail,
+        to: [replyToEmail],
         subject: `🚀 Production à démarrer - ${orderNumber} approuvée`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">

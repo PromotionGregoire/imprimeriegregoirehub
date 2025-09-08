@@ -23,8 +23,13 @@ serve(async (req) => {
       throw new Error('proofId is required');
     }
 
-    // Initialize clients
-    const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
+    // Vérifier la clé API Resend
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    if (!resendApiKey) {
+      throw new Error('RESEND_API_KEY not configured');
+    }
+
+    const resend = new Resend(resendApiKey);
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -107,11 +112,11 @@ serve(async (req) => {
     }
 
     // Build approval URL
-    const baseUrl = Deno.env.get('PUBLIC_PORTAL_BASE_URL') || 'https://hub.promotiongregoire.com';
+    const baseUrl = Deno.env.get('PUBLIC_PORTAL_BASE_URL') || 'https://client.promotiongregoire.com';
     const approvalUrl = `${baseUrl}/approve/proof/${approvalToken}`;
 
     // Email content
-    const subject = `Épreuve v${proof.version} – Commande ${order.order_number} – ${client.business_name}`;
+    const subject = `Épreuve ${order.order_number} — version ${proof.version}`;
     
     const html = `
       <!DOCTYPE html>
@@ -159,17 +164,29 @@ serve(async (req) => {
     `;
 
     // Send email
+    const fromEmail = Deno.env.get('RESEND_FROM_PROOFS');
+    const replyToEmail = Deno.env.get('RESEND_REPLY_TO');
+    
+    if (!fromEmail || !replyToEmail) {
+      throw new Error('RESEND_FROM_PROOFS or RESEND_REPLY_TO not configured');
+    }
+
     const emailResult = await resend.emails.send({
-      from: Deno.env.get('RESEND_FROM_PROOFS') || 'Imprimerie Grégoire <noreply@promotiongregoire.com>',
+      from: fromEmail,
       to: [client.email],
-      reply_to: Deno.env.get('RESEND_REPLY_TO') || 'production@promotiongregoire.com',
+      reply_to: replyToEmail,
       subject,
       html,
     });
 
     if (emailResult.error) {
       console.error('Email send error:', emailResult.error);
-      throw new Error(`Failed to send email: ${emailResult.error.message}`);
+      return new Response(JSON.stringify({ 
+        error: `Failed to send email: ${emailResult.error.message}` 
+      }), {
+        status: 502,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
     }
 
     // Log the email notification
