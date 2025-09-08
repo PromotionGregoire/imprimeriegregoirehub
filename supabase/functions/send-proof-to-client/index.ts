@@ -19,45 +19,84 @@ serve(async (req) => {
   try {
     console.log('=== SEND PROOF TO CLIENT START ===');
     
-    const { proofId }: SendProofRequest = await req.json();
-    console.log('Request body received:', { proofId });
+    const requestBody = await req.text();
+    console.log('Raw request body:', requestBody);
+    
+    let parsedBody;
+    try {
+      parsedBody = JSON.parse(requestBody);
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      throw new Error('Invalid JSON in request body');
+    }
+    
+    const { proofId }: SendProofRequest = parsedBody;
+    console.log('Parsed proofId:', proofId);
 
     if (!proofId) {
       throw new Error('proofId is required');
     }
 
-    // Vérifier la clé API Resend
-    const resendApiKey = Deno.env.get('RESEND_API_KEY');
-    if (!resendApiKey) {
-      throw new Error('RESEND_API_KEY not configured');
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('Missing Supabase environment variables');
+      throw new Error('Supabase configuration missing');
     }
 
-    const resend = new Resend(resendApiKey);
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Vérifier les secrets Resend
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    const fromEmail = Deno.env.get('RESEND_FROM_PROOFS');
+    const replyToEmail = Deno.env.get('RESEND_REPLY_TO');
+    
+    console.log('Environment check:', {
+      hasResendKey: !!resendApiKey,
+      hasFromEmail: !!fromEmail,
+      hasReplyTo: !!replyToEmail
+    });
+    
+    if (!resendApiKey || !fromEmail || !replyToEmail) {
+      console.error('Missing Resend configuration:', {
+        resendApiKey: !!resendApiKey,
+        fromEmail: !!fromEmail,
+        replyToEmail: !!replyToEmail
+      });
+      throw new Error('Email configuration incomplete. Please check RESEND_API_KEY, RESEND_FROM_PROOFS, and RESEND_REPLY_TO secrets.');
+    }
 
     console.log('Fetching proof with ID:', proofId);
 
-    // Get proof details with client information - using separate queries for better reliability
+    // Get proof details
     const { data: proof, error: proofError } = await supabase
       .from('proofs')
       .select('*')
       .eq('id', proofId)
       .single();
 
-    if (proofError || !proof) {
+    if (proofError) {
       console.error('Proof fetch error:', proofError);
+      throw new Error(`Proof not found: ${proofError.message}`);
+    }
+
+    if (!proof) {
       throw new Error('Proof not found');
     }
 
     console.log('Proof found:', { id: proof.id, version: proof.version, status: proof.status });
 
+    // Verify proof has a file
+    if (!proof.file_url) {
+      throw new Error('Cette épreuve n\'a pas encore de fichier attaché');
+    }
+
     // Get order details
     const { data: order, error: orderError } = await supabase
       .from('orders')
-      .select('*, submissions(*)')
+      .select('*')
       .eq('id', proof.order_id)
       .single();
 
@@ -66,7 +105,7 @@ serve(async (req) => {
       throw new Error('Order not found');
     }
 
-    console.log('Order found:', { order_number: order.order_number, submission_id: order.submission_id });
+    console.log('Order found:', { order_number: order.order_number, client_id: order.client_id });
 
     // Get client details
     const { data: client, error: clientError } = await supabase
@@ -83,19 +122,16 @@ serve(async (req) => {
     console.log('Client found:', { business_name: client.business_name, email: client.email });
 
     if (!client.email) {
-      throw new Error('Client email not found');
+      throw new Error('Aucune adresse email trouvée pour ce client');
     }
 
-    if (!proof.file_url) {
-      throw new Error('Proof file not uploaded yet');
-    }
-
-    // Generate approval token if missing
+    // Generate or use existing approval token
     let approvalToken = proof.approval_token;
     if (!approvalToken) {
       approvalToken = crypto.randomUUID();
+      console.log('Generated new approval token');
       
-      const { error: updateError } = await supabase
+      const { error: updateTokenError } = await supabase
         .from('proofs')
         .update({ 
           approval_token: approvalToken,
@@ -103,13 +139,14 @@ serve(async (req) => {
         })
         .eq('id', proofId);
 
-      if (updateError) {
-        console.error('Token update error:', updateError);
+      if (updateTokenError) {
+        console.error('Token update error:', updateTokenError);
         throw new Error('Failed to generate approval token');
       }
     }
 
     // Update proof status to "Envoyée au client"
+    console.log('Updating proof status...');
     const { error: statusError } = await supabase
       .from('proofs')
       .update({ 
@@ -123,9 +160,15 @@ serve(async (req) => {
       throw new Error('Failed to update proof status');
     }
 
+    console.log('Proof status updated successfully');
+
     // Build approval URL
     const baseUrl = Deno.env.get('PUBLIC_PORTAL_BASE_URL') || 'https://client.promotiongregoire.com';
     const approvalUrl = `${baseUrl}/approve/proof/${approvalToken}`;
+    console.log('Approval URL generated:', approvalUrl);
+
+    // Initialize Resend
+    const resend = new Resend(resendApiKey);
 
     // Email content
     const subject = `Épreuve ${order.order_number} — version ${proof.version}`;
@@ -175,14 +218,9 @@ serve(async (req) => {
       </html>
     `;
 
-    // Send email
-    const fromEmail = Deno.env.get('RESEND_FROM_PROOFS');
-    const replyToEmail = Deno.env.get('RESEND_REPLY_TO');
-    
-    if (!fromEmail || !replyToEmail) {
-      throw new Error('RESEND_FROM_PROOFS or RESEND_REPLY_TO not configured');
-    }
+    console.log('Preparing email for:', client.email, `(${client.contact_name || client.business_name}) - Order: ${order.order_number}`);
 
+    // Send email
     const emailResult = await resend.emails.send({
       from: fromEmail,
       to: [client.email],
@@ -201,16 +239,22 @@ serve(async (req) => {
       });
     }
 
-    // Log the email notification
-    await supabase.from('email_notifications').insert({
-      email_type: 'proof_notification',
-      proof_id: proofId,
-      recipient_email: client.email,
-      sent_at: new Date().toISOString(),
-      success: true,
-    });
+    console.log('Email sent successfully:', emailResult.data?.id);
 
-    console.log('Proof notification sent successfully:', emailResult.data?.id);
+    // Log the email notification
+    try {
+      await supabase.from('email_notifications').insert({
+        email_type: 'proof_notification',
+        proof_id: proofId,
+        recipient_email: client.email,
+        sent_at: new Date().toISOString(),
+        success: true,
+      });
+      console.log('Email notification logged');
+    } catch (logError) {
+      console.error('Failed to log email notification:', logError);
+      // Don't fail the whole operation if logging fails
+    }
 
     return new Response(JSON.stringify({ 
       sent: true, 
