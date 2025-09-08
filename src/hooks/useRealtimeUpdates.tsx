@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from './use-toast';
 import { useNavigate } from 'react-router-dom';
+import { ToastAction } from '@/components/ui/toast';
 
 const SUBMISSION_STATUS = {
   PENDING: "En attente d'approbation",
@@ -80,10 +81,14 @@ export function useRealtimeUpdates(userId: string) {
           toast({
             title: 'Nouveau BAT disponible',
             description: 'Un nouveau BAT a été ajouté à une de vos commandes',
-            action: {
-              label: 'Voir',
-              onClick: () => navigate(`/proofs/${(payload as any).new.id}`),
-            },
+            action: (
+              <ToastAction 
+                altText="Voir le BAT" 
+                onClick={() => navigate(`/proofs/${(payload as any).new.id}`)}
+              >
+                Voir
+              </ToastAction>
+            ),
           });
         }
       )
