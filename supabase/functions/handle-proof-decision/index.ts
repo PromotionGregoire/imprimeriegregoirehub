@@ -128,25 +128,8 @@ serve(async (req) => {
         );
       }
 
-      // Update order status to "En production"
-      const { error: updateOrderError } = await supabase
-        .from('orders')
-        .update({
-          status: 'En production',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', proofData.order_id);
-
-      if (updateOrderError) {
-        console.error('Error updating order status:', updateOrderError);
-        return new Response(
-          JSON.stringify({ error: 'Erreur lors de la mise à jour de la commande' }),
-          { 
-            status: 500, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        );
-      }
+      // Le statut de la commande sera automatiquement mis à jour par le trigger
+      // sync_order_status_from_proof() quand l'épreuve passe à "Approuvée"
 
       // Add history entry for approval
       const { error: historyError } = await supabase
@@ -174,9 +157,9 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: true,
-          message: 'Épreuve approuvée avec succès. La production va commencer.',
+          message: 'Épreuve approuvée avec succès. La commande est prête pour production.',
           proof_status: 'Approuvée',
-          order_status: 'En production'
+          order_status: 'Épreuve acceptée'
         }),
         { 
           status: 200, 
