@@ -157,10 +157,11 @@ serve(async (req) => {
 
     if (statusError) {
       console.error('Status update error:', statusError);
-      throw new Error('Failed to update proof status');
+      // Don't throw here - the trigger might fail but we can still continue
+      console.log('Continuing despite status update error...');
+    } else {
+      console.log('Proof status updated successfully');
     }
-
-    console.log('Proof status updated successfully');
 
     // Build approval URL
     const baseUrl = Deno.env.get('PUBLIC_PORTAL_BASE_URL') || 'https://client.promotiongregoire.com';
