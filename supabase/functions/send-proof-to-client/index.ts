@@ -17,7 +17,10 @@ serve(async (req) => {
   }
 
   try {
+    console.log('=== SEND PROOF TO CLIENT START ===');
+    
     const { proofId }: SendProofRequest = await req.json();
+    console.log('Request body received:', { proofId });
 
     if (!proofId) {
       throw new Error('proofId is required');
@@ -35,28 +38,12 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Get proof details with client information
+    console.log('Fetching proof with ID:', proofId);
+
+    // Get proof details with client information - using separate queries for better reliability
     const { data: proof, error: proofError } = await supabase
       .from('proofs')
-      .select(`
-        id,
-        version,
-        status,
-        file_url,
-        approval_token,
-        order_id,
-        orders!inner(
-          order_number,
-          submissions!inner(
-            submission_number,
-            clients!inner(
-              business_name,
-              contact_name,
-              email
-            )
-          )
-        )
-      `)
+      .select('*')
       .eq('id', proofId)
       .single();
 
@@ -65,10 +52,35 @@ serve(async (req) => {
       throw new Error('Proof not found');
     }
 
-    // Extract client information
-    const client = proof.orders.submissions.clients;
-    const order = proof.orders;
-    const submission = proof.orders.submissions;
+    console.log('Proof found:', { id: proof.id, version: proof.version, status: proof.status });
+
+    // Get order details
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .select('*, submissions(*)')
+      .eq('id', proof.order_id)
+      .single();
+
+    if (orderError || !order) {
+      console.error('Order fetch error:', orderError);
+      throw new Error('Order not found');
+    }
+
+    console.log('Order found:', { order_number: order.order_number, submission_id: order.submission_id });
+
+    // Get client details
+    const { data: client, error: clientError } = await supabase
+      .from('clients')
+      .select('*')
+      .eq('id', order.client_id)
+      .single();
+
+    if (clientError || !client) {
+      console.error('Client fetch error:', clientError);
+      throw new Error('Client not found');
+    }
+
+    console.log('Client found:', { business_name: client.business_name, email: client.email });
 
     if (!client.email) {
       throw new Error('Client email not found');
