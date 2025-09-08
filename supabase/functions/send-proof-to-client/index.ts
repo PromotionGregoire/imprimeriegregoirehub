@@ -50,22 +50,18 @@ serve(async (req) => {
 
     // Vérifier les secrets Resend
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
-    const fromEmail = Deno.env.get('RESEND_FROM_PROOFS');
-    const replyToEmail = Deno.env.get('RESEND_REPLY_TO');
+    const fromEmailRaw = (Deno.env.get('RESEND_FROM_PROOFS') || '').trim();
+    const replyToEmail = (Deno.env.get('RESEND_REPLY_TO') || fromEmailRaw || '').trim();
     
     console.log('Environment check:', {
       hasResendKey: !!resendApiKey,
-      hasFromEmail: !!fromEmail,
+      hasFromEmail: !!fromEmailRaw,
       hasReplyTo: !!replyToEmail
     });
     
-    if (!resendApiKey || !fromEmail || !replyToEmail) {
-      console.error('Missing Resend configuration:', {
-        resendApiKey: !!resendApiKey,
-        fromEmail: !!fromEmail,
-        replyToEmail: !!replyToEmail
-      });
-      throw new Error('Email configuration incomplete. Please check RESEND_API_KEY, RESEND_FROM_PROOFS, and RESEND_REPLY_TO secrets.');
+    if (!resendApiKey) {
+      console.error('Missing Resend API key');
+      throw new Error('Email configuration incomplete: RESEND_API_KEY missing');
     }
 
     console.log('Fetching proof with ID:', proofId);
@@ -174,15 +170,18 @@ serve(async (req) => {
     // Normalize from email (remove any existing name/brackets)
     const displayName = 'Imprimerie Grégoire';
     const emailOnly = (() => {
-      const match = fromEmail.match(/<([^>]+)>/);
-      return match ? match[1] : fromEmail; // Remove potential "Name <email>"
+      const match = fromEmailRaw.match(/<([^>]+)>/);
+      return match ? match[1] : fromEmailRaw; // Remove potential "Name <email>"
     })();
-    const formattedFrom = `${displayName} <${emailOnly}>`;
+    const isEmail = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emailOnly);
+    const formattedFrom = isEmail ? `${displayName} <${emailOnly}>` : `${displayName} <onboarding@resend.dev>`;
+    const isTestFrom = !isEmail;
 
     console.log('Formatted FROM field:', formattedFrom);
 
     // Email content
     const subject = `Épreuve ${order.order_number} — version ${proof.version}`;
+    const finalSubject = isTestFrom ? `[TEST] ${subject}` : subject;
     
     const html = `
       <!DOCTYPE html>
@@ -236,7 +235,7 @@ serve(async (req) => {
       from: formattedFrom,
       to: [client.email],
       reply_to: replyToEmail,
-      subject,
+      subject: finalSubject,
       html,
     });
 
