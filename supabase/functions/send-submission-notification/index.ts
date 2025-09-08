@@ -33,6 +33,11 @@ serve(async (req) => {
   }
 
   try {
+    console.log('=== SEND SUBMISSION NOTIFICATION START ===');
+    
+    const body = await req.json();
+    console.log('Request body received:', JSON.stringify(body, null, 2));
+    
     const { 
       clientEmail, 
       clientName, 
@@ -42,13 +47,25 @@ serve(async (req) => {
       totalPrice,
       acceptanceToken,
       items
-    }: SubmissionNotificationRequest = await req.json();
+    }: SubmissionNotificationRequest = body;
 
-    console.log(`Sending submission notification to: ${clientEmail} for submission ${submissionNumber}`);
+    // Validate required fields
+    if (!clientEmail || !clientName || !submissionNumber || !acceptanceToken) {
+      const error = 'Missing required fields for email notification';
+      console.error('Validation error:', error);
+      return new Response(JSON.stringify({ error }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
+    }
+
+    console.log(`Preparing email for: ${clientEmail} (${clientName}) - Submission: ${submissionNumber}`);
 
     // Créer l'URL d'approbation avec le domaine personnalisé
     const APP_URL = 'https://client.promotiongregoire.com';
     const approvalUrl = `${APP_URL}/approve/submission/${acceptanceToken}`;
+    
+    console.log('Approval URL generated:', approvalUrl);
 
     // Render the email template
     const html = await renderAsync(

@@ -86,14 +86,17 @@ export const useCreateSubmission = () => {
             submissionId: submission.id,
             submissionNumber: submission.submission_number,
             totalPrice: submissionData.total_price,
+            acceptanceToken: acceptanceToken, // Use the locally generated token
             items: submissionData.items,
-            acceptanceToken: submission.acceptance_token,
           },
         });
 
         if (emailError) {
           console.error('Error sending submission email:', emailError);
-          throw new Error('Erreur lors de l\'envoi de l\'email de soumission');
+          // Don't throw error - continue with submission creation but log the email failure
+          console.warn('Soumission créée mais email non envoyé:', emailError.message);
+        } else {
+          console.log('Email de soumission envoyé avec succès');
         }
       }
 
