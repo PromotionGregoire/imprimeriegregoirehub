@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { CheckCircle, XCircle, FileText, Building2, User, Mail, AlertCircle, Loader2, Download, Eye, Clock, MessageSquare } from 'lucide-react';
+import { CheckCircle, XCircle, FileText, Building2, User, Mail, AlertCircle, Loader2, Download, Eye, Clock, MessageSquare, Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import logoGregoire from '@/assets/logo-imprimerie-gregoire.png';
 import { usePublicProofData } from '@/hooks/usePublicProofData';
@@ -688,6 +688,22 @@ export default function ProofApprovalPage() {
                     </>
                   )}
                 </Button>
+              </div>
+
+              {/* Contact */}
+              <Separator />
+              <div className="text-center text-sm text-muted-foreground">
+                <p className="mb-2">Des questions? Contactez-nous:</p>
+                <div className="flex items-center justify-center gap-4">
+                  <a href="mailto:info@promotiongregoire.com" className="text-primary hover:underline">
+                    <Send className="inline h-4 w-4 mr-1" />
+                    info@promotiongregoire.com
+                  </a>
+                  <span>•</span>
+                  <a href="tel:+15149354540" className="text-primary hover:underline">
+                    (514) 935-4540
+                  </a>
+                </div>
               </div>
             </CardContent>
           </Card>
