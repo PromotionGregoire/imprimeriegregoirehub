@@ -409,13 +409,13 @@ export default function SubmissionApprovalPage() {
             <div className="text-center text-sm text-muted-foreground">
               <p className="mb-2">Des questions? Contactez-nous:</p>
               <div className="flex items-center justify-center gap-4">
-                <a href={`mailto:${submission.clients.email}`} className="text-primary hover:underline">
+                <a href="mailto:info@promotiongregoire.com" className="text-primary hover:underline">
                   <Send className="inline h-4 w-4 mr-1" />
-                  {submission.clients.email}
+                  info@promotiongregoire.com
                 </a>
                 <span>•</span>
-                <a href={`tel:${submission.clients.phone_number}`} className="text-primary hover:underline">
-                  {submission.clients.phone_number}
+                <a href="tel:+15149354540" className="text-primary hover:underline">
+                  (514) 935-4540
                 </a>
               </div>
             </div>
