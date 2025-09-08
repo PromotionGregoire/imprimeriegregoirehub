@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import StatusManager from '@/components/StatusManager';
 import EmployeeAssignManager from '@/components/EmployeeAssignManager';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { supabase } from '@/integrations/supabase/client';
 
 
 const SubmissionDetails = () => {
@@ -74,11 +75,54 @@ const SubmissionDetails = () => {
   };
 
   const handleResendEmail = async () => {
-    // TODO: Implement email resend functionality
-    toast({
-      title: 'Email envoyé',
-      description: 'Le courriel d\'approbation a été renvoyé au client',
-    });
+    if (!submission || !submission.clients) {
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de renvoyer l\'email - données manquantes',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      console.log('Sending submission notification email...');
+      
+      const { data, error } = await supabase.functions.invoke('send-submission-notification', {
+        body: {
+          clientEmail: submission.clients.email,
+          clientName: submission.clients.contact_name,
+          businessName: submission.clients.business_name,
+          submissionId: submission.id,
+          submissionNumber: submission.submission_number,
+          totalPrice: submission.total_price || 0,
+          acceptanceToken: submission.acceptance_token,
+          items: submission.submission_items?.map(item => ({
+            product_name: item.product_name,
+            description: item.description || '',
+            quantity: item.quantity,
+            unit_price: Number(item.unit_price),
+          })) || [],
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      console.log('Email sent successfully:', data);
+      
+      toast({
+        title: '✅ Email envoyé',
+        description: `Le courriel d'approbation a été renvoyé à ${submission.clients.contact_name}`,
+      });
+    } catch (error) {
+      console.error('Error sending email:', error);
+      toast({
+        title: '❌ Erreur lors de l\'envoi',
+        description: 'Impossible d\'envoyer l\'email. Veuillez réessayer.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleCloneSubmission = async () => {
