@@ -19,7 +19,10 @@ verify_jwt = false
 verify_jwt = true
 
 [functions.send-proof-to-client]
-verify_jwt = true
+verify_jwt = false
+
+[functions.proof-approval-public]
+verify_jwt = false
 
 [functions.send-submission-notification]
 verify_jwt = true
