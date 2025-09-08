@@ -52,7 +52,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send notification to employee
     const employeeEmailResponse = await resend.emails.send({
-      from: 'PromoFlow <onboarding@resend.dev>',
+      from: 'PromoFlow <info@promotiongregoire.com>',
       to: [requestData.user_email],
       subject: 'Mot de passe changé avec succès - PromoFlow',
       html: `
@@ -69,7 +69,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send notification to admin
     const adminEmailResponse = await resend.emails.send({
-      from: 'PromoFlow <onboarding@resend.dev>',
+      from: 'PromoFlow <info@promotiongregoire.com>',
       to: [adminEmail],
       subject: 'Changement de mot de passe employé - PromoFlow',
       html: `

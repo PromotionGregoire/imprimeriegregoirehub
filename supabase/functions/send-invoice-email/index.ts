@@ -179,8 +179,8 @@ serve(async (req) => {
           <div class="footer">
             <p>Imprimerie Grégoire<br>
             📞 Téléphone: (555) 123-4567<br>
-            ✉️ Email: info@imprimerie-gregoire.ca<br>
-            🌐 Web: www.imprimerie-gregoire.ca</p>
+            ✉️ Email: info@promotiongregoire.com<br>
+            🌐 Web: www.promotiongregoire.com</p>
           </div>
         </div>
       </body>
@@ -189,7 +189,7 @@ serve(async (req) => {
 
     // Send email
     const emailResult = await resend.emails.send({
-      from: 'Imprimerie Grégoire <factures@imprimerie-gregoire.ca>',
+      from: 'Imprimerie Grégoire <info@promotiongregoire.com>',
       to: [recipientEmail],
       subject: `Facture ${invoice.number} - ${businessName}`,
       html: emailHtml,
