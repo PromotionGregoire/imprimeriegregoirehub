@@ -1565,6 +1565,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      is_admin_or_manager: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_admin_role: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       mark_invoices_overdue: {
         Args: Record<PropertyKey, never>
         Returns: undefined
