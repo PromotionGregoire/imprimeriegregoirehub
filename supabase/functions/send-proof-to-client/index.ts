@@ -171,6 +171,16 @@ serve(async (req) => {
     // Initialize Resend
     const resend = new Resend(resendApiKey);
 
+    // Normalize from email (remove any existing name/brackets)
+    const displayName = 'Imprimerie Grégoire';
+    const emailOnly = (() => {
+      const match = fromEmail.match(/<([^>]+)>/);
+      return match ? match[1] : fromEmail; // Remove potential "Name <email>"
+    })();
+    const formattedFrom = `${displayName} <${emailOnly}>`;
+
+    console.log('Formatted FROM field:', formattedFrom);
+
     // Email content
     const subject = `Épreuve ${order.order_number} — version ${proof.version}`;
     
@@ -221,14 +231,27 @@ serve(async (req) => {
 
     console.log('Preparing email for:', client.email, `(${client.contact_name || client.business_name}) - Order: ${order.order_number}`);
 
-    // Send email
-    const emailResult = await resend.emails.send({
-      from: `Imprimerie Grégoire <${fromEmail}>`,
+    // Send email with automatic fallback
+    let emailResult = await resend.emails.send({
+      from: formattedFrom,
       to: [client.email],
       reply_to: replyToEmail,
       subject,
       html,
     });
+
+    // Automatic fallback if domain validation issues
+    if (emailResult.error && /invalid.*from/i.test(emailResult.error.name || emailResult.error.message || '')) {
+      console.log('FROM field rejected, falling back to Resend default:', emailResult.error);
+      
+      emailResult = await resend.emails.send({
+        from: 'Imprimerie Grégoire <onboarding@resend.dev>',
+        to: [client.email],
+        reply_to: replyToEmail,
+        subject: `[TEST] ${subject}`,
+        html,
+      });
+    }
 
     if (emailResult.error) {
       console.error('Email send error:', emailResult.error);
