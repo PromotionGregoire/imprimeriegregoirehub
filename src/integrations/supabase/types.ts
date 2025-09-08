@@ -1425,24 +1425,15 @@ export type Database = {
     }
     Functions: {
       add_ordre_history: {
-        Args:
-          | {
-              p_action_description: string
-              p_action_type: string
-              p_client_action?: boolean
-              p_created_by?: string
-              p_metadata?: Json
-              p_order_id: string
-              p_proof_id?: string
-            }
-          | {
-              p_action_description: string
-              p_action_type: string
-              p_client_action?: boolean
-              p_metadata?: Json
-              p_order_id: string
-              p_proof_id?: string
-            }
+        Args: {
+          p_action_description: string
+          p_action_type: string
+          p_client_action?: boolean
+          p_created_by?: string
+          p_metadata?: Json
+          p_order_id: string
+          p_proof_id?: string
+        }
         Returns: string
       }
       gen_invoice_number: {
