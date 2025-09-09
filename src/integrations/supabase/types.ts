@@ -192,6 +192,13 @@ export type Database = {
             referencedRelation: "v_archived_proofs"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "email_notifications_proof_id_fkey"
+            columns: ["proof_id"]
+            isOneToOne: false
+            referencedRelation: "v_submission_cards"
+            referencedColumns: ["latest_proof_id"]
+          },
         ]
       }
       epreuve_commentaires: {
@@ -254,6 +261,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "epreuve_commentaires_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_submission_cards"
+            referencedColumns: ["order_id"]
+          },
+          {
             foreignKeyName: "epreuve_commentaires_proof_id_fkey"
             columns: ["proof_id"]
             isOneToOne: false
@@ -273,6 +287,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_archived_proofs"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "epreuve_commentaires_proof_id_fkey"
+            columns: ["proof_id"]
+            isOneToOne: false
+            referencedRelation: "v_submission_cards"
+            referencedColumns: ["latest_proof_id"]
           },
         ]
       }
@@ -429,6 +450,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "invoices_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_submission_cards"
+            referencedColumns: ["order_id"]
+          },
+          {
             foreignKeyName: "invoices_submission_id_fkey"
             columns: ["submission_id"]
             isOneToOne: false
@@ -447,6 +475,13 @@ export type Database = {
             columns: ["submission_id"]
             isOneToOne: false
             referencedRelation: "v_archived_submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "v_submission_cards"
             referencedColumns: ["id"]
           },
         ]
@@ -558,6 +593,13 @@ export type Database = {
             referencedRelation: "v_archived_submissions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "orders_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "v_submission_cards"
+            referencedColumns: ["id"]
+          },
         ]
       }
       ordre_historique: {
@@ -617,6 +659,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ordre_historique_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_submission_cards"
+            referencedColumns: ["order_id"]
+          },
+          {
             foreignKeyName: "ordre_historique_proof_id_fkey"
             columns: ["proof_id"]
             isOneToOne: false
@@ -636,6 +685,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_archived_proofs"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordre_historique_proof_id_fkey"
+            columns: ["proof_id"]
+            isOneToOne: false
+            referencedRelation: "v_submission_cards"
+            referencedColumns: ["latest_proof_id"]
           },
         ]
       }
@@ -1077,6 +1133,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           order_id: string
+          proof_code: string | null
           status: string
           updated_at: string
           uploaded_at: string | null
@@ -1097,6 +1154,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           order_id: string
+          proof_code?: string | null
           status?: string
           updated_at?: string
           uploaded_at?: string | null
@@ -1117,6 +1175,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           order_id?: string
+          proof_code?: string | null
           status?: string
           updated_at?: string
           uploaded_at?: string | null
@@ -1145,6 +1204,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_archived_orders"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_proofs_order_id"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_submission_cards"
+            referencedColumns: ["order_id"]
           },
           {
             foreignKeyName: "proofs_archived_by_fkey"
@@ -1236,6 +1302,13 @@ export type Database = {
             columns: ["submission_id"]
             isOneToOne: false
             referencedRelation: "v_archived_submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submission_items_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "v_submission_cards"
             referencedColumns: ["id"]
           },
         ]
@@ -1625,6 +1698,13 @@ export type Database = {
             referencedRelation: "v_archived_submissions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "orders_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "v_submission_cards"
+            referencedColumns: ["id"]
+          },
         ]
       }
       v_active_proofs: {
@@ -1709,6 +1789,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_archived_orders"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_proofs_order_id"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_submission_cards"
+            referencedColumns: ["order_id"]
           },
           {
             foreignKeyName: "proofs_archived_by_fkey"
@@ -1884,6 +1971,13 @@ export type Database = {
             referencedRelation: "v_archived_submissions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "orders_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "v_submission_cards"
+            referencedColumns: ["id"]
+          },
         ]
       }
       v_archived_proofs: {
@@ -1968,6 +2062,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_archived_orders"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_proofs_order_id"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_submission_cards"
+            referencedColumns: ["order_id"]
           },
           {
             foreignKeyName: "proofs_archived_by_fkey"
@@ -2097,6 +2198,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ordre_historique_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_submission_cards"
+            referencedColumns: ["order_id"]
+          },
+          {
             foreignKeyName: "ordre_historique_proof_id_fkey"
             columns: ["proof_id"]
             isOneToOne: false
@@ -2116,6 +2224,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_archived_proofs"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordre_historique_proof_id_fkey"
+            columns: ["proof_id"]
+            isOneToOne: false
+            referencedRelation: "v_submission_cards"
+            referencedColumns: ["latest_proof_id"]
           },
         ]
       }
@@ -2162,6 +2277,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ordre_historique_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_submission_cards"
+            referencedColumns: ["order_id"]
+          },
+          {
             foreignKeyName: "ordre_historique_proof_id_fkey"
             columns: ["proof_id"]
             isOneToOne: false
@@ -2182,7 +2304,39 @@ export type Database = {
             referencedRelation: "v_archived_proofs"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "ordre_historique_proof_id_fkey"
+            columns: ["proof_id"]
+            isOneToOne: false
+            referencedRelation: "v_submission_cards"
+            referencedColumns: ["latest_proof_id"]
+          },
         ]
+      }
+      v_submission_cards: {
+        Row: {
+          amount: number | null
+          client_name: string | null
+          created_at: string | null
+          days_remaining: number | null
+          deadline: string | null
+          has_proof: boolean | null
+          id: string | null
+          latest_proof_id: string | null
+          latest_proof_version: number | null
+          order_id: string | null
+          order_number: string | null
+          order_status: string | null
+          priority_level: string | null
+          proof_approval_token: string | null
+          proof_status: string | null
+          sent_at: string | null
+          status_label: string | null
+          submission_number: string | null
+          updated_at: string | null
+          valid_until: string | null
+        }
+        Relationships: []
       }
     }
     Functions: {

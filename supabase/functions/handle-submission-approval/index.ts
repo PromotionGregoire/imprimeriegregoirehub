@@ -109,6 +109,11 @@ serve(async (req) => {
         order_id = existing.id;
         order_number = existing.order_number;
       } else {
+        // Dériver le numéro de commande depuis le numéro de soumission
+        const derivedOrderNumber = submission.submission_number
+          ? submission.submission_number.replace(/^S-/, 'C-')
+          : undefined;
+
         const { data: newOrder, error: orderErr } = await supabase
           .from('orders')
           .insert({
@@ -116,6 +121,8 @@ serve(async (req) => {
             client_id: submission.client_id,
             total_price: submission.total_price || 0,
             status: "En attente de l'épreuve",
+            // ⬇️ force l'order_number pour qu'il "suive" la soumission
+            order_number: derivedOrderNumber,
           })
           .select('id, order_number')
           .single();
