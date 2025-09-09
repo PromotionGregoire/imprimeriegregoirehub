@@ -20,18 +20,10 @@ interface ProofData {
   approved_at?: string;
   approved_by_name?: string;
   created_at: string;
-  orders: {
-    order_number: string;
-    total_price: number;
-    submissions: {
-      submission_number: string;
-      clients: {
-        business_name: string;
-        contact_name: string;
-        contact_email: string;
-      };
-    };
-  };
+  order_number: string;
+  submission_number?: string;
+  business_name?: string;
+  contact_name?: string;
 }
 
 const ProofApproval = () => {
@@ -56,15 +48,21 @@ const ProofApproval = () => {
   const fetchProofData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`https://ytcrplsistsxfaxkfqqp.supabase.co/functions/v1/get-proof-by-token?token=${token}`);
+      const response = await fetch('https://ytcrplsistsxfaxkfqqp.supabase.co/functions/v1/get-proof-by-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token }),
+      });
       const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data.error || 'Erreur lors du chargement de l\'épreuve');
       }
 
-      setProof(data.proof);
-      setClientName(data.proof.orders.submissions.clients.contact_name || '');
+      setProof(data);
+      setClientName(data.contact_name || data.business_name || '');
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -80,15 +78,15 @@ const ProofApproval = () => {
 
     try {
       setProcessing(true);
-      const response = await fetch('https://ytcrplsistsxfaxkfqqp.supabase.co/functions/v1/approve-proof', {
+      const response = await fetch('https://ytcrplsistsxfaxkfqqp.supabase.co/functions/v1/handle-proof-decision', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          approvalToken: token,
-          approverName: clientName.trim(),
-          confirmationWord: 'ACCEPTER'
+          token,
+          decision: 'approved',
+          comments: `Approuvé par ${clientName.trim()}`
         }),
       });
 
@@ -119,15 +117,15 @@ const ProofApproval = () => {
 
     try {
       setProcessing(true);
-      const response = await fetch('https://ytcrplsistsxfaxkfqqp.supabase.co/functions/v1/request-proof-modification', {
+      const response = await fetch('https://ytcrplsistsxfaxkfqqp.supabase.co/functions/v1/handle-proof-decision', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          approvalToken: token,
-          clientComments: modificationComments.trim(),
-          clientName: clientName.trim()
+          token,
+          decision: 'rejected',
+          comments: modificationComments.trim()
         }),
       });
 
@@ -162,12 +160,8 @@ const ProofApproval = () => {
     }
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-CA', {
-      style: 'currency',
-      currency: 'CAD',
-    }).format(price);
-  };
+  // Remove formatPrice function since total_price is not available in secure response
+  // const formatPrice = (price: number) => { ... }
 
   if (loading) {
     return (
@@ -220,17 +214,19 @@ const ProofApproval = () => {
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-gray-900">Validation de votre épreuve</h1>
               <p className="text-gray-600 mt-1">
-                Épreuve pour la commande #{proof.orders.order_number}
+                Épreuve pour la commande #{proof.order_number}
               </p>
             </div>
           </div>
           
           {/* Status and Info */}
           <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-            <div className="flex items-center gap-2">
-              <Building className="h-4 w-4" />
-              {proof.orders.submissions.clients.business_name}
-            </div>
+            {proof.business_name && (
+              <div className="flex items-center gap-2">
+                <Building className="h-4 w-4" />
+                {proof.business_name}
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Version {proof.version}
@@ -238,10 +234,6 @@ const ProofApproval = () => {
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               {format(new Date(proof.created_at), 'dd MMMM yyyy', { locale: fr })}
-            </div>
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
-              {formatPrice(proof.orders.total_price)}
             </div>
             {getStatusBadge(proof.status)}
           </div>
