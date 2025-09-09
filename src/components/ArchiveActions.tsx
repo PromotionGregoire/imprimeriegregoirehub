@@ -51,7 +51,7 @@ export function ArchiveActions({
         ) : (
           <ArchiveRestore className="h-4 w-4" />
         )}
-        <span className="ml-2">Désarchiver</span>
+        {size !== 'icon' && <span className="ml-2">Désarchiver</span>}
       </Button>
     );
   }
@@ -61,7 +61,7 @@ export function ArchiveActions({
       <DialogTrigger asChild>
         <Button variant={variant} size={size}>
           <Archive className="h-4 w-4" />
-          <span className="ml-2">Archiver</span>
+          {size !== 'icon' && <span className="ml-2">Archiver</span>}
         </Button>
       </DialogTrigger>
       <DialogContent>

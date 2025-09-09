@@ -26,6 +26,7 @@ import { ArchiveFilter } from '@/components/ArchiveFilter';
 import { ArchiveActions } from '@/components/ArchiveActions';
 import { ArchiveFilter as ArchiveFilterType } from '@/utils/archiveUtils';
 import { cn } from '@/lib/utils';
+import { useArchiveMutations } from '@/hooks/useArchiveMutations';
 
 const Submissions = () => {
   const navigate = useNavigate();
@@ -33,6 +34,8 @@ const Submissions = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [periodFilter, setPeriodFilter] = useState('all');
   const [archiveFilter, setArchiveFilter] = useState<ArchiveFilterType>('actives');
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const { archiveMutation } = useArchiveMutations('submission');
   
   const { data: submissions, isLoading, error } = useAllSubmissions(archiveFilter);
 
@@ -134,7 +137,11 @@ const Submissions = () => {
     if (daysLeft && daysLeft > 1) return `${formatDate(submission.deadline)} (${daysLeft} jours restants)`;
     return formatDate(submission.deadline);
   };
-
+  
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+  const clearSelection = () => setSelectedIds([]);
   if (isLoading) {
     return (
       <div className="px-4 md:px-6 lg:px-8 py-6 space-y-6">
