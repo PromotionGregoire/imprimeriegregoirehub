@@ -55,8 +55,8 @@ const ModernSubmissionCard = ({
   const priorityColors = {
     critical: 'bg-red-500',
     high: 'bg-orange-500',
-    normal: 'bg-yellow-400',
-    low: 'bg-gray-300'
+    normal: 'bg-blue-500',
+    low: 'bg-green-500'
   };
 
   const statusConfig = {

@@ -32,8 +32,8 @@ const DESIGN_SYSTEM = {
     priority: {
       critical: 'bg-red-500',
       high: 'bg-orange-500',
-      normal: 'bg-yellow-400',
-      low: 'bg-gray-300'
+      normal: 'bg-blue-500',
+      low: 'bg-green-500'
     },
     status: {
       accepted: { dot: 'bg-green-500', badge: 'bg-green-100 text-green-700' },
