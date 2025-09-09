@@ -418,23 +418,23 @@ const ProofDetails = () => {
           <CardContent className="space-y-4">
             {(proof.approval_token || proof.validation_token) ? (
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Lien d'approbation client</Label>
-                  <div className="flex items-center gap-2 p-3 bg-primary/5 border-2 border-primary/20 rounded-lg">
-                    <input
-                      type="text"
-                      readOnly
-                      value={`${window.location.origin}/approve/proof/${proof.validation_token || proof.approval_token}`}
-                      className="flex-1 bg-transparent border-none outline-none text-sm font-mono"
-                    />
-                    <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <div className="space-y-2">
+                    <Label>Lien d'approbation client</Label>
+                    <div className="flex items-center gap-2 p-3 bg-primary/5 border-2 border-primary/20 rounded-lg">
+                      <input
+                        type="text"
+                        readOnly
+                        value={`https://client.promotiongregoire.com/approve/proof/${proof.validation_token || proof.approval_token}`}
+                        className="flex-1 bg-transparent border-none outline-none text-sm font-mono"
+                      />
+                      <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    </div>
                   </div>
-                </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <Button
                     onClick={async () => {
-                      const url = `${window.location.origin}/approve/proof/${proof.validation_token || proof.approval_token}`;
+                      const url = `https://client.promotiongregoire.com/approve/proof/${proof.validation_token || proof.approval_token}`;
                       try {
                         await navigator.clipboard.writeText(url);
                         setLinkCopied(true);
@@ -474,7 +474,7 @@ const ProofDetails = () => {
                     className="border-primary/20 hover:bg-primary/10"
                   >
                     <a
-                      href={`${window.location.origin}/approve/proof/${proof.validation_token || proof.approval_token}`}
+                      href={`https://client.promotiongregoire.com/approve/proof/${proof.validation_token || proof.approval_token}`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
