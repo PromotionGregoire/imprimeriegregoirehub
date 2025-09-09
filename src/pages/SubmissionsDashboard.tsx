@@ -9,6 +9,7 @@ import { useMultiSelect } from '@/hooks/useMultiSelect';
 import { SubmissionFilters } from '@/types/submission';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { SUBMISSION_STATUS } from '@/constants/status-constants';
 
 export const SubmissionsDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -40,7 +41,7 @@ export const SubmissionsDashboard: React.FC = () => {
   const [statusTargetId, setStatusTargetId] = useState<string | null>(null);
   const targetSubmission = useMemo(() => submissions.find(s => s.id === statusTargetId) || null, [submissions, statusTargetId]);
   const statusOptions = useMemo(() => (
-    ['Brouillon', 'Envoyée', 'En attente', 'Acceptée', 'Refusée', 'Modification Demandée']
+    Object.values(SUBMISSION_STATUS)
   ), []);
   const { updateStatus } = useBulkActions();
 
@@ -203,7 +204,7 @@ export const SubmissionsDashboard: React.FC = () => {
             {statusOptions.map((s) => (
               <Button
                 key={s}
-                variant={targetSubmission?.status === s ? 'secondary' : 'outline'}
+                variant={Object.values(SUBMISSION_STATUS).includes(targetSubmission?.status as any) ? 'secondary' : 'outline'}
                 className="w-full justify-start"
                 onClick={() => {
                   if (!statusTargetId) return;

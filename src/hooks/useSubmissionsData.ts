@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Submission, SubmissionFilters, DashboardStats } from '@/types/submission';
 import { useToast } from '@/hooks/use-toast';
+import { SUBMISSION_STATUS } from '@/constants/status-constants';
 
 export const useSubmissionsData = (filters: SubmissionFilters) => {
   return useQuery({
@@ -83,9 +84,9 @@ export const useDashboardStats = (): { data: DashboardStats | undefined; isLoadi
       const stats = (data || []).reduce(
         (acc: DashboardStats, submission: any) => {
           acc.total++;
-          if (submission.status === 'accepted') acc.accepted++;
-          if (submission.status === 'sent') acc.sent++;
-          if (['accepted', 'rejected'].includes(submission.status)) acc.completed++;
+          if (submission.status === SUBMISSION_STATUS.ACCEPTED) acc.accepted++;
+          if (submission.status === SUBMISSION_STATUS.SENT) acc.sent++;
+          if ([SUBMISSION_STATUS.ACCEPTED, SUBMISSION_STATUS.REJECTED].includes(submission.status)) acc.completed++;
           acc.totalValue += submission.total_price || 0;
           return acc;
         },

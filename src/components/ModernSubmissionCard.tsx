@@ -3,6 +3,7 @@ import { MoreVertical, Eye, Users, Archive, RefreshCw, Trash2 } from 'lucide-rea
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { SUBMISSION_STATUS, STATUS_COLORS } from '@/constants/status-constants';
 
 // CONSTANTES DE DESIGN - NE PAS MODIFIER
 const DESIGN_SYSTEM = {
@@ -43,7 +44,7 @@ const ModernSubmissionCard = ({
     const today = new Date();
     const daysLeft = deadline ? Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) : null;
     
-    if (submission.status === 'Refusée') return 'critical';
+    if (submission.status === SUBMISSION_STATUS.REJECTED) return 'critical';
     if (daysLeft !== null && daysLeft <= 1) return 'critical';
     if (daysLeft !== null && daysLeft <= 3) return 'high';
     if (daysLeft !== null && daysLeft <= 7) return 'normal';
@@ -59,13 +60,7 @@ const ModernSubmissionCard = ({
     low: 'bg-green-500'
   };
 
-  const statusConfig = {
-    'Acceptée': { dot: 'bg-green-500', badge: 'bg-green-100 text-green-700' },
-    'Envoyée': { dot: 'bg-blue-500', badge: 'bg-blue-100 text-blue-700' },
-    'En attente': { dot: 'bg-orange-500', badge: 'bg-orange-100 text-orange-700' },
-    'Refusée': { dot: 'bg-red-500', badge: 'bg-red-100 text-red-700' },
-    'Brouillon': { dot: 'bg-gray-500', badge: 'bg-gray-100 text-gray-700' }
-  };
+  const statusConfig = STATUS_COLORS;
 
   // Formatage montant
   const formatCurrency = (amount: number) => {
