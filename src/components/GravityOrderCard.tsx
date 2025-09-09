@@ -134,7 +134,7 @@ const GravityOrderCard: React.FC<GravityOrderCardProps> = ({
                 e.stopPropagation();
                 onProofAccepted(order.id);
               }}
-              className="flex-1 px-3 py-1.5 text-xs font-medium bg-info/10 text-info rounded-md hover:bg-info/20 transition-colors"
+              className="flex-1 px-3 py-1.5 text-xs font-medium bg-blue-500/10 text-blue-600 rounded-md hover:bg-blue-500/20 transition-colors"
             >
               Démarrer production
             </button>
@@ -145,10 +145,15 @@ const GravityOrderCard: React.FC<GravityOrderCardProps> = ({
                 e.stopPropagation();
                 onDelivered(order.id);
               }}
-              className="flex-1 px-3 py-1.5 text-xs font-medium bg-success/10 text-success rounded-md hover:bg-success/20 transition-colors"
+              className="flex-1 px-3 py-1.5 text-xs font-medium bg-green-500/10 text-green-600 rounded-md hover:bg-green-500/20 transition-colors"
             >
               Marquer livrée
             </button>
+          )}
+          {order.status === 'Complétée' && (
+            <div className="flex-1 px-3 py-1.5 text-xs font-medium text-green-600 text-center">
+              ✅ Livraison terminée
+            </div>
           )}
         </div>
       )}
