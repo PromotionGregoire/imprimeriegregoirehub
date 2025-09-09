@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { 
   ArrowRight, 
   ExternalLink, 
@@ -12,7 +13,10 @@ import {
   Eye,
   Send,
   MoreVertical,
-  TrendingUp
+  TrendingUp,
+  RefreshCw,
+  Archive,
+  Trash2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -151,7 +155,7 @@ const ModernSubmissionCard = ({ submission, onClick, isSelected = false, onSelec
 
   return (
     <Card className={cn(
-      "group cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-2 bg-white border rounded-2xl overflow-hidden",
+      "group cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-2 bg-white border rounded-2xl overflow-hidden relative",
       isSelected ? "border-primary ring-2 ring-primary/20 bg-primary/5" : "border-gray-100"
     )}>
       {/* Priority Indicator Bar */}
@@ -160,7 +164,7 @@ const ModernSubmissionCard = ({ submission, onClick, isSelected = false, onSelec
       <CardContent className="p-5">
         {/* Selection Checkbox */}
         {onSelect && (
-          <div className="absolute top-3 left-3 z-10">
+          <div className="absolute top-5 left-5 z-10">
             <Checkbox
               checked={isSelected}
               onCheckedChange={(checked) => onSelect?.()}
@@ -170,11 +174,60 @@ const ModernSubmissionCard = ({ submission, onClick, isSelected = false, onSelec
           </div>
         )}
 
+        {/* Dropdown Menu */}
+        <div className="absolute top-3 right-3 z-10">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MoreVertical className="w-4 h-4 text-gray-400" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48 bg-white shadow-lg border border-gray-200 z-50">
+              <DropdownMenuItem 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClick();
+                }}
+                className="flex items-center gap-2 p-3 hover:bg-gray-50"
+              >
+                <Eye className="w-4 h-4" />
+                Voir détails
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={(e) => e.stopPropagation()}
+                className="flex items-center gap-2 p-3 hover:bg-gray-50"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Changer statut
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={(e) => e.stopPropagation()}
+                className="flex items-center gap-2 p-3 hover:bg-gray-50"
+              >
+                <Archive className="w-4 h-4" />
+                Archiver
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={(e) => e.stopPropagation()}
+                className="flex items-center gap-2 p-3 hover:bg-gray-50 text-red-600"
+              >
+                <Trash2 className="w-4 h-4" />
+                Supprimer
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
         {/* Card content wrapper with click handler */}
         <div onClick={onClick} className="w-full">
           {/* Header with Status Dot */}
           <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
+            <div className={cn("flex-1", onSelect && "ml-8")}>
               <div className="flex items-center space-x-2 mb-1">
                 <h3 className="font-semibold text-gray-900 text-base truncate">
                   {submission.clients?.business_name || 'Client Non Défini'}
@@ -183,9 +236,6 @@ const ModernSubmissionCard = ({ submission, onClick, isSelected = false, onSelec
               </div>
               <p className="text-xs text-gray-500 font-mono">{submission.submission_number}</p>
             </div>
-            <button className="opacity-0 group-hover:opacity-100 transition-opacity">
-              <MoreVertical className="w-5 h-5 text-gray-400" />
-            </button>
           </div>
 
           {/* Amount - Prominent Display */}

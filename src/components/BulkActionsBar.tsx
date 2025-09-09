@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RefreshCw, Users, Archive, Trash2, X } from 'lucide-react';
+import { RefreshCw, Users, Archive, Trash2, X, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useBulkActions } from '@/hooks/useSubmissionsData';
@@ -48,110 +48,77 @@ export const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
   if (selectedCount === 0) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
+    <div className="fixed bottom-0 left-0 right-0 bg-slate-800 border-t shadow-2xl z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Selection Info */}
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
-                {selectedCount}
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
+                <Check className="w-4 h-4" />
               </div>
-              <span className="text-sm text-gray-700">
-                <span className="hidden sm:inline">
-                  {selectedCount === 1 ? 'soumission sélectionnée' : 'soumissions sélectionnées'}
-                </span>
-                <span className="sm:hidden">
-                  sélectionnée{selectedCount > 1 ? 's' : ''}
-                </span>
+              <span className="text-white font-medium">
+                {selectedCount} sélectionnée{selectedCount > 1 ? 's' : ''}
               </span>
             </div>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClearSelection}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              <X className="w-4 h-4" />
-              <span className="hidden sm:inline ml-1">Annuler</span>
-            </Button>
           </div>
 
           {/* Actions */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
             {/* Status Change */}
-            {showStatusSelect ? (
-              <Select onValueChange={handleStatusChange}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Nouveau statut" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draft">Brouillon</SelectItem>
-                  <SelectItem value="sent">Envoyé</SelectItem>
-                  <SelectItem value="pending">En attente</SelectItem>
-                  <SelectItem value="accepted">Accepté</SelectItem>
-                  <SelectItem value="rejected">Rejeté</SelectItem>
-                </SelectContent>
-              </Select>
-            ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowStatusSelect(true)}
-                disabled={isLoading}
-              >
-                <RefreshCw className="w-4 h-4" />
-                <span className="hidden sm:inline ml-2">Statut</span>
-              </Button>
-            )}
+            <Button
+              variant="secondary"
+              size="sm"
+              className="bg-blue-600 hover:bg-blue-700 text-white border-0"
+              disabled={isLoading}
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Changer statut
+            </Button>
 
             {/* Assignment */}
-            {showAssignSelect ? (
-              <Select onValueChange={handleAssignChange}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Assigner à" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Jean Dupont">Jean Dupont</SelectItem>
-                  <SelectItem value="Marie Martin">Marie Martin</SelectItem>
-                  <SelectItem value="Pierre Durand">Pierre Durand</SelectItem>
-                  <SelectItem value="">Non assigné</SelectItem>
-                </SelectContent>
-              </Select>
-            ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowAssignSelect(true)}
-                disabled={isLoading}
-              >
-                <Users className="w-4 h-4" />
-                <span className="hidden sm:inline ml-2">Assigner</span>
-              </Button>
-            )}
+            <Button
+              variant="secondary"
+              size="sm"
+              className="bg-purple-600 hover:bg-purple-700 text-white border-0"
+              disabled={isLoading}
+            >
+              <Users className="w-4 h-4 mr-2" />
+              Assigner
+            </Button>
 
             {/* Archive */}
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={handleArchive}
               disabled={isLoading}
+              className="bg-gray-600 hover:bg-gray-700 text-white border-0"
             >
-              <Archive className="w-4 h-4" />
-              <span className="hidden sm:inline ml-2">Archiver</span>
+              <Archive className="w-4 h-4 mr-2" />
+              Archiver
             </Button>
 
             {/* Delete */}
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={handleDelete}
               disabled={isLoading}
-              className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
+              className="bg-red-600 hover:bg-red-700 text-white border-0"
             >
-              <Trash2 className="w-4 h-4" />
-              <span className="hidden sm:inline ml-2">Supprimer</span>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Supprimer
+            </Button>
+
+            {/* Close button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClearSelection}
+              className="text-gray-300 hover:text-white hover:bg-slate-700"
+            >
+              <X className="w-4 h-4" />
             </Button>
           </div>
         </div>

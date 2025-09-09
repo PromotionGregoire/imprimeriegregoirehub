@@ -353,7 +353,7 @@ const Submissions = () => {
             </div>
           ) : (
             filteredSubmissions.map((submission) => (
-              <div key={submission.id} className="relative group">
+              <div key={submission.id} className="relative">
                 <ModernSubmissionCard
                   submission={submission}
                   onClick={() => navigate(`/dashboard/submissions/${submission.id}`)}
@@ -363,17 +363,6 @@ const Submissions = () => {
                     toggleSelection(submission.id);
                   }}
                 />
-                
-                {/* Archive Actions - Only show for admin/managers */}
-                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <ArchiveActions
-                    entity={submission}
-                    entityId={submission.id}
-                    kind="submission"
-                    variant="ghost"
-                    size="icon"
-                  />
-                </div>
               </div>
             ))
           )}
