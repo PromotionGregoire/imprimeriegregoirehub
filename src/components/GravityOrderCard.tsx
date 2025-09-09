@@ -8,7 +8,7 @@ interface GravityOrderCardProps {
   isSelected?: boolean;
   onSelect?: (e?: React.MouseEvent) => void;
   onProofAccepted?: (orderId: string) => void;
-  onInvoiced?: (orderId: string, paymentType: string) => void;
+  onInvoiced?: (orderId: string) => void;
   onDelivered?: (orderId: string) => void;
 }
 
@@ -147,7 +147,7 @@ const GravityOrderCard: React.FC<GravityOrderCardProps> = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                onInvoiced(order.id, ''); // Call the function properly
+                onInvoiced(order.id); // Open payment type modal
               }}
               className="flex-1 px-3 py-1.5 text-xs font-medium bg-cyan-500/10 text-cyan-600 rounded-md hover:bg-cyan-500/20 transition-colors mr-2"
             >
