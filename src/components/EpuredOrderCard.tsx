@@ -52,11 +52,11 @@ const EpuredOrderCard = ({ order, onProofAccepted, onDelivered }: OrderCardProps
   const getBorderColor = (status: string) => {
     switch (status) {
       case 'En attente de l\'épreuve':
-        return 'border-l-[hsl(var(--status-orange))]';
+        return 'border-l-orange-500';
       case 'En production':
-        return 'border-l-[hsl(var(--status-green))]';
+        return 'border-l-blue-500';
       case 'Complétée':
-        return 'border-l-[hsl(var(--status-purple))]';
+        return 'border-l-green-500';
       default:
         return 'border-l-muted-foreground';
     }
