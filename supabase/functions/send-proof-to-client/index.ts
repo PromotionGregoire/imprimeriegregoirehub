@@ -135,15 +135,18 @@ serve(async (req) => {
     }
 
     // Log notification (best-effort)
-    await supabase
-      .from("email_notifications")
-      .insert({
-        proof_id: proof.id,
-        email_type: "proof_notification",
-        recipient_email: clientEmail,
-        success: true,
-      })
-      .catch(() => {});
+    try {
+      await supabase
+        .from("email_notifications")
+        .insert({
+          proof_id: proof.id,
+          email_type: "proof_notification",
+          recipient_email: clientEmail,
+          success: true,
+        });
+    } catch (error) {
+      console.warn("Failed to log email notification:", error);
+    }
 
     return json({ ok: true, messageId: sent?.data?.id ?? null });
   } catch (e) {
