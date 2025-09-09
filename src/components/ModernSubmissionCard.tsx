@@ -13,7 +13,9 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { SubmissionStatusTimeline } from './SubmissionStatusTimeline';
 import ModernToggle from './ModernToggle';
-import { useProofToggle } from '@/hooks/useProofToggle';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface ModernSubmissionCardProps {
   submission: any;
@@ -22,7 +24,40 @@ interface ModernSubmissionCardProps {
 
 const ModernSubmissionCard = ({ submission, onClick }: ModernSubmissionCardProps) => {
   const navigate = useNavigate();
-  const proofToggle = useProofToggle(submission.id);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const acceptSubmissionMutation = useMutation({
+    mutationFn: async (submissionId: string) => {
+      const { data, error } = await supabase.functions.invoke('handle-submission-approval', {
+        body: { 
+          submission_id: submissionId,
+          client_name: submission.clients?.business_name || 'Client'
+        }
+      });
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      toast({
+        title: '✅ Soumission approuvée',
+        description: `Commande ${data.order_number} créée automatiquement`
+      });
+      
+      // Invalider les queries pour refetch les données
+      queryClient.invalidateQueries({ queryKey: ['all-submissions'] });
+      queryClient.invalidateQueries({ queryKey: ['submission-details', submission.id] });
+    },
+    onError: (error) => {
+      console.error('Erreur lors de l\'approbation:', error);
+      toast({
+        title: '❌ Erreur',
+        description: 'Impossible d\'approuver la soumission',
+        variant: 'destructive'
+      });
+    }
+  });
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-CA', {
@@ -47,7 +82,7 @@ const ModernSubmissionCard = ({ submission, onClick }: ModernSubmissionCardProps
     
     if (!confirmed) return;
     
-    proofToggle.mutate({ isAccepted: true });
+    acceptSubmissionMutation.mutate(submission.id);
   };
 
   return (
@@ -115,9 +150,9 @@ const ModernSubmissionCard = ({ submission, onClick }: ModernSubmissionCardProps
           <ModernToggle
             id={`accept-${submission.id}`}
             label="Accepter la Soumission"
-            checked={submission.status === 'Acceptée'}
+            checked={submission.status === 'Approuvée'}
             onCheckedChange={handleAcceptSubmission}
-            disabled={submission.status === 'Acceptée' || proofToggle.isPending}
+            disabled={submission.status === 'Approuvée' || acceptSubmissionMutation.isPending}
           />
         </div>
 
