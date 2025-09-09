@@ -31,6 +31,14 @@ const statusColors = {
   'Approuvée': 'bg-[hsl(var(--status-green-light))] text-[hsl(var(--status-green))] border-[hsl(var(--status-green))]/20',
 };
 
+const statusBarColors = {
+  'A preparer': 'bg-orange-500',
+  'En préparation': 'bg-blue-500',
+  'Envoyée': 'bg-purple-500',
+  'En révision': 'bg-amber-500',
+  'Approuvée': 'bg-green-500',
+};
+
 export const ProofCard = ({ proof }: ProofCardProps) => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -129,7 +137,7 @@ export const ProofCard = ({ proof }: ProofCardProps) => {
           </div>
           
           <div className="flex items-center gap-base-200">
-            <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
+            <div className={`w-1 h-4 rounded-full ${statusBarColors[proof.status as keyof typeof statusBarColors] || 'bg-primary/60'}`}></div>
             <p className="text-sm text-muted-foreground font-mono">
               {proof.human_id || 'Code épreuve manquant'}
             </p>
