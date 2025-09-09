@@ -669,16 +669,15 @@ const ProofDetails = () => {
                             </Button>
                           )}
                           
-                          {(version.status === 'En préparation' || version.status === 'Envoyée au client') && index === 0 && (
+                          {version.status === 'En préparation' && index === 0 && (
                             <Button
                               onClick={() => sendToClient.mutate()}
                               disabled={sendToClient.isPending}
                               size="sm"
-                              variant={version.status === 'Envoyée au client' ? 'outline' : 'primary'}
+                              variant="primary"
                             >
                               <Send className="w-4 h-4 mr-2" />
-                              {sendToClient.isPending ? 'Envoi...' : 
-                               version.status === 'Envoyée au client' ? 'Renvoyer au client' : 'Envoyer au client'}
+                              {sendToClient.isPending ? 'Envoi...' : 'Envoyer au client'}
                             </Button>
                           )}
                           
