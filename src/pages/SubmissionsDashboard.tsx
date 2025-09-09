@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { SubmissionCard } from '@/components/SubmissionCard';
@@ -7,6 +7,11 @@ import { DashboardHeader } from '@/components/DashboardHeader';
 import { useSubmissionsData, useDashboardStats } from '@/hooks/useSubmissionsData';
 import { useMultiSelect } from '@/hooks/useMultiSelect';
 import { SubmissionFilters } from '@/types/submission';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const SubmissionsDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -35,6 +40,14 @@ export const SubmissionsDashboard: React.FC = () => {
     isAllSelected,
   } = useMultiSelect(submissions);
 
+  const [statusTargetId, setStatusTargetId] = useState<string | null>(null);
+  const targetSubmission = useMemo(() => submissions.find(s => s.id === statusTargetId) || null, [submissions, statusTargetId]);
+  const statusOptions = useMemo(() => (
+    ['Brouillon', 'Envoyée', 'En attente', 'Acceptée', 'Refusée', 'Modification Demandée']
+  ), []);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   const handleMenuAction = (action: string, submissionId: string) => {
     switch (action) {
       case 'view':
@@ -44,20 +57,16 @@ export const SubmissionsDashboard: React.FC = () => {
         navigate(`/dashboard/submissions/${submissionId}/proof`);
         break;
       case 'status':
-        // TODO: Open status change modal
-        console.log('Change status for:', submissionId);
+        setStatusTargetId(submissionId);
         break;
       case 'archive':
-        // TODO: Archive submission
         console.log('Archive:', submissionId);
         break;
       case 'delete':
-        // TODO: Delete submission
         console.log('Delete:', submissionId);
         break;
     }
   };
-
   const handleNewSubmission = () => {
     navigate('/dashboard/submissions/new');
   };
@@ -187,6 +196,40 @@ export const SubmissionsDashboard: React.FC = () => {
         selectedIds={selectedIds}
         onClearSelection={clearSelection}
       />
+
+      {/* Status Change Dialog */}
+      <Dialog open={!!statusTargetId} onOpenChange={(open) => !open && setStatusTargetId(null)}>
+        <DialogContent className="max-w-sm z-[60]">
+          <DialogHeader>
+            <DialogTitle>Changer le statut</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            {statusOptions.map((s) => (
+              <Button
+                key={s}
+                variant={targetSubmission?.status === s ? 'secondary' : 'outline'}
+                className="w-full justify-start"
+                onClick={async () => {
+                  if (!statusTargetId) return;
+                  const { error } = await supabase
+                    .from('submissions')
+                    .update({ status: s, updated_at: new Date().toISOString() })
+                    .eq('id', statusTargetId);
+                  if (error) {
+                    toast({ title: 'Erreur', description: 'Mise à jour impossible.', variant: 'destructive' });
+                  } else {
+                    toast({ title: 'Statut mis à jour', description: `Statut changé pour "${s}".` });
+                    queryClient.invalidateQueries({ queryKey: ['submissions'] });
+                  }
+                  setStatusTargetId(null);
+                }}
+              >
+                {s}
+              </Button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
