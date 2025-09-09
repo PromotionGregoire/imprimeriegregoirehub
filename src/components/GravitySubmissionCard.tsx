@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { Calendar, User, MoreVertical, Clock, Send, CheckCircle, AlertCircle, Edit, FileText, DollarSign } from 'lucide-react';
+import React from 'react';
+import { Calendar, User, MoreVertical, Clock, Send, CheckCircle, AlertCircle, Hourglass } from 'lucide-react';
 import { Submission } from '@/types/submission';
-import { formatCurrency, formatDate, calculateDaysRemaining } from '@/lib/formatters';
+import { formatDate } from '@/lib/formatters';
 
 interface GravitySubmissionCardProps {
-  submission: Submission | any; // Allow any to handle missing priority
+  submission: Submission | any;
   onClick: () => void;
   isSelected?: boolean;
   onSelect?: (e?: React.MouseEvent) => void;
@@ -16,37 +16,37 @@ const GravitySubmissionCard: React.FC<GravitySubmissionCardProps> = ({
   isSelected = false,
   onSelect
 }) => {
-  // Mapping des statuts de soumissions aux thèmes Gravity UI
+  // Mapping des statuts aux thèmes Gravity UI (comme dans l'image de référence)
   const getTheme = (status: string) => {
     const themes = {
       'draft': 'warning',      // À préparer - Orange
-      'sent': 'normal',        // Envoyé au client - Gris
-      'pending': 'info',       // En attente - Bleu
-      'accepted': 'success',   // Accepté - Vert
-      'rejected': 'danger'     // Refusé - Rouge
+      'sent': 'normal',        // Envoyée au client - Gris
+      'pending': 'info',       // En préparation - Bleu 
+      'accepted': 'success',   // Approuvée - Vert
+      'rejected': 'danger'     // Refusée - Rouge
     };
     return themes[status as keyof typeof themes] || 'normal';
   };
 
-  // Icônes par statut de soumission
+  // Icônes par statut (exactement comme dans l'image)
   const getStatusIcon = (status: string) => {
     const icons = {
-      'draft': <Edit size={14} />,
-      'sent': <Send size={14} />,
-      'pending': <Clock size={14} />,
-      'accepted': <CheckCircle size={14} />,
-      'rejected': <AlertCircle size={14} />
+      'draft': <Hourglass size={16} />,
+      'sent': <Send size={16} />,
+      'pending': <Clock size={16} />,
+      'accepted': <CheckCircle size={16} />,
+      'rejected': <AlertCircle size={16} />
     };
-    return icons[status as keyof typeof icons] || <FileText size={14} />;
+    return icons[status as keyof typeof icons] || <Clock size={16} />;
   };
 
-  // Transformation du statut pour l'affichage
+  // Labels de statut en français (comme dans l'image)
   const getStatusLabel = (status: string) => {
     const labels = {
-      'draft': 'Brouillon',
-      'sent': 'Envoyée',
-      'pending': 'En attente',
-      'accepted': 'Acceptée',
+      'draft': 'À préparer',
+      'sent': 'Envoyée au client', 
+      'pending': 'En préparation',
+      'accepted': 'Approuvée',
       'rejected': 'Refusée'
     };
     return labels[status as keyof typeof labels] || status;
@@ -54,11 +54,7 @@ const GravitySubmissionCard: React.FC<GravitySubmissionCardProps> = ({
 
   const theme = getTheme(submission.status);
   const businessName = submission.clients?.business_name || 'Client inconnu';
-  const contactName = submission.clients?.contact_name;
-  const clientDisplay = contactName ? `${businessName} (${contactName})` : businessName;
-
-  // Calcul des jours restants si deadline
-  const deadlineInfo = submission.deadline ? calculateDaysRemaining(submission.deadline) : null;
+  const contactName = submission.clients?.contact_name || 'Contact inconnu';
 
   const handleCardClick = (e: React.MouseEvent) => {
     if (onSelect && e.currentTarget.contains(e.target as Node)) {
@@ -98,14 +94,14 @@ const GravitySubmissionCard: React.FC<GravitySubmissionCardProps> = ({
         </div>
       )}
 
-      {/* Header */}
+      {/* Header - Nom du client et numéro de soumission */}
       <div className={`gravity-card-header ${onSelect ? 'ml-6' : ''}`}>
         <div>
           <h3 className="gravity-card-title">
-            Soumission {submission.submission_number}
+            {businessName}
           </h3>
           <span className="gravity-card-code">
-            ID: {submission.id.slice(0, 8)}...
+            {submission.submission_number}
           </span>
         </div>
         <button 
@@ -117,75 +113,30 @@ const GravitySubmissionCard: React.FC<GravitySubmissionCardProps> = ({
         </button>
       </div>
       
-      {/* Version/Priority */}
+      {/* Version */}
       <div className="gravity-card-version">
-        {(submission.priority === 'high' || submission.priority === 'critical') ? (
-          <span className="text-orange-600 font-semibold">
-            Priorité: {submission.priority === 'critical' ? 'Critique' : 'Élevée'}
-          </span>
-        ) : (
-          <span>Priorité {submission.priority || 'normale'}</span>
-        )}
+        V1
       </div>
       
-      {/* Status Badge */}
+      {/* Status Badge avec icône */}
       <div className={`gravity-status-badge badge-${theme}`}>
         {getStatusIcon(submission.status)}
         <span>{getStatusLabel(submission.status)}</span>
       </div>
-
-      {/* Price Section */}
-      <div className="mb-4">
-        <div className="flex items-center gap-2 text-lg font-bold">
-          <DollarSign size={18} className="text-muted-foreground" />
-          <span>{formatCurrency(submission.total_price)}</span>
-        </div>
-      </div>
-
-      {/* Deadline Warning if applicable */}
-      {deadlineInfo && deadlineInfo.days <= 7 && (
-        <div className={`text-sm font-medium mb-3 ${deadlineInfo.color}`}>
-          📅 Échéance: {deadlineInfo.text}
-        </div>
-      )}
       
-      {/* Metadata */}
+      {/* Metadata - Date et contact */}
       <div className="gravity-card-meta">
         <div className="gravity-meta-item">
           <Calendar size={16} />
           <span>
-            {submission.sent_at 
-              ? `Envoyée ${formatDate(submission.sent_at)}`
-              : `Créée ${formatDate(submission.created_at)}`
-            }
+            {formatDate(submission.created_at)}
           </span>
         </div>
         <div className="gravity-meta-item">
           <User size={16} />
-          <span title={clientDisplay}>
-            {clientDisplay.length > 20 ? `${clientDisplay.slice(0, 20)}...` : clientDisplay}
-          </span>
+          <span>{contactName}</span>
         </div>
       </div>
-
-      {/* Tags if any */}
-      {submission.tags && submission.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-3">
-          {submission.tags.slice(0, 3).map((tag, index) => (
-            <span
-              key={index}
-              className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded-full"
-            >
-              {tag}
-            </span>
-          ))}
-          {submission.tags.length > 3 && (
-            <span className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded-full">
-              +{submission.tags.length - 3}
-            </span>
-          )}
-        </div>
-      )}
     </div>
   );
 };
