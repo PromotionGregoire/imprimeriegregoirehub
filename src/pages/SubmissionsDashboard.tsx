@@ -4,14 +4,11 @@ import { Plus } from 'lucide-react';
 import { SubmissionCard } from '@/components/SubmissionCard';
 import { BulkActionsBar } from '@/components/BulkActionsBar';
 import { DashboardHeader } from '@/components/DashboardHeader';
-import { useSubmissionsData, useDashboardStats } from '@/hooks/useSubmissionsData';
+import { useSubmissionsData, useDashboardStats, useBulkActions } from '@/hooks/useSubmissionsData';
 import { useMultiSelect } from '@/hooks/useMultiSelect';
 import { SubmissionFilters } from '@/types/submission';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { useQueryClient } from '@tanstack/react-query';
 
 export const SubmissionsDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -45,8 +42,7 @@ export const SubmissionsDashboard: React.FC = () => {
   const statusOptions = useMemo(() => (
     ['Brouillon', 'Envoyée', 'En attente', 'Acceptée', 'Refusée', 'Modification Demandée']
   ), []);
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const { updateStatus } = useBulkActions();
 
   const handleMenuAction = (action: string, submissionId: string) => {
     switch (action) {
@@ -209,18 +205,9 @@ export const SubmissionsDashboard: React.FC = () => {
                 key={s}
                 variant={targetSubmission?.status === s ? 'secondary' : 'outline'}
                 className="w-full justify-start"
-                onClick={async () => {
+                onClick={() => {
                   if (!statusTargetId) return;
-                  const { error } = await supabase
-                    .from('submissions')
-                    .update({ status: s, updated_at: new Date().toISOString() })
-                    .eq('id', statusTargetId);
-                  if (error) {
-                    toast({ title: 'Erreur', description: 'Mise à jour impossible.', variant: 'destructive' });
-                  } else {
-                    toast({ title: 'Statut mis à jour', description: `Statut changé pour "${s}".` });
-                    queryClient.invalidateQueries({ queryKey: ['submissions'] });
-                  }
+                  updateStatus({ ids: [statusTargetId], status: s });
                   setStatusTargetId(null);
                 }}
               >
