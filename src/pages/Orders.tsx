@@ -12,8 +12,10 @@ import GravityOrderCard from '@/components/GravityOrderCard';
 import PaymentTypeModal from '@/components/PaymentTypeModal';
 import { useOrderMutations } from '@/hooks/useOrderMutations';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 
 const Orders = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [periodFilter, setPeriodFilter] = useState('all');
@@ -355,7 +357,7 @@ const Orders = () => {
               <GravityOrderCard
                 key={order.id}
                 order={order}
-                onClick={() => window.location.href = `/dashboard/orders/${order.id}`}
+                onClick={() => navigate(`/dashboard/orders/${order.id}`)}
                 onProofAccepted={handleProofAccepted}
                 onInvoiced={handleInvoiced}
                 onDelivered={handleDelivered}
