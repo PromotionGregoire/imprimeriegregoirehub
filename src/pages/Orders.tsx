@@ -148,6 +148,27 @@ const Orders = () => {
           </Button>
         </div>
         
+        {/* Legend - Color Codes */}
+        <div className="mb-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">🎨 Codes de couleurs</h3>
+            <div className="flex flex-wrap gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-1 bg-green-500 rounded"></div>
+                <span className="text-gray-600">Complétée</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-1 bg-yellow-400 rounded"></div>
+                <span className="text-gray-600">En production</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-1 bg-orange-500 rounded"></div>
+                <span className="text-gray-600">En attente d'épreuve</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Period Filter - BaseWeb Form Controls */}
         <div className="mb-6">
           <Select value={periodFilter} onValueChange={setPeriodFilter}>
