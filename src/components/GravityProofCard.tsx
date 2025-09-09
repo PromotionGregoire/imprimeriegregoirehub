@@ -90,7 +90,12 @@ const GravityProofCard: React.FC<GravityProofCardProps> = ({
             {businessName}
           </h3>
           <span className="gravity-card-code">
-            {proof.human_id}-{proof.human_year}-{String(proof.human_seq).padStart(4, '0')}
+            {(() => {
+              const year = proof.human_year;
+              const seq = proof.human_seq;
+              if (year && seq) return `E-${year}-${String(seq).padStart(4, '0')}`;
+              return proof.orders?.order_number || proof.orders?.human_id || 'Non attribué';
+            })()}
           </span>
         </div>
         <button 

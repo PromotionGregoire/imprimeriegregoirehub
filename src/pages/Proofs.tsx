@@ -21,7 +21,7 @@ const Proofs = () => {
   const proofStatusOptions = [
     { value: 'A preparer', label: 'À préparer' },
     { value: 'En préparation', label: 'En préparation' },
-    { value: 'Envoyée', label: 'Envoyée' },
+    { value: 'Envoyée au client', label: 'Envoyée' },
     { value: 'En révision', label: 'En révision' },
     { value: 'Approuvée', label: 'Approuvée' },
   ];
@@ -46,7 +46,7 @@ const Proofs = () => {
     total: proofs?.length || 0,
     toPrepare: proofs?.filter(proof => proof.status === 'A preparer').length || 0,
     inPreparation: proofs?.filter(proof => proof.status === 'En préparation').length || 0,
-    sent: proofs?.filter(proof => proof.status === 'Envoyée').length || 0,
+    sent: proofs?.filter(proof => proof.status === 'Envoyée au client').length || 0,
     inRevision: proofs?.filter(proof => proof.status === 'En révision').length || 0,
     approved: proofs?.filter(proof => proof.status === 'Approuvée').length || 0,
   };
