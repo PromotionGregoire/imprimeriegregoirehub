@@ -16,21 +16,33 @@ const GravitySubmissionCard: React.FC<GravitySubmissionCardProps> = ({
   isSelected = false,
   onSelect
 }) => {
-  // Mapping des statuts aux thèmes Gravity UI (comme dans l'image de référence)
+  // Mapping des statuts aux thèmes Gravity UI (selon la légende des couleurs)
   const getTheme = (status: string) => {
     const themes = {
-      'draft': 'warning',      // À préparer - Orange
-      'sent': 'normal',        // Envoyée au client - Gris
-      'pending': 'info',       // En préparation - Bleu 
-      'accepted': 'success',   // Approuvée - Vert
-      'rejected': 'danger'     // Refusée - Rouge
+      'Brouillon': 'normal',     // Gris
+      'Envoyée': 'info',         // Bleu  
+      'En attente': 'warning',   // Orange
+      'Acceptée': 'success',     // Vert
+      'Refusée': 'danger',       // Rouge
+      // Anciens statuts anglais pour compatibilité
+      'draft': 'normal',
+      'sent': 'info',
+      'pending': 'warning', 
+      'accepted': 'success',
+      'rejected': 'danger'
     };
     return themes[status as keyof typeof themes] || 'normal';
   };
 
-  // Icônes par statut (exactement comme dans l'image)
+  // Icônes par statut
   const getStatusIcon = (status: string) => {
     const icons = {
+      'Brouillon': <Hourglass size={16} />,
+      'Envoyée': <Send size={16} />,
+      'En attente': <Clock size={16} />,
+      'Acceptée': <CheckCircle size={16} />,
+      'Refusée': <AlertCircle size={16} />,
+      // Anciens statuts anglais pour compatibilité
       'draft': <Hourglass size={16} />,
       'sent': <Send size={16} />,
       'pending': <Clock size={16} />,
@@ -40,16 +52,9 @@ const GravitySubmissionCard: React.FC<GravitySubmissionCardProps> = ({
     return icons[status as keyof typeof icons] || <Clock size={16} />;
   };
 
-  // Labels de statut en français (comme dans l'image)
+  // Pas besoin de transformation des labels car ils sont déjà en français
   const getStatusLabel = (status: string) => {
-    const labels = {
-      'draft': 'À préparer',
-      'sent': 'Envoyée au client', 
-      'pending': 'En préparation',
-      'accepted': 'Approuvée',
-      'rejected': 'Refusée'
-    };
-    return labels[status as keyof typeof labels] || status;
+    return status;
   };
 
   const theme = getTheme(submission.status);
