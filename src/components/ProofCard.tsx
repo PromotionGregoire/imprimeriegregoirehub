@@ -23,20 +23,12 @@ interface ProofCardProps {
   };
 }
 
-const statusColors = {
-  'A preparer': 'bg-[hsl(var(--status-orange-light))] text-[hsl(var(--status-orange))] border-[hsl(var(--status-orange))]/20',
-  'En préparation': 'bg-blue-50 text-blue-700 border-blue-200',
-  'Envoyée': 'bg-[hsl(var(--status-purple-light))] text-[hsl(var(--status-purple))] border-[hsl(var(--status-purple))]/20',
-  'En révision': 'bg-amber-50 text-amber-700 border-amber-200',
-  'Approuvée': 'bg-[hsl(var(--status-green-light))] text-[hsl(var(--status-green))] border-[hsl(var(--status-green))]/20',
-};
-
-const statusBarColors = {
-  'A preparer': 'bg-orange-500',
-  'En préparation': 'bg-blue-500',
-  'Envoyée': 'bg-purple-500',
-  'En révision': 'bg-amber-500',
-  'Approuvée': 'bg-green-500',
+const statusConfig = {
+  'A preparer': { dot: 'bg-orange-500', badge: 'bg-orange-100 text-orange-700' },
+  'En préparation': { dot: 'bg-blue-500', badge: 'bg-blue-100 text-blue-700' },
+  'Envoyée': { dot: 'bg-purple-500', badge: 'bg-purple-100 text-purple-700' },
+  'En révision': { dot: 'bg-amber-500', badge: 'bg-amber-100 text-amber-700' },
+  'Approuvée': { dot: 'bg-green-500', badge: 'bg-green-100 text-green-700' },
 };
 
 export const ProofCard = ({ proof }: ProofCardProps) => {
@@ -137,7 +129,7 @@ export const ProofCard = ({ proof }: ProofCardProps) => {
           </div>
           
           <div className="flex items-center gap-base-200">
-            <div className={`w-1 h-4 rounded-full ${statusBarColors[proof.status as keyof typeof statusBarColors] || 'bg-primary/60'}`}></div>
+            <div className={`w-2 h-2 rounded-full ${statusConfig[proof.status as keyof typeof statusConfig]?.dot || 'bg-gray-500'}`}></div>
             <p className="text-sm text-muted-foreground font-mono">
               {proof.human_id || 'Code épreuve manquant'}
             </p>
@@ -157,7 +149,7 @@ export const ProofCard = ({ proof }: ProofCardProps) => {
             </span>
           </div>
           <Badge 
-            className={`text-xs font-semibold px-base-300 py-base-200 ${statusColors[proof.status as keyof typeof statusColors] || 'bg-muted text-muted-foreground border-muted'}`}
+            className={`text-xs font-semibold px-base-300 py-base-200 border-transparent ${statusConfig[proof.status as keyof typeof statusConfig]?.badge || 'bg-gray-100 text-gray-700'}`}
           >
             {proof.status === 'A preparer' ? 'À préparer' : proof.status}
           </Badge>
