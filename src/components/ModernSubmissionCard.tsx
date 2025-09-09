@@ -1,32 +1,25 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { 
-  ArrowRight, 
-  ExternalLink, 
-  Loader2, 
-  CheckCircle, 
-  FileText,
-  Eye,
-  Send,
-  MoreVertical,
-  TrendingUp,
-  RefreshCw,
-  Archive,
-  Trash2
-} from 'lucide-react';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { SubmissionStatusTimeline } from './SubmissionStatusTimeline';
-import ModernToggle from './ModernToggle';
+import { MoreVertical, Eye, Users, Archive, RefreshCw, Trash2 } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { ArchiveBadge } from './ArchiveBadge';
-import { cn } from '@/lib/utils';
+
+// CONSTANTES DE DESIGN - NE PAS MODIFIER
+const DESIGN_SYSTEM = {
+  spacing: {
+    cardPadding: 20,
+    sectionGap: 16,
+    elementGap: 12,
+    inlineGap: 8,
+  },
+  heights: {
+    priorityBar: 4,
+    header: 48,
+    amountSection: 40,
+    infoRow: 24,
+    button: 40,
+  }
+};
 
 interface ModernSubmissionCardProps {
   submission: any;
@@ -35,55 +28,16 @@ interface ModernSubmissionCardProps {
   onSelect?: (e?: React.MouseEvent) => void;
 }
 
-const ModernSubmissionCard = ({ submission, onClick, isSelected = false, onSelect }: ModernSubmissionCardProps) => {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
+const ModernSubmissionCard = ({
+  submission,
+  onClick,
+  isSelected = false,
+  onSelect
+}: ModernSubmissionCardProps) => {
+  const [menuOpen, setMenuOpen] = useState(false);
   const { toast } = useToast();
 
-  const acceptSubmissionMutation = useMutation({
-    mutationFn: async (submissionId: string) => {
-      const { data, error } = await supabase.functions.invoke('handle-submission-approval', {
-        body: { 
-          submission_id: submissionId,
-          client_name: submission.clients?.business_name || 'Client'
-        }
-      });
-      
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: (data) => {
-      toast({
-        title: '✅ Soumission approuvée',
-        description: `Commande ${data.order_number} créée automatiquement`
-      });
-      
-      // Invalider les queries pour refetch les données
-      queryClient.invalidateQueries({ queryKey: ['all-submissions'] });
-      queryClient.invalidateQueries({ queryKey: ['submission-details', submission.id] });
-    },
-    onError: (error) => {
-      console.error('Erreur lors de l\'approbation:', error);
-      toast({
-        title: '❌ Erreur',
-        description: 'Impossible d\'approuver la soumission',
-        variant: 'destructive'
-      });
-    }
-  });
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-CA', {
-      style: 'currency',
-      currency: 'CAD',
-    }).format(price);
-  };
-
-  const formatDate = (dateString: string) => {
-    return format(new Date(dateString), 'dd/MM/yyyy', { locale: fr });
-  };
-
-  // Calculate priority based on deadline and status
+  // Configuration des couleurs de priorité
   const getPriority = () => {
     const deadline = submission.deadline ? new Date(submission.deadline) : null;
     const today = new Date();
@@ -96,240 +50,227 @@ const ModernSubmissionCard = ({ submission, onClick, isSelected = false, onSelec
     return 'low';
   };
 
-  // Get status color for dot indicator
-  const getStatusColor = (status: string) => {
-    switch(status) {
-      case 'Acceptée': return 'bg-green-500';
-      case 'Refusée': return 'bg-red-500';
-      case 'Envoyée': return 'bg-blue-500';
-      case 'Brouillon': return 'bg-gray-400';
-      default: return 'bg-orange-500';
-    }
-  };
-
-  // Get priority bar color and animation
-  const getPriorityBar = (priority: string) => {
-    switch(priority) {
-      case 'critical': 
-        return 'bg-red-500 animate-pulse';
-      case 'high': 
-        return 'bg-orange-500';
-      case 'normal': 
-        return 'bg-yellow-400';
-      case 'low': 
-        return 'bg-gray-300';
-      default: 
-        return 'bg-transparent';
-    }
-  };
-
-  // Calculate days remaining
-  const getDaysRemaining = () => {
-    const deadline = submission.deadline ? new Date(submission.deadline) : null;
-    if (!deadline) return null;
-    
-    const today = new Date();
-    const daysLeft = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    return daysLeft;
-  };
-
-  const handleAcceptSubmission = async (checked: boolean) => {
-    if (!checked) return;
-    
-    const confirmed = window.confirm(
-      "⚠️ ATTENTION: Acceptation Manuelle\n\n" +
-      "Cette action va créer une commande officielle sans l'approbation numérique formelle du client.\n\n" +
-      "Ceci doit être utilisé uniquement en cas de confirmation verbale ou écrite externe.\n\n" +
-      "Voulez-vous continuer ?"
-    );
-    
-    if (!confirmed) return;
-    
-    acceptSubmissionMutation.mutate(submission.id);
-  };
-
   const priority = getPriority();
-  const daysRemaining = getDaysRemaining();
-  const statusColor = getStatusColor(submission.status);
-  const priorityBarClass = getPriorityBar(priority);
+
+  const priorityColors = {
+    critical: 'bg-red-500',
+    high: 'bg-orange-500',
+    normal: 'bg-yellow-400',
+    low: 'bg-gray-300'
+  };
+
+  const statusConfig = {
+    'Acceptée': { dot: 'bg-green-500', badge: 'bg-green-100 text-green-700' },
+    'Envoyée': { dot: 'bg-blue-500', badge: 'bg-blue-100 text-blue-700' },
+    'En attente': { dot: 'bg-orange-500', badge: 'bg-orange-100 text-orange-700' },
+    'Refusée': { dot: 'bg-red-500', badge: 'bg-red-100 text-red-700' },
+    'Brouillon': { dot: 'bg-gray-500', badge: 'bg-gray-100 text-gray-700' }
+  };
+
+  // Formatage montant
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('fr-CA', {
+      style: 'currency',
+      currency: 'CAD'
+    }).format(amount);
+  };
+
+  // Formatage date
+  const formatDate = (date: string | null) => {
+    if (!date) return 'Non définie';
+    return new Date(date).toLocaleDateString('fr-CA');
+  };
+
+  const handleMenuAction = (action: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setMenuOpen(false);
+    
+    switch (action) {
+      case 'details':
+        onClick();
+        break;
+      case 'status':
+        // Handle status change
+        break;
+      case 'archive':
+        // Handle archive
+        break;
+      case 'delete':
+        // Handle delete
+        break;
+    }
+  };
 
   return (
-    <Card className={cn(
-      "group cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-2 bg-white border rounded-2xl overflow-hidden relative",
-      isSelected ? "border-primary ring-2 ring-primary/20 bg-primary/5" : "border-gray-100"
-    )}>
-      {/* Priority Indicator Bar */}
-      <div className={`h-1 transition-all duration-300 group-hover:h-1.5 ${priorityBarClass}`}></div>
-      
-      <CardContent className="p-5">
-        {/* Selection Checkbox */}
-        {onSelect && (
-          <div className="absolute top-5 left-5 z-10">
-            <Checkbox
-              checked={isSelected}
-              onCheckedChange={(checked) => onSelect?.()}
-              className="bg-white border-2 border-gray-300 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-              onClick={(e) => e.stopPropagation()}
-            />
-          </div>
-        )}
+    <div className={`
+      bg-white rounded-xl border overflow-hidden
+      transition-all duration-200 hover:shadow-lg
+      ${isSelected ? 'border-blue-500 ring-2 ring-blue-100' : 'border-gray-200'}
+    `}>
+      {/* BARRE DE PRIORITÉ - 4px */}
+      <div 
+        className={priorityColors[priority]}
+        style={{ height: `${DESIGN_SYSTEM.heights.priorityBar}px` }}
+      />
 
-        {/* Dropdown Menu */}
-        <div className="absolute top-3 right-3 z-10">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MoreVertical className="w-4 h-4 text-gray-400" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 bg-white shadow-lg border border-gray-200 z-50">
-              <DropdownMenuItem 
-                onClick={(e) => {
+      {/* CONTENU - Padding 20px */}
+      <div style={{ padding: `${DESIGN_SYSTEM.spacing.cardPadding}px` }}>
+        
+        {/* HEADER - 48px */}
+        <div 
+          className="flex items-start justify-between"
+          style={{ 
+            height: `${DESIGN_SYSTEM.heights.header}px`, 
+            marginBottom: `${DESIGN_SYSTEM.spacing.sectionGap}px` 
+          }}
+        >
+          <div className="flex items-start space-x-3 flex-1 min-w-0">
+            {onSelect && (
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={(e) => {
                   e.stopPropagation();
-                  onClick();
+                  onSelect?.();
                 }}
-                className="flex items-center gap-2 p-3 hover:bg-gray-50"
-              >
-                <Eye className="w-4 h-4" />
-                Voir détails
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={(e) => e.stopPropagation()}
-                className="flex items-center gap-2 p-3 hover:bg-gray-50"
-              >
-                <RefreshCw className="w-4 h-4" />
-                Changer statut
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={(e) => e.stopPropagation()}
-                className="flex items-center gap-2 p-3 hover:bg-gray-50"
-              >
-                <Archive className="w-4 h-4" />
-                Archiver
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={(e) => e.stopPropagation()}
-                className="flex items-center gap-2 p-3 hover:bg-gray-50 text-red-600"
-              >
-                <Trash2 className="w-4 h-4" />
-                Supprimer
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        {/* Card content wrapper with click handler */}
-        <div onClick={onClick} className="w-full">
-          {/* Header with Status Dot */}
-          <div className="flex items-start justify-between mb-4">
-            <div className={cn("flex-1", onSelect && "ml-8")}>
-              <div className="flex items-center space-x-2 mb-1">
-                <h3 className="font-semibold text-gray-900 text-base truncate">
+                className="w-4 h-4 mt-0.5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+            )}
+            
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center" style={{ gap: `${DESIGN_SYSTEM.spacing.inlineGap}px` }}>
+                <h3 className="text-base font-semibold text-gray-900 truncate">
                   {submission.clients?.business_name || 'Client Non Défini'}
                 </h3>
-                <div className={`w-2 h-2 rounded-full ${statusColor} ${priority === 'critical' ? 'animate-pulse' : ''}`}></div>
+                <div className={`w-2 h-2 rounded-full ${statusConfig[submission.status]?.dot || 'bg-gray-400'}`} />
               </div>
-              <p className="text-xs text-gray-500 font-mono">{submission.submission_number}</p>
+              <p className="text-xs font-mono text-gray-500 mt-1">
+                {submission.submission_number}
+              </p>
+              {submission.assigned_to && (
+                <div className="flex items-center mt-1" style={{ gap: '4px' }}>
+                  <Users className="w-3 h-3 text-gray-400" />
+                  <p className="text-xs text-gray-500">
+                    {submission.assigned_to}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Amount - Prominent Display */}
-          <div className="mb-4">
-            <p className="text-2xl font-bold text-gray-900">
-              {formatPrice(Number(submission.total_price) || 0)}
-            </p>
-            {/* Show trend if high value */}
-            {Number(submission.total_price) > 1000 && (
-              <div className="flex items-center text-green-600 text-xs mt-1">
-                <TrendingUp className="w-3 h-3 mr-1" />
-                <span>Valeur élevée</span>
-              </div>
-            )}
-          </div>
+          {/* MENU DROPDOWN */}
+          <div className="relative">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setMenuOpen(!menuOpen);
+              }}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <MoreVertical className="w-4 h-4 text-gray-500" />
+            </button>
 
-          {/* Meta Information */}
-          <div className="space-y-2 mb-4">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-500">Échéance</span>
-              <span className={`font-medium ${
-                submission.deadline === 'Non définie' || !submission.deadline ? 'text-orange-600' : 'text-gray-900'
-              }`}>
-                {submission.deadline ? formatDate(submission.deadline) : 'Non définie'}
-                {daysRemaining !== null && (
-                  <span className={`ml-2 text-xs ${
-                    daysRemaining <= 1 ? 'text-red-600 font-bold' :
-                    daysRemaining <= 3 ? 'text-orange-600 font-medium' :
-                    daysRemaining <= 7 ? 'text-yellow-600' : 'text-gray-500'
-                  }`}>
-                    {daysRemaining <= 0 ? '(Échue)' : `(J-${daysRemaining})`}
-                  </span>
-                )}
-              </span>
-            </div>
-            
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-500">Statut</span>
-              <span className={`font-medium px-2 py-0.5 rounded-full text-xs ${
-                submission.status === 'Acceptée' 
-                  ? 'bg-green-100 text-green-700' :
-                submission.status === 'Refusée'
-                  ? 'bg-red-100 text-red-700' :
-                submission.status === 'Envoyée'
-                  ? 'bg-blue-100 text-blue-700' :
-                submission.status === 'Brouillon'
-                  ? 'bg-gray-100 text-gray-700' :
-                  'bg-orange-100 text-orange-700'
-              }`}>
-                {submission.status}
-              </span>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center space-x-2">
-            {(submission.status === 'Acceptée' || submission.approval_token) && (
-              <button className={`flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl hover:bg-gray-800 transition-colors text-white ${
-                priority === 'critical' ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-900'
-              }`}>
-                <Eye className="w-4 h-4" />
-                <span className="text-sm font-medium">Voir l'épreuve</span>
-              </button>
-            )}
-            
-            {submission.status === 'Brouillon' && (
-              <button className="flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
-                <Send className="w-4 h-4 text-gray-600" />
-                <span className="text-sm font-medium text-gray-700">Envoyer</span>
-              </button>
-            )}
-            
-            {!submission.status || submission.status === 'En attente' ? (
-              <div className="flex-1">
-                <ModernToggle
-                  id={`accept-${submission.id}`}
-                  label="Accepter"
-                  checked={submission.status === 'Acceptée'}
-                  onCheckedChange={handleAcceptSubmission}
-                  disabled={submission.status === 'Acceptée' || acceptSubmissionMutation.isPending}
+            {menuOpen && (
+              <>
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setMenuOpen(false)} 
                 />
-              </div>
-            ) : null}
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
+                  <button 
+                    onClick={(e) => handleMenuAction('details', e)}
+                    className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3"
+                  >
+                    <Eye className="w-4 h-4 text-gray-500" />
+                    <span>Voir détails</span>
+                  </button>
+                  <button 
+                    onClick={(e) => handleMenuAction('status', e)}
+                    className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3"
+                  >
+                    <RefreshCw className="w-4 h-4 text-gray-500" />
+                    <span>Changer statut</span>
+                  </button>
+                  <button 
+                    onClick={(e) => handleMenuAction('archive', e)}
+                    className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3"
+                  >
+                    <Archive className="w-4 h-4 text-gray-500" />
+                    <span>Archiver</span>
+                  </button>
+                  <div className="border-t border-gray-100 my-2"></div>
+                  <button 
+                    onClick={(e) => handleMenuAction('delete', e)}
+                    className="w-full px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-3"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    <span>Supprimer</span>
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* MONTANT - 40px */}
+        <div 
+          style={{ 
+            height: `${DESIGN_SYSTEM.heights.amountSection}px`, 
+            marginBottom: `${DESIGN_SYSTEM.spacing.sectionGap}px` 
+          }}
+          className="flex items-center"
+        >
+          <p className="text-2xl font-bold text-gray-900">
+            {formatCurrency(Number(submission.total_price) || 0)}
+          </p>
+        </div>
+
+        {/* INFORMATIONS */}
+        <div style={{ marginBottom: `${DESIGN_SYSTEM.spacing.sectionGap}px` }}>
+          {/* Échéance - 24px */}
+          <div 
+            className="flex items-center justify-between"
+            style={{ 
+              height: `${DESIGN_SYSTEM.heights.infoRow}px`, 
+              marginBottom: `${DESIGN_SYSTEM.spacing.elementGap}px` 
+            }}
+          >
+            <span className="text-sm text-gray-500">Échéance</span>
+            <span className={`text-sm font-medium ${
+              !submission.deadline ? 'text-orange-600' : 'text-gray-900'
+            }`}>
+              {formatDate(submission.deadline)}
+            </span>
           </div>
 
-          {/* Archive Badge */}
-          {submission.archived_at && (
-            <div className="mt-4">
-              <ArchiveBadge entity={submission} />
-            </div>
-          )}
+          {/* Statut - 24px */}
+          <div 
+            className="flex items-center justify-between"
+            style={{ height: `${DESIGN_SYSTEM.heights.infoRow}px` }}
+          >
+            <span className="text-sm text-gray-500">Statut</span>
+            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+              statusConfig[submission.status]?.badge || 'bg-gray-100 text-gray-700'
+            }`}>
+              {submission.status}
+            </span>
+          </div>
         </div>
-      </CardContent>
-    </Card>
+
+        {/* BOUTON - 40px */}
+        <button 
+          onClick={onClick}
+          className="w-full flex items-center justify-center bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-colors"
+          style={{ 
+            height: `${DESIGN_SYSTEM.heights.button}px`, 
+            gap: `${DESIGN_SYSTEM.spacing.inlineGap}px` 
+          }}
+        >
+          <Eye className="w-4 h-4" />
+          <span className="text-sm font-medium">Voir l'épreuve</span>
+        </button>
+      </div>
+    </div>
   );
 };
 
