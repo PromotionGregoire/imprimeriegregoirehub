@@ -34,7 +34,14 @@ const OrderDetails = () => {
           ),
           submissions (
             submission_number,
-            id
+            id,
+            submission_items (
+              id,
+              product_name,
+              description,
+              quantity,
+              unit_price
+            )
           )
         `)
         .eq('id', id!)
@@ -193,6 +200,54 @@ const OrderDetails = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Articles commandés */}
+          {order.submissions?.submission_items && order.submissions.submission_items.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="h-5 w-5" />
+                  Articles commandés
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-2 font-medium text-muted-foreground">Produit</th>
+                        <th className="text-left py-2 font-medium text-muted-foreground">Description</th>
+                        <th className="text-right py-2 font-medium text-muted-foreground">Qté</th>
+                        <th className="text-right py-2 font-medium text-muted-foreground">Prix Unit.</th>
+                        <th className="text-right py-2 font-medium text-muted-foreground">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {order.submissions.submission_items.map((item: any) => (
+                        <tr key={item.id} className="border-b">
+                          <td className="py-3 font-medium">{item.product_name}</td>
+                          <td className="py-3 text-muted-foreground">{item.description || '-'}</td>
+                          <td className="py-3 text-right">{item.quantity}</td>
+                          <td className="py-3 text-right">${Number(item.unit_price).toFixed(2)}</td>
+                          <td className="py-3 text-right font-medium">
+                            ${(Number(item.unit_price) * item.quantity).toFixed(2)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="border-t-2">
+                        <td colSpan={4} className="py-3 text-right font-medium">Total général:</td>
+                        <td className="py-3 text-right font-bold text-lg text-primary">
+                          ${Number(order.total_price).toFixed(2)}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Informations client */}
           <Card>
