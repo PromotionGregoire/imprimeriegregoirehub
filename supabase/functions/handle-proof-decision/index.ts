@@ -1,63 +1,51 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.53.0";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface ProofDecisionRequest {
-  token: string;
-  decision: 'approved' | 'rejected';
-  clientName?: string;
-  comments?: string;
-}
+type Decision = "approved" | "rejected";
 
 serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { token, decision, clientName, comments }: ProofDecisionRequest = await req.json();
-
-    console.log('Processing proof decision:', { token, decision, clientName: clientName || 'N/A' });
+    const body = await req.json();
+    const token: string | undefined = body?.token;
+    const decision: Decision | undefined = body?.decision;
+    const comments: string | undefined = body?.comments;
+    const clientNameInput: string | undefined = body?.clientName; // facultatif
 
     if (!token || !decision) {
-      return new Response(
-        JSON.stringify({ error: 'Token et décision sont requis' }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
+      return json({ error: "Token et décision sont requis" }, 400);
+    }
+    if (!["approved", "rejected"].includes(decision)) {
+      return json({ error: 'Décision invalide. Utilisez "approved" ou "rejected".' }, 400);
     }
 
-    // Initialize Supabase client with service role for full access
     const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
     );
 
-    // First, find the proof by approval_token (corrected from validation_token)
-    const { data: proofData, error: proofError } = await supabase
-      .from('proofs')
+    // 🔎 IMPORTANT: on cherche par APPROVAL_TOKEN (pas validation_token)
+    const { data: proof, error: proofErr } = await supabase
+      .from("proofs")
       .select(`
         id,
         order_id,
         status,
         version,
+        approval_token,
         orders (
           id,
           order_number,
-          status,
-          submission_id,
           submissions (
-            id,
             submission_number,
             clients (
-              id,
               business_name,
               contact_name,
               email
@@ -65,217 +53,127 @@ serve(async (req) => {
           )
         )
       `)
-      .eq('approval_token', token)
+      .eq("approval_token", token)
       .maybeSingle();
 
-    if (proofError) {
-      console.error('Error fetching proof:', proofError);
-      return new Response(
-        JSON.stringify({ error: 'Erreur lors de la recherche de l\'épreuve' }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
+    if (proofErr) {
+      console.error("Error fetching proof:", proofErr);
+      return json({ error: "Erreur lors de la recherche de l'épreuve" }, 500);
+    }
+    if (!proof) {
+      console.log("Proof not found for approval_token:", token);
+      return json({ error: "Épreuve non trouvée ou token invalide" }, 404);
     }
 
-    if (!proofData) {
-      console.log('Proof not found for token:', token);
-      return new Response(
-        JSON.stringify({ error: 'Épreuve non trouvée ou token invalide' }),
-        { 
-          status: 404, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
+    // 👤 Déduction automatique du nom du client si non fourni
+    const derivedClientName =
+      (clientNameInput && clientNameInput.trim()) ||
+      proof.orders?.submissions?.clients?.contact_name ||
+      proof.orders?.submissions?.clients?.business_name ||
+      "Client";
 
-    console.log('Found proof:', proofData.id, 'for order:', proofData.order_id);
-
-    // Extract client information from the fetched data
-    const clientInfo = proofData.orders?.submissions?.clients;
-    const deducedClientName = clientInfo?.contact_name || clientInfo?.business_name || 'Client';
-    
-    console.log('Client info:', { 
-      business_name: clientInfo?.business_name, 
-      contact_name: clientInfo?.contact_name,
-      deduced_name: deducedClientName 
-    });
-
-    if (decision === 'approved') {
-      console.log('Processing approval...');
-      
-      // Use deduced client name for approval
-      const approverName = clientName?.trim() || deducedClientName;
-
-      // Update proof status to approved
-      const { error: updateProofError } = await supabase
-        .from('proofs')
+    if (decision === "approved") {
+      const { error: upErr } = await supabase
+        .from("proofs")
         .update({
-          status: 'Approuvée',
-          approved_by_name: approverName,
+          status: "Approuvée",
+          approved_by_name: derivedClientName,
           approved_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
-        .eq('id', proofData.id);
+        .eq("id", proof.id);
 
-      if (updateProofError) {
-        console.error('Error updating proof status:', updateProofError);
-        return new Response(
-          JSON.stringify({ error: 'Erreur lors de la mise à jour de l\'épreuve' }),
-          { 
-            status: 500, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        );
+      if (upErr) {
+        console.error("Error updating proof (approve):", upErr);
+        return json({ error: "Erreur lors de la mise à jour de l'épreuve" }, 500);
       }
 
-      // Le statut de la commande sera automatiquement mis à jour par le trigger
-      // sync_order_status_from_proof() quand l'épreuve passe à "Approuvée"
+      // Historique (best-effort)
+      await supabase.rpc("add_ordre_history", {
+        p_order_id: proof.order_id,
+        p_action_type: "approbation_epreuve",
+        p_action_description: `Épreuve v${proof.version} approuvée par ${derivedClientName}`,
+        p_metadata: {
+          proof_id: proof.id,
+          version: proof.version,
+          approved_by: derivedClientName,
+          approved_at: new Date().toISOString(),
+        },
+        p_proof_id: proof.id,
+        p_client_action: true,
+      }).catch((e) => console.warn("History RPC failed (approve):", e?.message));
 
-      // Add history entry for approval
-      const { error: historyError } = await supabase
-        .rpc('add_ordre_history', {
-          p_order_id: proofData.order_id,
-          p_action_type: 'approbation_epreuve',
-          p_action_description: `Épreuve version ${proofData.version} approuvée par ${approverName}`,
-          p_metadata: {
-            proof_id: proofData.id,
-            version: proofData.version,
-            approved_by: approverName,
-            approved_at: new Date().toISOString()
-          },
-          p_proof_id: proofData.id,
-          p_client_action: true
-        });
-
-      if (historyError) {
-        console.error('Error adding history entry:', historyError);
-        // Don't fail the request for history errors
-      }
-
-      console.log('Proof approved successfully');
-      
-      return new Response(
-        JSON.stringify({ 
-          success: true,
-          message: 'Épreuve approuvée avec succès. La commande est prête pour production.',
-          proof_status: 'Approuvée',
-          order_status: 'Épreuve acceptée'
-        }),
-        { 
-          status: 200, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-
-    } else if (decision === 'rejected') {
-      console.log('Processing rejection...');
-      
-      // Only require comments for rejection, client name is deduced
-      if (!comments?.trim()) {
-        return new Response(
-          JSON.stringify({ error: 'Les commentaires sont requis pour la demande de modification' }),
-          { 
-            status: 400, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        );
-      }
-
-      const rejectorName = clientName?.trim() || deducedClientName;
-
-      // Update proof status to modification requested
-      const { error: updateProofError } = await supabase
-        .from('proofs')
-        .update({
-          status: 'Modification demandée',
-          client_comments: comments.trim(),
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', proofData.id);
-
-      if (updateProofError) {
-        console.error('Error updating proof status:', updateProofError);
-        return new Response(
-          JSON.stringify({ error: 'Erreur lors de la mise à jour de l\'épreuve' }),
-          { 
-            status: 500, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        );
-      }
-
-      // Add comment to epreuve_commentaires table
-      const { error: commentError } = await supabase
-        .from('epreuve_commentaires')
-        .insert({
-          proof_id: proofData.id,
-          order_id: proofData.order_id,
-          comment_text: comments.trim(),
-          client_name: rejectorName,
-          created_by_client: true,
-          is_modification_request: true
-        });
-
-      if (commentError) {
-        console.error('Error adding comment:', commentError);
-        // Don't fail the request for comment errors
-      }
-
-      // Add history entry for modification request
-      const { error: historyError } = await supabase
-        .rpc('add_ordre_history', {
-          p_order_id: proofData.order_id,
-          p_action_type: 'demande_modification_epreuve',
-          p_action_description: `Modification demandée par ${rejectorName} pour l'épreuve version ${proofData.version}`,
-          p_metadata: {
-            proof_id: proofData.id,
-            version: proofData.version,
-            client_name: rejectorName,
-            comments: comments.trim()
-          },
-          p_proof_id: proofData.id,
-          p_client_action: true
-        });
-
-      if (historyError) {
-        console.error('Error adding history entry:', historyError);
-        // Don't fail the request for history errors
-      }
-
-      console.log('Modification request processed successfully');
-      
-      return new Response(
-        JSON.stringify({ 
-          success: true,
-          message: 'Demande de modification envoyée avec succès. Nous vous enverrons une nouvelle épreuve sous peu.',
-          proof_status: 'Modification demandée'
-        }),
-        { 
-          status: 200, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-
-    } else {
-      return new Response(
-        JSON.stringify({ error: 'Décision invalide. Utilisez "approved" ou "rejected".' }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
+      return json({
+        success: true,
+        message: "Épreuve approuvée avec succès. La commande est prête pour production.",
+        proof_status: "Approuvée",
+      });
     }
 
+    // decision === "rejected"
+    if (!comments || !comments.trim()) {
+      return json({ error: "Les commentaires sont requis pour refuser l'épreuve" }, 400);
+    }
+
+    const cleanComments = comments.trim();
+
+    const { error: rejErr } = await supabase
+      .from("proofs")
+      .update({
+        status: "Modification demandée",
+        client_comments: cleanComments,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", proof.id);
+
+    if (rejErr) {
+      console.error("Error updating proof (reject):", rejErr);
+      return json({ error: "Erreur lors de la mise à jour de l'épreuve" }, 500);
+    }
+
+    // 💬 Table des commentaires — colonne correcte: comment_text
+    await supabase
+      .from("epreuve_commentaires")
+      .insert({
+        proof_id: proof.id,
+        order_id: proof.order_id,
+        comment_text: cleanComments,
+        client_name: derivedClientName,
+        created_by_client: true,
+        is_modification_request: true,
+      })
+      .catch((e) => console.warn("Comment insert failed:", e?.message));
+
+    // Historique (best-effort)
+    await supabase.rpc("add_ordre_history", {
+      p_order_id: proof.order_id,
+      p_action_type: "demande_modification_epreuve",
+      p_action_description: `Modifications demandées par ${derivedClientName} (v${proof.version})`,
+      p_metadata: {
+        proof_id: proof.id,
+        version: proof.version,
+        client_name: derivedClientName,
+        comments: cleanComments,
+      },
+      p_proof_id: proof.id,
+      p_client_action: true,
+    }).catch((e) => console.warn("History RPC failed (reject):", e?.message));
+
+    return json({
+      success: true,
+      message:
+        "Demande de modification envoyée avec succès. Nous vous enverrons une nouvelle épreuve sous peu.",
+      proof_status: "Modification demandée",
+    });
   } catch (error) {
-    console.error('Unexpected error in handle-proof-decision:', error);
-    return new Response(
-      JSON.stringify({ error: 'Erreur interne du serveur' }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    );
+    console.error("Unexpected error in handle-proof-decision:", error);
+    return json({ error: "Erreur interne du serveur" }, 500);
   }
 });
+
+function json(payload: unknown, status = 200) {
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
