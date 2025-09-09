@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,10 +21,6 @@ import {
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
-// Créer un client public pour les pages non authentifiées
-const supabaseUrl = 'https://ytcrplsistsxfaxkfqqp.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0Y3JwbHNpc3RzeGZheGtmcXFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM4ODMwNjcsImV4cCI6MjA2OTQ1OTA2N30.rzKPK9GPPOUbZvTaqequy7KK2pBwG7wvxBAfAW-rwoE';
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 interface SubmissionData {
   id: string;
