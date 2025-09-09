@@ -108,6 +108,35 @@ const Proofs = () => {
           />
         </div>
 
+        {/* Legend - Color Codes */}
+        <div className="mb-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">🎨 Codes de couleurs</h3>
+            <div className="flex flex-wrap gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-3 bg-green-500 rounded-sm border border-green-200"></div>
+                <span className="text-gray-600">Approuvée</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-3 bg-purple-500 rounded-sm border border-purple-200"></div>
+                <span className="text-gray-600">Envoyée au client</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-3 bg-amber-500 rounded-sm border border-amber-200"></div>
+                <span className="text-gray-600">En révision</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-3 bg-blue-500 rounded-sm border border-blue-200"></div>
+                <span className="text-gray-600">En préparation</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-3 bg-orange-500 rounded-sm border border-orange-200"></div>
+                <span className="text-gray-600">À préparer</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Additional Filter: Include Archived */}
         <div className="mb-6">
           <div className="flex items-center space-x-2 px-2">
