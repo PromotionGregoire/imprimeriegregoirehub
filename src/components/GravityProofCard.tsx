@@ -20,7 +20,7 @@ const GravityProofCard: React.FC<GravityProofCardProps> = ({
     const themes = {
       'A preparer': 'warning',              // Orange - À faire
       'En préparation': 'info',             // Bleu - En cours
-      'Envoyée au client': 'normal',        // Gris - Envoyé
+      'Envoyée au client': 'purple',        // Violet - Envoyé au client
       'Modification demandée': 'danger',    // Rouge - Action requise
       'Approuvée': 'success',               // Vert - Terminé
       'En révision': 'warning'              // Orange - En révision

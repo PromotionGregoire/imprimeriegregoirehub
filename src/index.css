@@ -76,6 +76,12 @@ All colors MUST be HSL.
     --theme-danger-bg: 0 84% 60% / 0.05;
     --theme-danger-badge-bg: 0 84% 60% / 0.1;
     --theme-danger-text: 0 84% 60%;
+    
+    /* Purple Theme (Violet) */
+    --theme-purple-border: 269 100% 50%;
+    --theme-purple-bg: 269 100% 50% / 0.05;
+    --theme-purple-badge-bg: 269 100% 50% / 0.1;
+    --theme-purple-text: 269 100% 50%;
 
   /* CSS Variables for gravity cards in all themes */
   --info: 217 91% 60%;
@@ -245,6 +251,12 @@ All colors MUST be HSL.
     box-shadow: 0 0 0 4px hsl(var(--theme-danger-bg));
   }
 
+  .gravity-card.filled.theme-purple {
+    background: hsl(var(--theme-purple-bg));
+    border: 2px solid hsl(var(--theme-purple-border));
+    box-shadow: 0 0 0 4px hsl(var(--theme-purple-bg));
+  }
+
   /* Card Header */
   .gravity-card-header {
     @apply flex justify-between items-start mb-4;
@@ -300,6 +312,11 @@ All colors MUST be HSL.
   .badge-danger {
     background: hsl(var(--theme-danger-badge-bg));
     color: hsl(var(--theme-danger-text));
+  }
+
+  .badge-purple {
+    background: hsl(var(--theme-purple-badge-bg));
+    color: hsl(var(--theme-purple-text));
   }
 
   /* Metadata */
