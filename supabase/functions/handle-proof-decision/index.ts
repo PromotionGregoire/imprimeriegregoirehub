@@ -60,7 +60,7 @@ serve(async (req) => {
               id,
               business_name,
               contact_name,
-              contact_email
+              email
             )
           )
         )
