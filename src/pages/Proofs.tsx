@@ -22,6 +22,7 @@ const Proofs = () => {
     { value: 'En préparation', label: 'En préparation' },
     { value: 'Envoyée', label: 'Envoyée' },
     { value: 'En révision', label: 'En révision' },
+    { value: 'Approuvée', label: 'Approuvée' },
   ];
 
   if (error) {
@@ -46,6 +47,7 @@ const Proofs = () => {
     inPreparation: proofs?.filter(proof => proof.status === 'En préparation').length || 0,
     sent: proofs?.filter(proof => proof.status === 'Envoyée').length || 0,
     inRevision: proofs?.filter(proof => proof.status === 'En révision').length || 0,
+    approved: proofs?.filter(proof => proof.status === 'Approuvée').length || 0,
   };
 
   return (
@@ -107,7 +109,7 @@ const Proofs = () => {
 
         {/* Statistics Cards - BaseWeb Card Pattern with 8px Grid */}
         <div className={cn(
-          "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5",
+          "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6",
           "gap-2 mb-6" // 8px gaps
         )}>
           {/* Total Card */}
@@ -204,12 +206,31 @@ const Proofs = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Approved Card */}
+          <Card className="bg-background border-border shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-positive/10 rounded-lg">
+                  <CheckCircle2 className="h-5 w-5 text-positive flex-shrink-0" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[14px] leading-tight text-muted-foreground font-medium mb-1">
+                    Approuvées
+                  </p>
+                  <p className="text-[24px] font-semibold leading-tight text-foreground">
+                    {statistics.approved}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Proofs List - BaseWeb Layout Grid */}
         <Card className="bg-background border-border shadow-sm">
           <CardHeader className="pb-4">
-            <CardTitle className="text-[18px] font-medium text-foreground">Épreuves en attente</CardTitle>
+            <CardTitle className="text-[18px] font-medium text-foreground">Épreuves</CardTitle>
           </CardHeader>
           <CardContent className="p-6 pt-0">
             {isLoading ? (
@@ -239,10 +260,10 @@ const Proofs = () => {
                 <div className="flex flex-col items-center max-w-md mx-auto">
                   <FileText className="h-12 w-12 text-muted-foreground/60 mb-4" />
                   <h3 className="text-[18px] font-medium leading-tight mb-2 text-foreground">
-                    Aucune épreuve en attente
+                    Aucune épreuve trouvée
                   </h3>
                   <p className="text-[16px] leading-relaxed text-muted-foreground text-center">
-                    Les nouvelles épreuves apparaîtront ici dès qu'une commande sera acceptée et qu'une épreuve sera générée.
+                    Aucune épreuve ne correspond aux critères de recherche actuels. Les épreuves apparaîtront ici dès qu'une commande sera acceptée.
                   </p>
                 </div>
               </div>
