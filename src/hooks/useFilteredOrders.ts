@@ -14,11 +14,11 @@ export const useFilteredOrders = (
         .from('orders')
         .select(`
           *,
-          clients (
+          clients!orders_client_id_fkey (
             business_name,
             contact_name
           ),
-          submissions (
+          submissions!orders_submission_id_fkey (
             submission_number
           )
         `)
