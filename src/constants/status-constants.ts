@@ -18,8 +18,7 @@ export type SubmissionStatusType = typeof SUBMISSION_STATUS[keyof typeof SUBMISS
 // === STATUTS DES COMMANDES ===
 export const ORDER_STATUS = {
   WAITING_PROOF: "En attente de l'épreuve",
-  IN_PRODUCTION: 'En production',
-  INVOICED: 'Marqué Facturé',
+  IN_PRODUCTION: 'En production', 
   COMPLETED: 'Complétée'
 } as const;
 
@@ -48,7 +47,6 @@ export const ACTION_TYPES = {
   CREATE_ORDER: 'create_order',
   UPDATE_ORDER_STATUS: 'update_order_status',
   START_PRODUCTION: 'start_production',
-  MARK_INVOICED: 'mark_invoiced',
   COMPLETE_ORDER: 'complete_order',
   
   // Épreuves
@@ -90,7 +88,6 @@ export const STATUS_COLORS = {
   // Commandes  
   [ORDER_STATUS.WAITING_PROOF]: { dot: 'bg-orange-500', badge: 'bg-orange-100 text-orange-700', bar: 'bg-orange-500' },
   [ORDER_STATUS.IN_PRODUCTION]: { dot: 'bg-blue-500', badge: 'bg-blue-100 text-blue-700', bar: 'bg-blue-500' },
-  [ORDER_STATUS.INVOICED]: { dot: 'bg-cyan-500', badge: 'bg-cyan-100 text-cyan-700', bar: 'bg-cyan-500' },
   [ORDER_STATUS.COMPLETED]: { dot: 'bg-green-500', badge: 'bg-green-100 text-green-700', bar: 'bg-green-500' },
   
   // Épreuves

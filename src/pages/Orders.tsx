@@ -9,34 +9,25 @@ import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import GravityOrderCard from '@/components/GravityOrderCard';
-import PaymentTypeModal from '@/components/PaymentTypeModal';
-import { useOrderMutations } from '@/hooks/useOrderMutations';
 import { cn } from '@/lib/utils';
-import { useNavigate } from 'react-router-dom';
 
 const Orders = () => {
-  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [periodFilter, setPeriodFilter] = useState('all');
-  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
-  const [selectedOrderForPayment, setSelectedOrderForPayment] = useState<{id: string, orderNumber: string} | null>(null);
-  
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { updateOrderStatus } = useOrderMutations();
   
   const { orders, isLoading, error } = useFilteredOrders(searchQuery, statusFilter, periodFilter);
 
   const orderStatusOptions = [
     { value: 'En attente de l\'épreuve', label: 'En attente de l\'épreuve' },
     { value: 'En production', label: 'En production' },
-    { value: 'Marqué Facturé', label: 'Marqué Facturé' },
     { value: 'Complétée', label: 'Complétée' },
   ];
 
-  // Legacy mutation for simple status updates
-  const legacyUpdateOrderStatus = useMutation({
+  // Update order status mutations
+  const updateOrderStatus = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: string; status: string }) => {
       const { error } = await supabase
         .from('orders')
@@ -63,35 +54,11 @@ const Orders = () => {
   });
 
   const handleProofAccepted = (orderId: string) => {
-    legacyUpdateOrderStatus.mutate({ orderId, status: 'En production' });
-  };
-
-  const handleInvoiced = (orderId: string) => {
-    const order = orders.find(o => o.id === orderId);
-    if (order) {
-      setSelectedOrderForPayment({
-        id: orderId,
-        orderNumber: order.order_number
-      });
-      setPaymentModalOpen(true);
-    }
-  };
-
-  const handlePaymentConfirm = (paymentType: string) => {
-    if (selectedOrderForPayment) {
-      updateOrderStatus.mutate({
-        orderId: selectedOrderForPayment.id,
-        status: 'Marqué Facturé',
-        paymentType
-      });
-      // Fermer le modal et réinitialiser la sélection
-      setPaymentModalOpen(false);
-      setSelectedOrderForPayment(null);
-    }
+    updateOrderStatus.mutate({ orderId, status: 'En production' });
   };
 
   const handleDelivered = (orderId: string) => {
-    legacyUpdateOrderStatus.mutate({ orderId, status: 'Complétée' });
+    updateOrderStatus.mutate({ orderId, status: 'Complétée' });
   };
 
   // Calculate statistics
@@ -100,7 +67,6 @@ const Orders = () => {
     totalValue: orders.reduce((sum, order) => sum + Number(order.total_price), 0),
     pendingProof: orders.filter(o => o.status === 'En attente de l\'épreuve').length,
     inProduction: orders.filter(o => o.status === 'En production').length,
-    invoiced: orders.filter(o => o.status === 'Marqué Facturé').length,
     completed: orders.filter(o => o.status === 'Complétée').length,
   };
 
@@ -192,11 +158,7 @@ const Orders = () => {
                 <span className="text-gray-600">Complétée</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-1 bg-cyan-500 rounded"></div>
-                <span className="text-gray-600">Marqué Facturé</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-1 bg-blue-500 rounded"></div>
+                <div className="w-4 h-1 bg-yellow-400 rounded"></div>
                 <span className="text-gray-600">En production</span>
               </div>
               <div className="flex items-center gap-2">
@@ -357,25 +319,13 @@ const Orders = () => {
               <GravityOrderCard
                 key={order.id}
                 order={order}
-                onClick={() => navigate(`/dashboard/orders/${order.id}`)}
+                onClick={() => window.location.href = `/dashboard/orders/${order.id}`}
                 onProofAccepted={handleProofAccepted}
-                onInvoiced={handleInvoiced}
                 onDelivered={handleDelivered}
               />
             ))
           )}
         </div>
-
-        {/* Payment Type Modal */}
-        <PaymentTypeModal
-          isOpen={paymentModalOpen}
-          onClose={() => {
-            setPaymentModalOpen(false);
-            setSelectedOrderForPayment(null);
-          }}
-          onConfirm={handlePaymentConfirm}
-          orderNumber={selectedOrderForPayment?.orderNumber}
-        />
       </div>
     </div>
   );

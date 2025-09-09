@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Package, User, Calendar, DollarSign, CreditCard } from 'lucide-react';
+import { ArrowLeft, Package, User, Calendar, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,56 +12,6 @@ import { fr } from 'date-fns/locale';
 import ModernToggle from '@/components/ModernToggle';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
-
-// Affiche la dernière mention de facturation avec le mode de paiement
-function BillingStatus({ orderId }: { orderId: string }) {
-  const { data, isLoading } = useQuery({
-    queryKey: ['order-billing', orderId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('v_ordre_historique')
-        .select('id, created_at, action_type, action_description, metadata')
-        .eq('order_id', orderId)
-        .eq('action_type', 'mark_invoiced')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (error) throw error;
-      return data as { id: string; created_at: string; action_description: string; metadata: any } | null;
-    },
-  });
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <CreditCard className="h-5 w-5" />
-          Facturation
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <Skeleton className="h-6 w-40" />
-        ) : data ? (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary">Marqué Facturé</Badge>
-              {data.metadata?.paymentLabel && (
-                <span className="text-sm text-muted-foreground">• Mode de paiement: <span className="font-medium text-foreground">{data.metadata.paymentLabel}</span></span>
-              )}
-            </div>
-            {data.metadata?.invoicedAt && (
-              <p className="text-sm text-muted-foreground">Le {format(new Date(data.metadata.invoicedAt), 'dd MMM yyyy - HH:mm', { locale: fr })}</p>
-            )}
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">Aucune facture enregistrée pour cette commande.</p>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
 
 const OrderDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -84,14 +34,7 @@ const OrderDetails = () => {
           ),
           submissions (
             submission_number,
-            id,
-            submission_items (
-              id,
-              product_name,
-              description,
-              quantity,
-              unit_price
-            )
+            id
           )
         `)
         .eq('id', id!)
@@ -251,54 +194,6 @@ const OrderDetails = () => {
             </CardContent>
           </Card>
 
-          {/* Articles commandés */}
-          {order.submissions?.submission_items && order.submissions.submission_items.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Package className="h-5 w-5" />
-                  Articles commandés
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-2 font-medium text-muted-foreground">Produit</th>
-                        <th className="text-left py-2 font-medium text-muted-foreground">Description</th>
-                        <th className="text-right py-2 font-medium text-muted-foreground">Qté</th>
-                        <th className="text-right py-2 font-medium text-muted-foreground">Prix Unit.</th>
-                        <th className="text-right py-2 font-medium text-muted-foreground">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {order.submissions.submission_items.map((item: any) => (
-                        <tr key={item.id} className="border-b">
-                          <td className="py-3 font-medium">{item.product_name}</td>
-                          <td className="py-3 text-muted-foreground">{item.description || '-'}</td>
-                          <td className="py-3 text-right">{item.quantity}</td>
-                          <td className="py-3 text-right">${Number(item.unit_price).toFixed(2)}</td>
-                          <td className="py-3 text-right font-medium">
-                            ${(Number(item.unit_price) * item.quantity).toFixed(2)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot>
-                      <tr className="border-t-2">
-                        <td colSpan={4} className="py-3 text-right font-medium">Total général:</td>
-                        <td className="py-3 text-right font-bold text-lg text-primary">
-                          ${Number(order.total_price).toFixed(2)}
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
           {/* Informations client */}
           <Card>
             <CardHeader>
@@ -336,7 +231,7 @@ const OrderDetails = () => {
           </Card>
         </div>
 
-        {/* Actions de production et facturation */}
+        {/* Actions de production */}
         <div className="space-y-6">
           <Card>
             <CardHeader>
@@ -362,9 +257,6 @@ const OrderDetails = () => {
               />
             </CardContent>
           </Card>
-
-          {/* Facturation */}
-          <BillingStatus orderId={order.id} />
         </div>
       </div>
     </div>

@@ -20,7 +20,7 @@ const GravityProofCard: React.FC<GravityProofCardProps> = ({
     const themes = {
       'A preparer': 'warning',              // Orange - À faire
       'En préparation': 'info',             // Bleu - En cours
-      'Envoyée au client': 'purple',        // Violet - Envoyé au client
+      'Envoyée au client': 'normal',        // Gris - Envoyé
       'Modification demandée': 'danger',    // Rouge - Action requise
       'Approuvée': 'success',               // Vert - Terminé
       'En révision': 'warning'              // Orange - En révision
@@ -90,12 +90,7 @@ const GravityProofCard: React.FC<GravityProofCardProps> = ({
             {businessName}
           </h3>
           <span className="gravity-card-code">
-            {(() => {
-              const year = proof.human_year;
-              const seq = proof.human_seq;
-              if (year && seq) return `E-${year}-${String(seq).padStart(4, '0')}`;
-              return proof.orders?.order_number || proof.orders?.human_id || 'Non attribué';
-            })()}
+            {proof.human_id}-{proof.human_year}-{String(proof.human_seq).padStart(4, '0')}
           </span>
         </div>
         <button 

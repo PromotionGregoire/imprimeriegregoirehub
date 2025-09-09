@@ -28,7 +28,6 @@ interface ModernOrderCardProps {
   isSelected?: boolean;
   onSelect?: (e?: React.MouseEvent) => void;
   onProofAccepted: (orderId: string) => void;
-  onInvoiced?: (orderId: string, paymentType: string) => void;
   onDelivered: (orderId: string) => void;
 }
 
@@ -38,7 +37,6 @@ const ModernOrderCard = ({
   isSelected = false,
   onSelect,
   onProofAccepted,
-  onInvoiced,
   onDelivered
 }: ModernOrderCardProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -50,7 +48,6 @@ const ModernOrderCard = ({
     switch (order.status) {
       case 'En attente de l\'épreuve': return 'high';
       case 'En production': return 'normal';
-      case 'Marqué Facturé': return 'normal';
       case 'Complétée': return 'low';
       default: return 'normal';
     }
@@ -68,7 +65,6 @@ const ModernOrderCard = ({
   const statusConfig = {
     'En attente de l\'épreuve': { dot: 'bg-orange-500', badge: 'bg-orange-100 text-orange-700' },
     'En production': { dot: 'bg-blue-500', badge: 'bg-blue-100 text-blue-700' },
-    'Marqué Facturé': { dot: 'bg-cyan-500', badge: 'bg-cyan-100 text-cyan-700' },
     'Complétée': { dot: 'bg-green-500', badge: 'bg-green-100 text-green-700' }
   };
 
@@ -99,11 +95,8 @@ const ModernOrderCard = ({
           onProofAccepted(order.id);
         }
         break;
-      case 'invoiced':
-        // Will be handled by parent component with modal
-        break;
       case 'delivered':
-        if (order.status === 'Marqué Facturé') {
+        if (order.status === 'En production') {
           onDelivered(order.id);
         }
         break;
@@ -116,8 +109,7 @@ const ModernOrderCard = ({
     }
   };
 
-  const isProofAccepted = order.status === 'En production' || order.status === 'Marqué Facturé' || order.status === 'Complétée';
-  const isInvoiced = order.status === 'Marqué Facturé' || order.status === 'Complétée';
+  const isProofAccepted = order.status === 'En production' || order.status === 'Complétée';
   const isDelivered = order.status === 'Complétée';
 
   return (
@@ -212,17 +204,7 @@ const ModernOrderCard = ({
                     </button>
                   )}
                   
-                  {order.status === 'En production' && onInvoiced && (
-                    <button 
-                      onClick={(e) => handleMenuAction('invoiced', e)}
-                      className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3"
-                    >
-                      <RefreshCw className="w-4 h-4 text-gray-500" />
-                      <span>Marquer facturé</span>
-                    </button>
-                  )}
-                  
-                  {isInvoiced && !isDelivered && (
+                  {isProofAccepted && !isDelivered && (
                     <button 
                       onClick={(e) => handleMenuAction('delivered', e)}
                       className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3"

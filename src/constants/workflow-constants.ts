@@ -66,15 +66,8 @@ export const ORDER_WORKFLOW: WorkflowStep[] = [
     status: 'En production',
     description: 'Épreuve approuvée, production en cours',
     color: 'info',
-    nextSteps: ['Marqué Facturé'],
-    actions: ['Voir épreuve', 'Marquer facturé', 'Modifier délai']
-  },
-  {
-    status: 'Marqué Facturé',
-    description: 'Production terminée et facturée',
-    color: 'normal',
     nextSteps: ['Complétée'],
-    actions: ['Voir facture', 'Marquer livrée']
+    actions: ['Voir épreuve', 'Marquer livrée', 'Modifier délai']
   },
   {
     status: 'Complétée',
@@ -164,8 +157,7 @@ export const AVAILABLE_ACTIONS = {
   
   orders: {
     'En attente de l\'épreuve': ['create_proof', 'view_details', 'start_production'],
-    'En production': ['view_proof', 'mark_invoiced', 'modify_deadline'],
-    'Marqué Facturé': ['view_invoice', 'mark_delivered'],
+    'En production': ['view_proof', 'mark_delivered', 'modify_deadline'],
     'Complétée': ['create_invoice', 'request_review', 'archive']
   },
   
@@ -193,7 +185,6 @@ export const STATUS_THEMES = {
   // Commandes  
   'En attente de l\'épreuve': { theme: 'warning', icon: 'Clock' },
   'En production': { theme: 'info', icon: 'FileText' },
-  'Marqué Facturé': { theme: 'normal', icon: 'CreditCard' },
   'Complétée': { theme: 'success', icon: 'CheckCircle' },
   
   // Épreuves

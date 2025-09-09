@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, User, MoreVertical, Clock, Truck, CheckCircle, FileText, CreditCard } from 'lucide-react';
+import { Calendar, User, MoreVertical, Clock, Truck, CheckCircle, FileText } from 'lucide-react';
 import { formatDate, formatCurrency } from '@/lib/formatters';
 
 interface GravityOrderCardProps {
@@ -8,7 +8,6 @@ interface GravityOrderCardProps {
   isSelected?: boolean;
   onSelect?: (e?: React.MouseEvent) => void;
   onProofAccepted?: (orderId: string) => void;
-  onInvoiced?: (orderId: string) => void;
   onDelivered?: (orderId: string) => void;
 }
 
@@ -18,7 +17,6 @@ const GravityOrderCard: React.FC<GravityOrderCardProps> = ({
   isSelected = false,
   onSelect,
   onProofAccepted,
-  onInvoiced,
   onDelivered
 }) => {
   // Mapping des statuts de commandes aux thèmes Gravity UI
@@ -26,7 +24,6 @@ const GravityOrderCard: React.FC<GravityOrderCardProps> = ({
     const themes = {
       'En attente de l\'épreuve': 'warning',  // Orange - En attente
       'En production': 'info',               // Bleu - En cours
-      'Marqué Facturé': 'normal',            // Gris - Facturé
       'Complétée': 'success'                 // Vert - Terminé
     };
     return themes[status as keyof typeof themes] || 'normal';
@@ -37,7 +34,6 @@ const GravityOrderCard: React.FC<GravityOrderCardProps> = ({
     const icons = {
       'En attente de l\'épreuve': <Clock size={16} />,
       'En production': <FileText size={16} />,
-      'Marqué Facturé': <CreditCard size={16} />,
       'Complétée': <CheckCircle size={16} />
     };
     return icons[status as keyof typeof icons] || <Clock size={16} />;
@@ -130,7 +126,7 @@ const GravityOrderCard: React.FC<GravityOrderCardProps> = ({
       </div>
 
       {/* Action Buttons for status changes */}
-      {(onProofAccepted || onInvoiced || onDelivered) && (
+      {(onProofAccepted || onDelivered) && (
         <div className="flex gap-2 mt-4 pt-3 border-t border-border">
           {order.status === 'En attente de l\'épreuve' && onProofAccepted && (
             <button
@@ -143,18 +139,7 @@ const GravityOrderCard: React.FC<GravityOrderCardProps> = ({
               Démarrer production
             </button>
           )}
-          {order.status === 'En production' && onInvoiced && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onInvoiced(order.id); // Open payment type modal
-              }}
-              className="flex-1 px-3 py-1.5 text-xs font-medium bg-cyan-500/10 text-cyan-600 rounded-md hover:bg-cyan-500/20 transition-colors mr-2"
-            >
-              Marquer facturé
-            </button>
-          )}
-          {order.status === 'Marqué Facturé' && onDelivered && (
+          {order.status === 'En production' && onDelivered && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
