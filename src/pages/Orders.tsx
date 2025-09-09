@@ -8,7 +8,7 @@ import { useFilteredOrders } from '@/hooks/useFilteredOrders';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import ModernOrderCard from '@/components/ModernOrderCard';
+import GravityOrderCard from '@/components/GravityOrderCard';
 import { cn } from '@/lib/utils';
 
 const Orders = () => {
@@ -316,7 +316,7 @@ const Orders = () => {
             </div>
           ) : (
             orders.map((order) => (
-              <ModernOrderCard
+              <GravityOrderCard
                 key={order.id}
                 order={order}
                 onClick={() => window.location.href = `/dashboard/orders/${order.id}`}

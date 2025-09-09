@@ -77,8 +77,11 @@ All colors MUST be HSL.
     --theme-danger-badge-bg: 0 84% 60% / 0.1;
     --theme-danger-text: 0 84% 60%;
 
-    /* Semantic Status Colors - Couleurs Hub Grégoire */
-    --status-positive: 111 56% 53%; /* Vert principal pour succès */
+  /* CSS Variables for gravity cards in all themes */
+  --info: 217 91% 60%;
+  --success: 160 84% 39%;
+  --warning: 25 95% 53%;
+  --danger: 0 84% 60%;
     --status-positive-light: 111 56% 96%;
     --status-warning: 39 100% 50%; /* Orange pour warnings */
     --status-warning-light: 39 100% 95%;

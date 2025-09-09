@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ProofCard } from '@/components/ProofCard';
+import GravityProofCard from '@/components/GravityProofCard';
 import { FlexibleDashboardToolbar } from '@/components/FlexibleDashboardToolbar';
 import { CreateProofDialog } from '@/components/CreateProofDialog';
 import { useFilteredProofs } from '@/hooks/useFilteredProofs';
@@ -298,7 +298,11 @@ const Proofs = () => {
                 "gap-2" // 8px grid spacing
               )}>
                 {proofs.map((proof) => (
-                  <ProofCard key={proof.id} proof={proof} />
+                  <GravityProofCard 
+                    key={proof.id} 
+                    proof={proof}
+                    onClick={() => navigate(`/dashboard/proofs/${proof.id}`)}
+                  />
                 ))}
               </div>
             ) : (
