@@ -297,6 +297,24 @@ export type Database = {
           },
         ]
       }
+      id_sequences: {
+        Row: {
+          kind: string
+          next_seq: number
+          year: number
+        }
+        Insert: {
+          kind: string
+          next_seq?: number
+          year: number
+        }
+        Update: {
+          kind?: string
+          next_seq?: number
+          year?: number
+        }
+        Relationships: []
+      }
       invoice_lines: {
         Row: {
           id: string
@@ -517,6 +535,9 @@ export type Database = {
           archived_by: string | null
           client_id: string
           created_at: string
+          human_id: string | null
+          human_seq: number | null
+          human_year: number | null
           id: string
           is_archived: boolean | null
           order_number: string
@@ -531,6 +552,9 @@ export type Database = {
           archived_by?: string | null
           client_id: string
           created_at?: string
+          human_id?: string | null
+          human_seq?: number | null
+          human_year?: number | null
           id?: string
           is_archived?: boolean | null
           order_number?: string
@@ -545,6 +569,9 @@ export type Database = {
           archived_by?: string | null
           client_id?: string
           created_at?: string
+          human_id?: string | null
+          human_seq?: number | null
+          human_year?: number | null
           id?: string
           is_archived?: boolean | null
           order_number?: string
@@ -1133,6 +1160,9 @@ export type Database = {
           client_comments: string | null
           created_at: string
           file_url: string | null
+          human_id: string | null
+          human_seq: number | null
+          human_year: number | null
           id: string
           is_active: boolean | null
           is_archived: boolean | null
@@ -1155,6 +1185,9 @@ export type Database = {
           client_comments?: string | null
           created_at?: string
           file_url?: string | null
+          human_id?: string | null
+          human_seq?: number | null
+          human_year?: number | null
           id?: string
           is_active?: boolean | null
           is_archived?: boolean | null
@@ -1177,6 +1210,9 @@ export type Database = {
           client_comments?: string | null
           created_at?: string
           file_url?: string | null
+          human_id?: string | null
+          human_seq?: number | null
+          human_year?: number | null
           id?: string
           is_active?: boolean | null
           is_archived?: boolean | null
@@ -2504,6 +2540,10 @@ export type Database = {
       mark_invoices_overdue: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      reserve_sequence: {
+        Args: { p_kind: string; p_year: number }
+        Returns: number
       }
       test_history_triggers: {
         Args: Record<PropertyKey, never>
