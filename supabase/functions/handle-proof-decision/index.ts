@@ -92,25 +92,28 @@ serve(async (req) => {
 
     console.log('Found proof:', proofData.id, 'for order:', proofData.order_id);
 
+    // Extract client information from the fetched data
+    const clientInfo = proofData.orders?.submissions?.clients;
+    const deducedClientName = clientInfo?.contact_name || clientInfo?.business_name || 'Client';
+    
+    console.log('Client info:', { 
+      business_name: clientInfo?.business_name, 
+      contact_name: clientInfo?.contact_name,
+      deduced_name: deducedClientName 
+    });
+
     if (decision === 'approved') {
       console.log('Processing approval...');
       
-      if (!clientName?.trim()) {
-        return new Response(
-          JSON.stringify({ error: 'Le nom du client est requis pour l\'approbation' }),
-          { 
-            status: 400, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        );
-      }
+      // Use deduced client name for approval
+      const approverName = clientName?.trim() || deducedClientName;
 
       // Update proof status to approved
       const { error: updateProofError } = await supabase
         .from('proofs')
         .update({
           status: 'Approuvée',
-          approved_by_name: clientName.trim(),
+          approved_by_name: approverName,
           approved_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
@@ -135,11 +138,11 @@ serve(async (req) => {
         .rpc('add_ordre_history', {
           p_order_id: proofData.order_id,
           p_action_type: 'approbation_epreuve',
-          p_action_description: `Épreuve version ${proofData.version} approuvée par ${clientName.trim()}`,
+          p_action_description: `Épreuve version ${proofData.version} approuvée par ${approverName}`,
           p_metadata: {
             proof_id: proofData.id,
             version: proofData.version,
-            approved_by: clientName.trim(),
+            approved_by: approverName,
             approved_at: new Date().toISOString()
           },
           p_proof_id: proofData.id,
@@ -169,15 +172,18 @@ serve(async (req) => {
     } else if (decision === 'rejected') {
       console.log('Processing rejection...');
       
-      if (!clientName?.trim() || !comments?.trim()) {
+      // Only require comments for rejection, client name is deduced
+      if (!comments?.trim()) {
         return new Response(
-          JSON.stringify({ error: 'Le nom du client et les commentaires sont requis pour la demande de modification' }),
+          JSON.stringify({ error: 'Les commentaires sont requis pour la demande de modification' }),
           { 
             status: 400, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
           }
         );
       }
+
+      const rejectorName = clientName?.trim() || deducedClientName;
 
       // Update proof status to modification requested
       const { error: updateProofError } = await supabase
@@ -207,7 +213,7 @@ serve(async (req) => {
           proof_id: proofData.id,
           order_id: proofData.order_id,
           comment_text: comments.trim(),
-          client_name: clientName.trim(),
+          client_name: rejectorName,
           created_by_client: true,
           is_modification_request: true
         });
@@ -222,11 +228,11 @@ serve(async (req) => {
         .rpc('add_ordre_history', {
           p_order_id: proofData.order_id,
           p_action_type: 'demande_modification_epreuve',
-          p_action_description: `Modification demandée par ${clientName.trim()} pour l'épreuve version ${proofData.version}`,
+          p_action_description: `Modification demandée par ${rejectorName} pour l'épreuve version ${proofData.version}`,
           p_metadata: {
             proof_id: proofData.id,
             version: proofData.version,
-            client_name: clientName.trim(),
+            client_name: rejectorName,
             comments: comments.trim()
           },
           p_proof_id: proofData.id,
