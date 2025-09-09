@@ -48,7 +48,7 @@ const App = () => {
             <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/epreuve/:token" element={<ProofApproval />} />
+            <Route path="/epreuve/:token" element={<ProofApprovalPage />} />
             <Route path="/proof/:token" element={<ProofApprovalPage />} />
             <Route path="/approve/proof/:token" element={<ProofApprovalPage />} />
             <Route path="/approve/submission/:token" element={<SubmissionApprovalPage />} />
