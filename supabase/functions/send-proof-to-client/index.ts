@@ -1,328 +1,160 @@
-import { serve } from 'https://deno.land/std@0.190.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { Resend } from 'npm:resend@2.0.0'
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.53.0";
+import { Resend } from "https://esm.sh/resend@3.4.0";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+const cors = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface SendProofRequest {
-  proofId: string;
-}
+const isEmail = (v?: string | null) =>
+  !!v && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
   try {
-    console.log('=== SEND PROOF TO CLIENT START ===');
-    
-    const requestBody = await req.text();
-    console.log('Raw request body:', requestBody);
-    
-    let parsedBody;
-    try {
-      parsedBody = JSON.parse(requestBody);
-    } catch (parseError) {
-      console.error('JSON parse error:', parseError);
-      throw new Error('Invalid JSON in request body');
-    }
-    
-    const { proofId }: SendProofRequest = parsedBody;
-    console.log('Parsed proofId:', proofId);
-    const force = parsedBody?.force === true;
+    const { proofId } = await req.json();
 
     if (!proofId) {
-      throw new Error('proofId is required');
+      return json({ error: "proofId requis" }, 400);
     }
 
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    
-    if (!supabaseUrl || !supabaseServiceKey) {
-      console.error('Missing Supabase environment variables');
-      throw new Error('Supabase configuration missing');
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
+
+    // Récupère preuve + commande + client
+    const { data: proof, error } = await supabase
+      .from("proofs")
+      .select(`
+        id, version, file_url, approval_token, status, order_id,
+        orders (
+          id, order_number,
+          submissions (
+            submission_number,
+            clients ( business_name, contact_name, email )
+          )
+        )
+      `)
+      .eq("id", proofId)
+      .maybeSingle();
+
+    if (error) return json({ error: "Erreur DB (proof fetch)" }, 500);
+    if (!proof) return json({ error: "Épreuve introuvable" }, 404);
+
+    const clientEmail = proof.orders?.submissions?.clients?.email;
+    const clientName =
+      proof.orders?.submissions?.clients?.contact_name ||
+      proof.orders?.submissions?.clients?.business_name ||
+      "Client";
+
+    if (!isEmail(clientEmail)) {
+      return json({ error: "Client sans email valide" }, 400);
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Prépare envoi Resend
+    const resend = new Resend(Deno.env.get("RESEND_API_KEY") ?? "");
+    const fromSecret = (Deno.env.get("RESEND_FROM_PROOFS") ?? "").trim();
+    const replyToSecret = (Deno.env.get("RESEND_REPLY_TO") ?? "").trim();
 
-    // Vérifier les secrets Resend
-    const resendApiKey = Deno.env.get('RESEND_API_KEY');
-    const fromEmailRaw = (Deno.env.get('RESEND_FROM_PROOFS') || '').trim();
-    const replyToEmailRaw = (Deno.env.get('RESEND_REPLY_TO') || fromEmailRaw || '').trim();
-    
-    // Fonction pour extraire l'email pur (sans le nom)
-    const extractEmailOnly = (emailString: string): string => {
-      const match = emailString.match(/<([^>]+)>/);
-      return match ? match[1] : emailString;
-    };
-    
-    const isValidEmail = (s: string) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s);
-    
-    const replyToEmail = extractEmailOnly(replyToEmailRaw);
-    const validReplyTo = isValidEmail(replyToEmail) ? replyToEmail : undefined;
-    
-    console.log('Environment check:', {
-      hasResendKey: !!resendApiKey,
-      hasFromEmail: !!fromEmailRaw,
-      hasReplyTo: !!validReplyTo,
-      replyToFormat: validReplyTo || '(none)'
-    });
-    
-    if (!resendApiKey) {
-      console.error('Missing Resend API key');
-      throw new Error('Email configuration incomplete: RESEND_API_KEY missing');
-    }
+    // normalisation
+    const fromEmail = (fromSecret.match(/<([^>]+)>/)?.[1] || fromSecret).trim();
+    const replyTo = isEmail(replyToSecret) ? replyToSecret : undefined;
 
-    console.log('Fetching proof with ID:', proofId);
+    const displayName = "Imprimerie Grégoire";
+    const formattedFrom = isEmail(fromEmail)
+      ? `${displayName} <${fromEmail}>`
+      : `${displayName} <onboarding@resend.dev>`; // fallback sécure
 
-    // Get proof details
-    const { data: proof, error: proofError } = await supabase
-      .from('proofs')
-      .select('*')
-      .eq('id', proofId)
-      .single();
+    const subject = `Épreuve ${proof.orders ? proof.orders.order_number : ""} – version v${proof.version}`;
+    const approveUrl = `${Deno.env.get("PUBLIC_PORTAL_BASE_URL")}/approval?token=${encodeURIComponent(
+      proof.approval_token
+    )}`;
 
-    if (proofError) {
-      console.error('Proof fetch error:', proofError);
-      throw new Error(`Proof not found: ${proofError.message}`);
-    }
-
-    if (!proof) {
-      throw new Error('Proof not found');
-    }
-
-    console.log('Proof found:', { id: proof.id, version: proof.version, status: proof.status });
-
-    // Verify proof has a file
-    if (!proof.file_url) {
-      throw new Error('Cette épreuve n\'a pas encore de fichier attaché');
-    }
-
-    // Get order details
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('id', proof.order_id)
-      .single();
-
-    if (orderError || !order) {
-      console.error('Order fetch error:', orderError);
-      throw new Error('Order not found');
-    }
-
-    console.log('Order found:', { order_number: order.order_number, client_id: order.client_id });
-
-    // Get client details
-    const { data: client, error: clientError } = await supabase
-      .from('clients')
-      .select('*')
-      .eq('id', order.client_id)
-      .single();
-
-    if (clientError || !client) {
-      console.error('Client fetch error:', clientError);
-      throw new Error('Client not found');
-    }
-
-    console.log('Client found:', { business_name: client.business_name, email: client.email });
-
-    if (!client.email) {
-      throw new Error('Aucune adresse email trouvée pour ce client');
-    }
-
-    // Idempotence: avoid re-sending unless force=true
-    if (!force && proof.status === 'Envoyée au client') {
-      return new Response(JSON.stringify({ error: 'Déjà envoyée', code: 'ALREADY_SENT' }), {
-        status: 409,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
-      });
-    }
-
-    // Generate or use existing approval token
-    let approvalToken = proof.approval_token;
-    if (!approvalToken) {
-      approvalToken = crypto.randomUUID();
-      console.log('Generated new approval token');
-      
-      const { error: updateTokenError } = await supabase
-        .from('proofs')
-        .update({ 
-          approval_token: approvalToken,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', proofId);
-
-      if (updateTokenError) {
-        console.error('Token update error:', updateTokenError);
-        throw new Error('Failed to generate approval token');
-      }
-    }
-
-    // Status will be updated after a successful email send
-
-    // Build approval URL
-    const baseUrl = Deno.env.get('PUBLIC_PORTAL_BASE_URL') || 'https://client.promotiongregoire.com';
-    const approvalUrl = `${baseUrl}/approve/proof/${approvalToken}`;
-    console.log('Approval URL generated:', approvalUrl);
-
-    // Initialize Resend
-    const resend = new Resend(resendApiKey);
-
-    // Normalize from email (remove any existing name/brackets)
-    const displayName = 'Imprimerie Grégoire';
-    const emailOnly = (() => {
-      const match = fromEmailRaw.match(/<([^>]+)>/);
-      return match ? match[1] : fromEmailRaw; // Remove potential "Name <email>"
-    })();
-    const isEmail = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emailOnly);
-    const formattedFrom = isEmail ? `${displayName} <${emailOnly}>` : `${displayName} <onboarding@resend.dev>`;
-    const isTestFrom = !isEmail;
-
-    console.log('Formatted FROM field:', formattedFrom);
-
-    // Email content
-    const subject = `Épreuve ${order.order_number} — version ${proof.version}`;
-    const finalSubject = isTestFrom ? `[TEST] ${subject}` : subject;
-    
     const html = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      </head>
-      <body style="font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="background: #f8f9fa; padding: 30px; border-radius: 8px; border-left: 4px solid #5a7a51;">
-          <h2 style="color: #5a7a51; margin: 0 0 20px 0;">Votre épreuve est prête – Version ${proof.version}</h2>
-          
-          <p>Bonjour ${client.contact_name || 'Cher client'},</p>
-          
-          <p>Votre épreuve (BAT) pour la commande <strong>${order.order_number}</strong> est maintenant disponible pour validation.</p>
-          
-          <div style="margin: 30px 0; text-align: center;">
-            <a href="${approvalUrl}" 
-               style="display: inline-block; 
-                      padding: 15px 30px; 
-                      background-color: #5a7a51; 
-                      color: white; 
-                      text-decoration: none; 
-                      border-radius: 6px; 
-                      font-weight: bold;
-                      box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-              📋 Consulter et approuver l'épreuve
-            </a>
-          </div>
-          
-          <p>Vous pouvez également télécharger directement le fichier : 
-             <a href="${proof.file_url}" style="color: #5a7a51; text-decoration: underline;">
-               Télécharger l'épreuve (v${proof.version})
-             </a>
-          </p>
-          
-          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef; font-size: 14px; color: #6c757d;">
-            <p><strong>Imprimerie Grégoire</strong><br>
-               Pour toute question, répondez simplement à ce message.<br>
-               Nous sommes là pour vous accompagner ! 🎨</p>
-          </div>
-        </div>
-      </body>
-      </html>
+      <p>Bonjour ${clientName},</p>
+      <p>Voici votre épreuve (v${proof.version}).</p>
+      <p><a href="${approveUrl}">Voir et approuver / demander des modifications</a></p>
     `;
 
-    console.log('Preparing email for:', client.email, `(${client.contact_name || client.business_name}) - Order: ${order.order_number}`);
-
-    // Send email with automatic fallback
-    let emailResult = await resend.emails.send({
+    // ENVOI EMAIL en premier
+    let sent = await resend.emails.send({
       from: formattedFrom,
-      to: [client.email],
-      reply_to: validReplyTo,
-      subject: finalSubject,
+      to: [clientEmail!],
+      reply_to: replyTo,
+      subject,
       html,
     });
 
-    // Automatic fallback if domain validation issues
-    if (emailResult.error && /invalid.*from/i.test(emailResult.error.name || emailResult.error.message || '')) {
-      console.log('FROM field rejected, falling back to Resend default:', emailResult.error);
-      
-      emailResult = await resend.emails.send({
-        from: 'Imprimerie Grégoire <onboarding@resend.dev>',
-        to: [client.email],
-        reply_to: validReplyTo,
+    // Si échec → log détaillé et fallback onboarding
+    if (sent?.error) {
+      console.warn("Resend primary failed:", {
+        name: sent.error.name,
+        message: sent.error.message,
+        type: (sent as any).error?.type,
+      });
+
+      // Fallback si le from n'est pas accepté (domaine non vérifié, etc.)
+      sent = await resend.emails.send({
+        from: `${displayName} <onboarding@resend.dev>`,
+        to: [clientEmail!],
+        reply_to: replyTo,
         subject: `[TEST] ${subject}`,
         html,
       });
-    }
 
-    if (emailResult.error) {
-      console.error('Email send error:', emailResult.error);
-      return new Response(JSON.stringify({ 
-        error: `Failed to send email: ${emailResult.error.message}` 
-      }), {
-        status: 502,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
-      });
-    }
-
-    console.log('Email sent successfully:', emailResult.data?.id);
-
-    // Update proof status AFTER successful send
-    const { error: postSendStatusError } = await supabase
-      .from('proofs')
-      .update({ 
-        status: 'Envoyée au client',
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', proofId);
-
-    if (postSendStatusError) {
-      console.error('Status update error after email send:', postSendStatusError);
-      // We continue but let the caller know status might be stale
-    } else {
-      console.log('Proof status updated successfully after email send');
-    }
-
-    // Log the email notification
-    try {
-      await supabase.from('email_notifications').insert({
-        email_type: 'proof_notification',
-        proof_id: proofId,
-        recipient_email: client.email,
-        sent_at: new Date().toISOString(),
-        success: true,
-      });
-      console.log('Email notification logged');
-    } catch (logError) {
-      console.error('Failed to log email notification:', logError);
-      // Don't fail the whole operation if logging fails
-    }
-
-    return new Response(JSON.stringify({ 
-      sent: true, 
-      email_id: emailResult.data?.id,
-      approval_url: approvalUrl
-    }), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        ...corsHeaders,
-      },
-    });
-
-  } catch (error: any) {
-    console.error('Error in send-proof-to-client function:', error);
-    
-    return new Response(
-      JSON.stringify({ 
-        error: error.message || 'Internal server error'
-      }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      if (sent?.error) {
+        // On renvoie l'erreur lisible au client
+        return json(
+          {
+            error: "Failed to send email",
+            details: {
+              name: sent.error.name,
+              message: sent.error.message,
+            },
+          },
+          502
+        );
       }
-    );
+    }
+
+    // EMAIL OK → on met à jour le statut
+    const { error: upErr } = await supabase
+      .from("proofs")
+      .update({
+        status: "Envoyée au client",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", proof.id);
+
+    if (upErr) {
+      console.warn("Proof status update after email failed:", upErr);
+    }
+
+    // Log notification (best-effort)
+    await supabase
+      .from("email_notifications")
+      .insert({
+        proof_id: proof.id,
+        email_type: "proof_notification",
+        recipient_email: clientEmail,
+        success: true,
+      })
+      .catch(() => {});
+
+    return json({ ok: true, messageId: sent?.data?.id ?? null });
+  } catch (e) {
+    console.error("send-proof-to-client fatal:", e);
+    return json({ error: "Unexpected error", details: String(e?.message ?? e) }, 500);
   }
 });
+
+function json(payload: unknown, status = 200) {
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers: { ...cors, "Content-Type": "application/json" },
+  });
+}
