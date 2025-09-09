@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Package, User, Calendar, DollarSign } from 'lucide-react';
+import { ArrowLeft, Package, User, Calendar, DollarSign, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +12,56 @@ import { fr } from 'date-fns/locale';
 import ModernToggle from '@/components/ModernToggle';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+
+// Affiche la dernière mention de facturation avec le mode de paiement
+function BillingStatus({ orderId }: { orderId: string }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ['order-billing', orderId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('v_ordre_historique')
+        .select('id, created_at, action_type, action_description, metadata')
+        .eq('order_id', orderId)
+        .eq('action_type', 'mark_invoiced')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data as { id: string; created_at: string; action_description: string; metadata: any } | null;
+    },
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <CreditCard className="h-5 w-5" />
+          Facturation
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <Skeleton className="h-6 w-40" />
+        ) : data ? (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary">Marqué Facturé</Badge>
+              {data.metadata?.paymentLabel && (
+                <span className="text-sm text-muted-foreground">• Mode de paiement: <span className="font-medium text-foreground">{data.metadata.paymentLabel}</span></span>
+              )}
+            </div>
+            {data.metadata?.invoicedAt && (
+              <p className="text-sm text-muted-foreground">Le {format(new Date(data.metadata.invoicedAt), 'dd MMM yyyy - HH:mm', { locale: fr })}</p>
+            )}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">Aucune facture enregistrée pour cette commande.</p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 const OrderDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -286,7 +336,7 @@ const OrderDetails = () => {
           </Card>
         </div>
 
-        {/* Actions de production */}
+        {/* Actions de production et facturation */}
         <div className="space-y-6">
           <Card>
             <CardHeader>
@@ -312,6 +362,9 @@ const OrderDetails = () => {
               />
             </CardContent>
           </Card>
+
+          {/* Facturation */}
+          <BillingStatus orderId={order.id} />
         </div>
       </div>
     </div>

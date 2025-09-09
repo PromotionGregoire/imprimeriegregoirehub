@@ -82,6 +82,9 @@ const Orders = () => {
         status: 'Marqué Facturé',
         paymentType
       });
+      // Fermer le modal et réinitialiser la sélection
+      setPaymentModalOpen(false);
+      setSelectedOrderForPayment(null);
     }
   };
 
