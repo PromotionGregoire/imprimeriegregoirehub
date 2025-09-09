@@ -89,7 +89,7 @@ serve(async (req) => {
       }
 
       // Historique (best-effort)
-      await supabase.rpc("add_ordre_history", {
+      const { error: histApproveErr } = await supabase.rpc("add_ordre_history", {
         p_order_id: proof.order_id,
         p_action_type: "approbation_epreuve",
         p_action_description: `Épreuve v${proof.version} approuvée par ${derivedClientName}`,
@@ -101,7 +101,10 @@ serve(async (req) => {
         },
         p_proof_id: proof.id,
         p_client_action: true,
-      }).catch((e) => console.warn("History RPC failed (approve):", e?.message));
+      });
+      if (histApproveErr) {
+        console.warn("History RPC failed (approve):", histApproveErr.message || histApproveErr);
+      }
 
       return json({
         success: true,
@@ -132,7 +135,7 @@ serve(async (req) => {
     }
 
     // 💬 Table des commentaires — colonne correcte: comment_text
-    await supabase
+    const { error: commentErr } = await supabase
       .from("epreuve_commentaires")
       .insert({
         proof_id: proof.id,
@@ -141,11 +144,13 @@ serve(async (req) => {
         client_name: derivedClientName,
         created_by_client: true,
         is_modification_request: true,
-      })
-      .catch((e) => console.warn("Comment insert failed:", e?.message));
+      });
+    if (commentErr) {
+      console.warn("Comment insert failed:", commentErr.message || commentErr);
+    }
 
     // Historique (best-effort)
-    await supabase.rpc("add_ordre_history", {
+    const { error: histRejectErr } = await supabase.rpc("add_ordre_history", {
       p_order_id: proof.order_id,
       p_action_type: "demande_modification_epreuve",
       p_action_description: `Modifications demandées par ${derivedClientName} (v${proof.version})`,
@@ -157,7 +162,10 @@ serve(async (req) => {
       },
       p_proof_id: proof.id,
       p_client_action: true,
-    }).catch((e) => console.warn("History RPC failed (reject):", e?.message));
+    });
+    if (histRejectErr) {
+      console.warn("History RPC failed (reject):", histRejectErr.message || histRejectErr);
+    }
 
     return json({
       success: true,
