@@ -22,6 +22,7 @@ export type Database = {
           created_by: string | null
           description: string
           id: string
+          idempotency_key: string | null
           metadata: Json | null
         }
         Insert: {
@@ -31,6 +32,7 @@ export type Database = {
           created_by?: string | null
           description: string
           id?: string
+          idempotency_key?: string | null
           metadata?: Json | null
         }
         Update: {
@@ -40,6 +42,7 @@ export type Database = {
           created_by?: string | null
           description?: string
           id?: string
+          idempotency_key?: string | null
           metadata?: Json | null
         }
         Relationships: []
@@ -2415,6 +2418,14 @@ export type Database = {
       }
       generate_client_number: {
         Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_idempotency_key: {
+        Args: {
+          p_action_type: string
+          p_additional_context?: string
+          p_entity_id: string
+        }
         Returns: string
       }
       generate_order_number: {
