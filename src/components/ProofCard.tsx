@@ -42,8 +42,9 @@ interface ProofCardProps {
 const statusConfig = {
   'A preparer': { dot: 'bg-orange-500', badge: 'bg-orange-100 text-orange-700', bar: 'bg-orange-500' },
   'En préparation': { dot: 'bg-blue-500', badge: 'bg-blue-100 text-blue-700', bar: 'bg-blue-500' },
-  'Envoyée': { dot: 'bg-purple-500', badge: 'bg-purple-100 text-purple-700', bar: 'bg-purple-500' },
-  'En révision': { dot: 'bg-amber-500', badge: 'bg-amber-100 text-amber-700', bar: 'bg-amber-500' },
+  'Envoyée au client': { dot: 'bg-purple-500', badge: 'bg-purple-100 text-purple-700', bar: 'bg-purple-500' },
+  'En révision': { dot: 'bg-orange-500', badge: 'bg-orange-100 text-orange-700', bar: 'bg-orange-500' },
+  'Modification demandée': { dot: 'bg-orange-500', badge: 'bg-orange-100 text-orange-700', bar: 'bg-orange-500' },
   'Approuvée': { dot: 'bg-green-500', badge: 'bg-green-100 text-green-700', bar: 'bg-green-500' },
 };
 
