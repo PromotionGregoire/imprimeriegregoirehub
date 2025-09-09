@@ -32,6 +32,7 @@ serve(async (req) => {
     
     const { proofId }: SendProofRequest = parsedBody;
     console.log('Parsed proofId:', proofId);
+    const force = parsedBody?.force === true;
 
     if (!proofId) {
       throw new Error('proofId is required');
@@ -59,13 +60,16 @@ serve(async (req) => {
       return match ? match[1] : emailString;
     };
     
+    const isValidEmail = (s: string) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s);
+    
     const replyToEmail = extractEmailOnly(replyToEmailRaw);
+    const validReplyTo = isValidEmail(replyToEmail) ? replyToEmail : undefined;
     
     console.log('Environment check:', {
       hasResendKey: !!resendApiKey,
       hasFromEmail: !!fromEmailRaw,
-      hasReplyTo: !!replyToEmail,
-      replyToFormat: replyToEmail
+      hasReplyTo: !!validReplyTo,
+      replyToFormat: validReplyTo || '(none)'
     });
     
     if (!resendApiKey) {
@@ -130,6 +134,14 @@ serve(async (req) => {
       throw new Error('Aucune adresse email trouvée pour ce client');
     }
 
+    // Idempotence: avoid re-sending unless force=true
+    if (!force && proof.status === 'Envoyée au client') {
+      return new Response(JSON.stringify({ error: 'Déjà envoyée', code: 'ALREADY_SENT' }), {
+        status: 409,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
+    }
+
     // Generate or use existing approval token
     let approvalToken = proof.approval_token;
     if (!approvalToken) {
@@ -150,23 +162,7 @@ serve(async (req) => {
       }
     }
 
-    // Update proof status to "Envoyée au client"
-    console.log('Updating proof status...');
-    const { error: statusError } = await supabase
-      .from('proofs')
-      .update({ 
-        status: 'Envoyée au client',
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', proofId);
-
-    if (statusError) {
-      console.error('Status update error:', statusError);
-      // Don't throw here - the trigger might fail but we can still continue
-      console.log('Continuing despite status update error...');
-    } else {
-      console.log('Proof status updated successfully');
-    }
+    // Status will be updated after a successful email send
 
     // Build approval URL
     const baseUrl = Deno.env.get('PUBLIC_PORTAL_BASE_URL') || 'https://client.promotiongregoire.com';
@@ -243,7 +239,7 @@ serve(async (req) => {
     let emailResult = await resend.emails.send({
       from: formattedFrom,
       to: [client.email],
-      reply_to: replyToEmail,
+      reply_to: validReplyTo,
       subject: finalSubject,
       html,
     });
@@ -255,7 +251,7 @@ serve(async (req) => {
       emailResult = await resend.emails.send({
         from: 'Imprimerie Grégoire <onboarding@resend.dev>',
         to: [client.email],
-        reply_to: replyToEmail,
+        reply_to: validReplyTo,
         subject: `[TEST] ${subject}`,
         html,
       });
@@ -272,6 +268,22 @@ serve(async (req) => {
     }
 
     console.log('Email sent successfully:', emailResult.data?.id);
+
+    // Update proof status AFTER successful send
+    const { error: postSendStatusError } = await supabase
+      .from('proofs')
+      .update({ 
+        status: 'Envoyée au client',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', proofId);
+
+    if (postSendStatusError) {
+      console.error('Status update error after email send:', postSendStatusError);
+      // We continue but let the caller know status might be stale
+    } else {
+      console.log('Proof status updated successfully after email send');
+    }
 
     // Log the email notification
     try {
