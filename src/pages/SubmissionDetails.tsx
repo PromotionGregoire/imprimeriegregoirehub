@@ -12,7 +12,6 @@ import { useCloneSubmission, useDeleteSubmission, useUpdateSubmissionStatus } fr
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import StatusManager from '@/components/StatusManager';
-import EmployeeAssignManager from '@/components/EmployeeAssignManager';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -241,14 +240,6 @@ const SubmissionDetails = () => {
                   <div className="font-bold text-2xl sm:text-3xl text-primary">
                     ${Number(submission.total_price || 0).toFixed(2)}
                   </div>
-                </div>
-                <div className="space-y-2 sm:col-span-2 pt-2 border-t">
-                  <div className="text-sm text-muted-foreground">Employé assigné</div>
-                  <EmployeeAssignManager 
-                    clientId={submission.client_id}
-                    currentAssignedUserId={submission.clients?.assigned_user_id}
-                    type="client"
-                  />
                 </div>
               </div>
             </CardContent>

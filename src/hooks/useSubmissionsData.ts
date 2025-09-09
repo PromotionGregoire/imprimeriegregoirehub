@@ -131,30 +131,7 @@ export const useBulkActions = () => {
     },
   });
 
-  const assignMutation = useMutation({
-    mutationFn: async ({ ids, assignedTo }: { ids: string[]; assignedTo: string }) => {
-      const { error } = await supabase
-        .from('submissions')
-        .update({ assigned_to: assignedTo, updated_at: new Date().toISOString() })
-        .in('id', ids);
-
-      if (error) throw error;
-    },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['submissions'] });
-      toast({
-        title: 'Attribution mise à jour',
-        description: `${variables.ids.length} soumission(s) attribuée(s) avec succès.`,
-      });
-    },
-    onError: () => {
-      toast({
-        title: 'Erreur',
-        description: 'Impossible d\'attribuer les soumissions.',
-        variant: 'destructive',
-      });
-    },
-  });
+  // Assignation supprimée
 
   const archiveMutation = useMutation({
     mutationFn: async (ids: string[]) => {
@@ -210,11 +187,9 @@ export const useBulkActions = () => {
 
   return {
     updateStatus: updateStatusMutation.mutate,
-    assign: assignMutation.mutate,
     archive: archiveMutation.mutate,
     delete: deleteMutation.mutate,
     isLoading: updateStatusMutation.isPending || 
-               assignMutation.isPending || 
                archiveMutation.isPending || 
                deleteMutation.isPending,
   };
