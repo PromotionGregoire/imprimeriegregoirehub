@@ -1,5 +1,4 @@
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
 
 export const formatCurrency = (amount: number | null | undefined): string => {
   if (!amount && amount !== 0) return '0,00 $';
@@ -15,7 +14,7 @@ export const formatCurrency = (amount: number | null | undefined): string => {
 export const formatDate = (date: Date | string | null | undefined): string => {
   if (!date) return 'Non définie';
   
-  return format(new Date(date), 'dd/MM/yyyy', { locale: fr });
+  return format(new Date(date), 'dd/MM/yyyy');
 };
 
 export const calculateDaysRemaining = (deadline: Date | string | null | undefined) => {
