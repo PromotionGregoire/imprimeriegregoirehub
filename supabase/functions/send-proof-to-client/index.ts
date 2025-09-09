@@ -10,6 +10,15 @@ const cors = {
 const isEmail = (v?: string | null) =>
   !!v && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 
+function escapeHtml(s: string) {
+  return s
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 function json(payload: unknown, status = 200) {
   return new Response(JSON.stringify(payload), {
     status,
@@ -70,49 +79,62 @@ serve(async (req) => {
       (Deno.env.get("PUBLIC_PORTAL_BASE_URL") || "https://client.promotiongregoire.com").replace(/\/+$/, "");
 
     // Liens publics
-    const proofVersion = `v${proof.version}`;
-    const orderNumber = proof.orders.order_number;
-    const approveUrl = `${portalBase}/epreuve/${encodeURIComponent(proof.approval_token)}`;
-    const downloadUrl = proof.file_url;
+    const portal = (Deno.env.get("PUBLIC_PORTAL_BASE_URL") ?? "https://client.promotiongregoire.com").replace(/\/+$/, "");
+    const token = proof.approval_token;
+    const approveUrl = `${portal}/epreuve/${encodeURIComponent(token)}`;
+    const fileUrl = proof.file_url ?? "#";
+    const orderNo = proof.orders.order_number;
+    const version = proof.version;
+    const who = clientName;
 
     // Sujet + HTML stylé (comme votre maquette)
-    const subject = `Épreuve ${orderNumber} – ${proofVersion}`;
+    const subject = `Épreuve ${orderNo} – v${version}`;
 
     const html = `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
-<body style="font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; line-height:1.6; color:#333; max-width:600px; margin:0 auto; padding:20px;">
-  <div style="background:#f8f9fa; padding:30px; border-radius:8px; border-left:4px solid #5a7a51;">
-    <h2 style="color:#5a7a51; margin:0 0 20px 0;">Votre épreuve est prête – ${proofVersion}</h2>
-    <p>Bonjour ${clientName},</p>
-    <p>Votre épreuve (BAT) pour la commande <strong>${orderNumber}</strong> est maintenant disponible pour validation.</p>
-    <div style="margin:30px 0; text-align:center;">
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background: #f8f9fa; padding: 30px; border-radius: 8px; border-left: 4px solid #5a7a51;">
+    <h2 style="color: #5a7a51; margin: 0 0 20px 0;">Votre épreuve est prête – Version ${version}</h2>
+
+    <p>Bonjour ${escapeHtml(who)},</p>
+
+    <p>Votre épreuve (BAT) pour la commande <strong>${escapeHtml(orderNo)}</strong> est maintenant disponible pour validation.</p>
+
+    <div style="margin: 30px 0; text-align: center;">
       <a href="${approveUrl}"
-         style="display:inline-block; padding:15px 30px; background-color:#5a7a51; color:#fff; text-decoration:none; border-radius:6px; font-weight:700; box-shadow:0 2px 4px rgba(0,0,0,.1);">
+         style="display:inline-block;padding:15px 30px;background-color:#5a7a51;color:#fff;text-decoration:none;border-radius:6px;font-weight:bold;box-shadow:0 2px 4px rgba(0,0,0,0.1);">
         📋 Consulter et approuver l'épreuve
       </a>
     </div>
+
     <p>Vous pouvez également télécharger directement le fichier :
-       <a href="${downloadUrl}" style="color:#5a7a51; text-decoration:underline;">
-         Télécharger l'épreuve (${proofVersion})
-       </a>
+      <a href="${fileUrl}" style="color:#5a7a51; text-decoration: underline;">
+        Télécharger l'épreuve (v${version})
+      </a>
     </p>
+
     <div style="margin-top:30px; padding-top:20px; border-top:1px solid #e9ecef; font-size:14px; color:#6c757d;">
       <p><strong>Imprimerie Grégoire</strong><br>
-      Pour toute question, répondez simplement à ce message.<br>
-      Nous sommes là pour vous accompagner ! 🎨</p>
+         Pour toute question, répondez simplement à ce message.<br>
+         Nous sommes là pour vous accompagner ! 🎨</p>
     </div>
   </div>
-</body></html>`;
+</body>
+</html>`;
 
-    const text = `Bonjour ${clientName},
+    const text = `Bonjour ${who},
 
-Votre épreuve (${proofVersion}) pour la commande ${orderNumber} est prête.
+Votre épreuve (v${version}) pour la commande ${orderNo} est prête.
 
 Voir et approuver / demander des modifications :
 ${approveUrl}
 
-Télécharger l'épreuve (${proofVersion}) :
-${downloadUrl}
+Télécharger l'épreuve (v${version}) :
+${fileUrl}
 
 — Imprimerie Grégoire`;
 
