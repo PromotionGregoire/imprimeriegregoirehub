@@ -40,7 +40,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // First, find the proof by validation_token
+    // First, find the proof by approval_token (corrected from validation_token)
     const { data: proofData, error: proofError } = await supabase
       .from('proofs')
       .select(`
@@ -65,8 +65,7 @@ serve(async (req) => {
           )
         )
       `)
-      .eq('validation_token', token)
-      .eq('is_active', true)
+      .eq('approval_token', token)
       .maybeSingle();
 
     if (proofError) {
