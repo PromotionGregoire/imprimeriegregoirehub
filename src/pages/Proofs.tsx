@@ -80,7 +80,7 @@ const Proofs = () => {
           <FlexibleDashboardToolbar
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
-            searchPlaceholder="Rechercher par numéro de commande ou client..."
+            searchPlaceholder="Rechercher par code épreuve ou client..."
             filters={[
               {
                 label: "Statut",

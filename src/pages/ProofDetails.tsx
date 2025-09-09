@@ -39,6 +39,7 @@ const ProofDetails = () => {
           orders!inner (
             id,
             order_number,
+            human_id,
             status,
             client_id,
             submission_id,
@@ -294,7 +295,7 @@ const ProofDetails = () => {
           </Button>
           <div className="min-w-0 flex-1">
             <h1 className="text-base-750 font-semibold text-foreground leading-tight mb-base-300">
-              Épreuve pour la Commande {proof.orders.order_number}
+              Épreuve {proof.human_id || `V${proof.version}`}
             </h1>
             <div className="flex flex-col sm:flex-row sm:items-center gap-base-300 sm:gap-base-400">
               <div className="flex items-center gap-base-300">
@@ -366,7 +367,7 @@ const ProofDetails = () => {
           </CardHeader>
           <CardContent>
             <div className="text-lg font-bold text-primary hover:underline">
-              {proof.orders.order_number}
+              {proof.orders.human_id || proof.orders.order_number}
             </div>
             <p className="text-xs text-muted-foreground">
               Statut: {proof.orders.status}

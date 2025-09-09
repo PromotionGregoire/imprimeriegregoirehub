@@ -13,15 +13,16 @@ export const useFilteredProofs = (
 
     let filtered = [...proofs];
 
-    // Filter by search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(proof => {
-        const orders = proof.orders as any;
-        return orders?.order_number?.toLowerCase().includes(query) ||
-               orders?.clients?.business_name?.toLowerCase().includes(query);
-      });
-    }
+      // Filter by search query
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter(proof => {
+          const orders = proof.orders as any;
+          return proof.human_id?.toLowerCase().includes(query) ||
+                 orders?.order_number?.toLowerCase().includes(query) ||
+                 orders?.clients?.business_name?.toLowerCase().includes(query);
+        });
+      }
 
     // Filter by status
     if (statusFilter !== 'all') {

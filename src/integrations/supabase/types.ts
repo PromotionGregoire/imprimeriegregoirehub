@@ -2433,6 +2433,9 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: {
           created_at: string
+          human_id: string
+          human_seq: number
+          human_year: number
           id: string
           order_id: string
           orders: Json

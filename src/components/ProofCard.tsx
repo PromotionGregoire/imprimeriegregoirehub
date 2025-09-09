@@ -12,6 +12,9 @@ interface ProofCardProps {
     status: string;
     version: number;
     created_at: string;
+    human_id: string;
+    human_year: number;
+    human_seq: number;
     orders: any; // JSONB type from database function
   };
 }
@@ -45,7 +48,7 @@ export const ProofCard = ({ proof }: ProofCardProps) => {
           <div className="flex items-center gap-base-200">
             <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
             <p className="text-sm text-muted-foreground font-mono">
-              {proof.orders?.order_number || 'N° de commande manquant'}
+              {proof.human_id || 'Code épreuve manquant'}
             </p>
           </div>
         </div>
