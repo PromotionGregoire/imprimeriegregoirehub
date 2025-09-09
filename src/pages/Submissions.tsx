@@ -330,6 +330,35 @@ const Submissions = () => {
           </div>
         </div>
 
+        {/* Legend - Color Codes */}
+        <div className="mb-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">🎨 Codes de couleurs</h3>
+            <div className="flex flex-wrap gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-1 bg-green-500 rounded"></div>
+                <span className="text-gray-600">Acceptée</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-1 bg-blue-500 rounded"></div>
+                <span className="text-gray-600">Envoyée</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-1 bg-orange-500 rounded"></div>
+                <span className="text-gray-600">En attente</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-1 bg-red-500 rounded"></div>
+                <span className="text-gray-600">Refusée</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-1 bg-gray-500 rounded"></div>
+                <span className="text-gray-600">Brouillon</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Modern Submissions Grid - 3 columns on desktop */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredSubmissions.length === 0 ? (
