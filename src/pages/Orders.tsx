@@ -8,7 +8,7 @@ import { useFilteredOrders } from '@/hooks/useFilteredOrders';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import EpuredOrderCard from '@/components/EpuredOrderCard';
+import ModernOrderCard from '@/components/ModernOrderCard';
 import { cn } from '@/lib/utils';
 
 const Orders = () => {
@@ -269,10 +269,10 @@ const Orders = () => {
           />
         </div>
 
-        {/* Orders Grid - BaseWeb Layout Grid with Responsive Breakpoints */}
+        {/* Orders Grid - Modern Cards Layout */}
         <div className={cn(
           "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3",
-          "gap-2", // 8px grid spacing
+          "gap-6", // Espacement moderne
           "animate-fade-in"
         )}>
           {orders.length === 0 ? (
@@ -295,9 +295,10 @@ const Orders = () => {
             </div>
           ) : (
             orders.map((order) => (
-              <EpuredOrderCard
+              <ModernOrderCard
                 key={order.id}
                 order={order}
+                onClick={() => window.location.href = `/dashboard/orders/${order.id}`}
                 onProofAccepted={handleProofAccepted}
                 onDelivered={handleDelivered}
               />
