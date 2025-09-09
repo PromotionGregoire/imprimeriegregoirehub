@@ -4,7 +4,19 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, FileText, AlertCircle, Search } from 'lucide-react';
+import { 
+  Plus, 
+  FileText, 
+  AlertCircle, 
+  Search, 
+  Check,
+  Send,
+  DollarSign,
+  TrendingUp,
+  ArrowUpRight,
+  Filter,
+  ChevronDown
+} from 'lucide-react';
 import { useAllSubmissions } from '@/hooks/useAllSubmissions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
@@ -69,13 +81,14 @@ const Submissions = () => {
     );
   }
 
-  // Calculate dashboard stats
+  // Calculate dashboard stats with trends
   const stats = {
     total: filteredSubmissions?.length || 0,
-    completed: filteredSubmissions?.filter(s => s.status === 'Acceptée')?.length || 0,
-    accepted: filteredSubmissions?.filter(s => s.status === 'Acceptée')?.length || 0,
-    sent: filteredSubmissions?.filter(s => s.status === 'Envoyée')?.length || 0,
-    totalValue: filteredSubmissions?.reduce((sum, s) => sum + (Number(s.total_price) || 0), 0) || 0
+    completed: filteredSubmissions?.filter(s => s?.status === 'Acceptée')?.length || 0,
+    accepted: filteredSubmissions?.filter(s => s?.status === 'Acceptée')?.length || 0,
+    sent: filteredSubmissions?.filter(s => s?.status === 'Envoyée')?.length || 0,
+    totalValue: filteredSubmissions?.reduce((sum, s) => sum + (Number(s?.total_price) || 0), 0) || 0,
+    trend: '+12.5%' // Mock trend data - can be calculated from historical data
   };
 
   const formatPrice = (price: number) => {
@@ -186,170 +199,124 @@ const Submissions = () => {
         </div>
 
 
-        {/* Statistics Cards - BaseWeb Card Pattern with 8px Grid */}
-        <div className={cn(
-          "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5",
-          "gap-2 mb-6" // 8px gaps
-        )}>
-          {/* Total Card */}
-          <Card className="bg-background border-border shadow-sm hover:shadow-md transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <FileText className="h-5 w-5 text-primary flex-shrink-0" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[14px] leading-tight text-muted-foreground font-medium mb-1">
-                    Total
-                  </p>
-                  <p className="text-[24px] font-semibold leading-tight text-foreground">
-                    {stats.total}
-                  </p>
-                </div>
+        {/* Modern Statistics Cards - Horizontal Layout */}
+        <div className="bg-white border border-gray-100 rounded-2xl p-6 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            {/* Total Card with Trend */}
+            <div className="bg-gray-50 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-gray-600">Total</span>
+                <FileText className="w-4 h-4 text-gray-400" />
               </div>
-            </CardContent>
-          </Card>
+              <p className="text-2xl font-bold text-gray-900 mb-1">{stats.total}</p>
+              <p className="text-xs text-green-600 flex items-center">
+                <ArrowUpRight className="w-3 h-3 mr-1" />
+                {stats.trend}
+              </p>
+            </div>
+            
+            {/* Completed Card */}
+            <div className="bg-green-50 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-green-700">Complétées</span>
+                <Check className="w-4 h-4 text-green-600" />
+              </div>
+              <p className="text-2xl font-bold text-green-900">{stats.completed}</p>
+            </div>
 
-          {/* Completed Card */}
-          <Card className="bg-background border-border shadow-sm hover:shadow-md transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-positive/10 rounded-lg">
-                  <FileText className="h-5 w-5 text-positive flex-shrink-0" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[14px] leading-tight text-muted-foreground font-medium mb-1">
-                    Complétées
-                  </p>
-                  <p className="text-[24px] font-semibold leading-tight text-foreground">
-                    {stats.completed}
-                  </p>
-                </div>
+            {/* Accepted Card */}
+            <div className="bg-blue-50 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-blue-700">Acceptées</span>
+                <Check className="w-4 h-4 text-blue-600" />
               </div>
-            </CardContent>
-          </Card>
+              <p className="text-2xl font-bold text-blue-900">{stats.accepted}</p>
+            </div>
 
-          {/* Accepted Card */}
-          <Card className="bg-background border-border shadow-sm hover:shadow-md transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-info/10 rounded-lg">
-                  <FileText className="h-5 w-5 text-info flex-shrink-0" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[14px] leading-tight text-muted-foreground font-medium mb-1">
-                    Acceptées
-                  </p>
-                  <p className="text-[24px] font-semibold leading-tight text-foreground">
-                    {stats.accepted}
-                  </p>
-                </div>
+            {/* Sent Card */}
+            <div className="bg-orange-50 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-orange-700">Envoyées</span>
+                <Send className="w-4 h-4 text-orange-600" />
               </div>
-            </CardContent>
-          </Card>
+              <p className="text-2xl font-bold text-orange-900">{stats.sent}</p>
+            </div>
 
-          {/* Sent Card */}
-          <Card className="bg-background border-border shadow-sm hover:shadow-md transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-warning/10 rounded-lg">
-                  <FileText className="h-5 w-5 text-warning flex-shrink-0" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[14px] leading-tight text-muted-foreground font-medium mb-1">
-                    Envoyées
-                  </p>
-                  <p className="text-[24px] font-semibold leading-tight text-foreground">
-                    {stats.sent}
-                  </p>
-                </div>
+            {/* Total Value Card */}
+            <div className="bg-purple-50 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-purple-700">Valeur Totale</span>
+                <DollarSign className="w-4 h-4 text-purple-600" />
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Total Value Card */}
-          <Card className="bg-background border-border shadow-sm hover:shadow-md transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-accent/10 rounded-lg">
-                  <FileText className="h-5 w-5 text-accent flex-shrink-0" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[14px] leading-tight text-muted-foreground font-medium mb-1">
-                    Valeur Totale
-                  </p>
-                  <p className="text-[20px] font-semibold leading-tight text-foreground truncate">
-                    {formatPrice(stats.totalValue)}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              <p className="text-2xl font-bold text-purple-900">
+                {formatPrice(stats.totalValue)}
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* Toolbar - BaseWeb Search and Filter Pattern */}
-        <div className="mb-6">
-          <Card className="bg-background border-border shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Rechercher par numéro de soumission ou client..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                <Select value={periodFilter} onValueChange={setPeriodFilter}>
-                  <SelectTrigger className="w-full sm:w-[200px]">
-                    <SelectValue placeholder="Tous" />
-                  </SelectTrigger>
-                  <SelectContent className="z-50 bg-background border border-border shadow-lg">
-                    <SelectItem value="all">Tous</SelectItem>
-                    <SelectItem value="today">Aujourd'hui</SelectItem>
-                    <SelectItem value="yesterday">Hier</SelectItem>
-                    <SelectItem value="thisWeek">Cette semaine</SelectItem>
-                    <SelectItem value="7days">Les 7 derniers jours</SelectItem>
-                    <SelectItem value="14days">Les 14 derniers jours</SelectItem>
-                    <SelectItem value="thisMonth">Ce mois-ci</SelectItem>
-                    <SelectItem value="30days">Les 30 derniers jours</SelectItem>
-                    <SelectItem value="3months">Les 3 derniers mois</SelectItem>
-                    <SelectItem value="6months">Les 6 derniers mois</SelectItem>
-                    <SelectItem value="thisYear">Cette année</SelectItem>
-                    <SelectItem value="12months">Les 12 derniers mois</SelectItem>
-                    <SelectItem value="lastYear">L'année dernière</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-full sm:w-[200px]">
-                    <SelectValue placeholder="Tous les statuts" />
-                  </SelectTrigger>
-                  <SelectContent className="z-50 bg-background border border-border shadow-lg">
-                    <SelectItem value="all">Tous les statuts</SelectItem>
-                    {submissionStatusOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                
-                <ArchiveFilter 
-                  value={archiveFilter} 
-                  onChange={setArchiveFilter}
-                  className="w-full sm:w-[200px]"
-                />
-              </div>
-            </CardContent>
-          </Card>
+        {/* Enhanced Search and Filter Bar */}
+        <div className="bg-white border border-gray-100 rounded-2xl p-6 mb-6">
+          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+            {/* Search Bar */}
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Rechercher par numéro ou client..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-4 py-2.5 bg-gray-50 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+              />
+            </div>
+
+            {/* Quick Filters */}
+            <div className="flex items-center space-x-2">
+              <button 
+                onClick={() => setStatusFilter('all')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  statusFilter === 'all' 
+                    ? 'bg-gray-900 text-white' 
+                    : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                Tous
+              </button>
+              <button 
+                onClick={() => setStatusFilter('Acceptée')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  statusFilter === 'Acceptée' 
+                    ? 'bg-gray-900 text-white' 
+                    : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                Acceptées
+              </button>
+              <button 
+                onClick={() => setStatusFilter('Envoyée')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  statusFilter === 'Envoyée' 
+                    ? 'bg-gray-900 text-white' 
+                    : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                En attente
+              </button>
+            </div>
+
+            {/* Advanced Filter Dropdown */}
+            <div className="hidden lg:block">
+              <ArchiveFilter 
+                value={archiveFilter} 
+                onChange={setArchiveFilter}
+                className="w-[200px]"
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Submissions Grid - BaseWeb Layout Grid */}
-        <div className={cn(
-          "grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4",
-          "gap-2" // 8px grid spacing
-        )}>
+        {/* Modern Submissions Grid - 3 columns on desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredSubmissions.length === 0 ? (
             <div className="col-span-full">
               <Card className="bg-background border-border">

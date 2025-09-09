@@ -7,7 +7,11 @@ import {
   ExternalLink, 
   Loader2, 
   CheckCircle, 
-  FileText 
+  FileText,
+  Eye,
+  Send,
+  MoreVertical,
+  TrendingUp
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -71,6 +75,56 @@ const ModernSubmissionCard = ({ submission, onClick }: ModernSubmissionCardProps
     return format(new Date(dateString), 'dd/MM/yyyy', { locale: fr });
   };
 
+  // Calculate priority based on deadline and status
+  const getPriority = () => {
+    const deadline = submission.deadline ? new Date(submission.deadline) : null;
+    const today = new Date();
+    const daysLeft = deadline ? Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) : null;
+    
+    if (submission.status === 'Refusée') return 'critical';
+    if (daysLeft !== null && daysLeft <= 1) return 'critical';
+    if (daysLeft !== null && daysLeft <= 3) return 'high';
+    if (daysLeft !== null && daysLeft <= 7) return 'normal';
+    return 'low';
+  };
+
+  // Get status color for dot indicator
+  const getStatusColor = (status: string) => {
+    switch(status) {
+      case 'Acceptée': return 'bg-green-500';
+      case 'Refusée': return 'bg-red-500';
+      case 'Envoyée': return 'bg-blue-500';
+      case 'Brouillon': return 'bg-gray-400';
+      default: return 'bg-orange-500';
+    }
+  };
+
+  // Get priority bar color and animation
+  const getPriorityBar = (priority: string) => {
+    switch(priority) {
+      case 'critical': 
+        return 'bg-red-500 animate-pulse';
+      case 'high': 
+        return 'bg-orange-500';
+      case 'normal': 
+        return 'bg-yellow-400';
+      case 'low': 
+        return 'bg-gray-300';
+      default: 
+        return 'bg-transparent';
+    }
+  };
+
+  // Calculate days remaining
+  const getDaysRemaining = () => {
+    const deadline = submission.deadline ? new Date(submission.deadline) : null;
+    if (!deadline) return null;
+    
+    const today = new Date();
+    const daysLeft = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    return daysLeft;
+  };
+
   const handleAcceptSubmission = async (checked: boolean) => {
     if (!checked) return;
     
@@ -86,92 +140,114 @@ const ModernSubmissionCard = ({ submission, onClick }: ModernSubmissionCardProps
     acceptSubmissionMutation.mutate(submission.id);
   };
 
+  const priority = getPriority();
+  const daysRemaining = getDaysRemaining();
+  const statusColor = getStatusColor(submission.status);
+  const priorityBarClass = getPriorityBar(priority);
+
   return (
-    <Card className="group cursor-pointer transition-all duration-300 ease-uber hover:shadow-xl hover:-translate-y-1 bg-background border border-border/60 hover:border-border rounded-xl touch-area">
-      <CardContent className="p-6" onClick={onClick}>
-        {/* Header */}
-        <div className="flex items-start justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <FileText className="h-5 w-5 text-primary" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="font-bold text-lg text-foreground leading-tight truncate">
-                {submission.clients?.business_name}
+    <Card className="group cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-2 bg-white border border-gray-100 rounded-2xl overflow-hidden">
+      {/* Priority Indicator Bar */}
+      <div className={`h-1 transition-all duration-300 group-hover:h-1.5 ${priorityBarClass}`}></div>
+      
+      <CardContent className="p-5" onClick={onClick}>
+        {/* Header with Status Dot */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex-1">
+            <div className="flex items-center space-x-2 mb-1">
+              <h3 className="font-semibold text-gray-900 text-base truncate">
+                {submission.clients?.business_name || 'Client Non Défini'}
               </h3>
-              <p className="text-sm text-muted-foreground font-mono mt-base-200">
-                {submission.submission_number}
-              </p>
+              <div className={`w-2 h-2 rounded-full ${statusColor} ${priority === 'critical' ? 'animate-pulse' : ''}`}></div>
             </div>
+            <p className="text-xs text-gray-500 font-mono">{submission.submission_number}</p>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={(e) => {
-              e.stopPropagation();
-              onClick();
-            }}
-            className="opacity-0 group-hover:opacity-100 transition-all duration-300 ease-uber touch-area flex-shrink-0 h-8 w-8"
-          >
-            <ArrowRight className="h-4 w-4" />
-          </Button>
+          <button className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <MoreVertical className="w-5 h-5 text-gray-400" />
+          </button>
         </div>
 
-        {/* Key Information */}
-        <div className="space-y-3 mb-6">
-          <div className="flex justify-between items-center py-1">
-            <span className="text-sm text-muted-foreground">Date d'envoi:</span>
-            <span className="text-sm font-medium text-foreground">
-              {submission.sent_at ? formatDate(submission.sent_at) : 'Non envoyée'}
-            </span>
-          </div>
-          
-          <div className="flex justify-between items-center py-1">
-            <span className="text-sm text-muted-foreground">Échéance:</span>
-            <span className="text-sm font-medium text-foreground">
-              {submission.deadline ? formatDate(submission.deadline) : 'Non définie'}
-            </span>
-          </div>
-          
-          <div className="flex justify-between items-center py-1">
-            <span className="text-sm text-muted-foreground">Montant:</span>
-            <span className="text-lg font-bold text-foreground">
-              {formatPrice(Number(submission.total_price) || 0)}
-            </span>
-          </div>
-        </div>
-
-        {/* Status Timeline */}
-        <div className="mb-6">
-          <SubmissionStatusTimeline status={submission.status} />
-        </div>
-
-        {/* Action Toggle */}
-        <div className="pt-4 border-t border-border/50">
-          <ModernToggle
-            id={`accept-${submission.id}`}
-            label="Accepter la Soumission"
-            checked={submission.status === 'Approuvée'}
-            onCheckedChange={handleAcceptSubmission}
-            disabled={submission.status === 'Approuvée' || acceptSubmissionMutation.isPending}
-          />
-        </div>
-
-        {/* Contextual Links */}
-        <div className="mt-4 space-y-2">
-          {submission.approval_token && (
-            <Button
-              variant="link"
-              className="p-0 h-auto text-primary hover:text-primary/80 touch-area text-sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                window.open(`/approval/${submission.approval_token}`, '_blank');
-              }}
-            >
-              <ExternalLink className="w-3 h-3 mr-2" />
-              Voir le lien d'épreuve
-            </Button>
+        {/* Amount - Prominent Display */}
+        <div className="mb-4">
+          <p className="text-2xl font-bold text-gray-900">
+            {formatPrice(Number(submission.total_price) || 0)}
+          </p>
+          {/* Show trend if high value */}
+          {Number(submission.total_price) > 1000 && (
+            <div className="flex items-center text-green-600 text-xs mt-1">
+              <TrendingUp className="w-3 h-3 mr-1" />
+              <span>Valeur élevée</span>
+            </div>
           )}
+        </div>
+
+        {/* Meta Information */}
+        <div className="space-y-2 mb-4">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-500">Échéance</span>
+            <span className={`font-medium ${
+              submission.deadline === 'Non définie' || !submission.deadline ? 'text-orange-600' : 'text-gray-900'
+            }`}>
+              {submission.deadline ? formatDate(submission.deadline) : 'Non définie'}
+              {daysRemaining !== null && (
+                <span className={`ml-2 text-xs ${
+                  daysRemaining <= 1 ? 'text-red-600 font-bold' :
+                  daysRemaining <= 3 ? 'text-orange-600 font-medium' :
+                  daysRemaining <= 7 ? 'text-yellow-600' : 'text-gray-500'
+                }`}>
+                  {daysRemaining <= 0 ? '(Échue)' : `(J-${daysRemaining})`}
+                </span>
+              )}
+            </span>
+          </div>
+          
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-500">Statut</span>
+            <span className={`font-medium px-2 py-0.5 rounded-full text-xs ${
+              submission.status === 'Acceptée' 
+                ? 'bg-green-100 text-green-700' :
+              submission.status === 'Refusée'
+                ? 'bg-red-100 text-red-700' :
+              submission.status === 'Envoyée'
+                ? 'bg-blue-100 text-blue-700' :
+              submission.status === 'Brouillon'
+                ? 'bg-gray-100 text-gray-700' :
+                'bg-orange-100 text-orange-700'
+            }`}>
+              {submission.status}
+            </span>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center space-x-2">
+          {(submission.status === 'Acceptée' || submission.approval_token) && (
+            <button className={`flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl hover:bg-gray-800 transition-colors text-white ${
+              priority === 'critical' ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-900'
+            }`}>
+              <Eye className="w-4 h-4" />
+              <span className="text-sm font-medium">Voir l'épreuve</span>
+            </button>
+          )}
+          
+          {submission.status === 'Brouillon' && (
+            <button className="flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+              <Send className="w-4 h-4 text-gray-600" />
+              <span className="text-sm font-medium text-gray-700">Envoyer</span>
+            </button>
+          )}
+          
+          {!submission.status || submission.status === 'En attente' ? (
+            <div className="flex-1">
+              <ModernToggle
+                id={`accept-${submission.id}`}
+                label="Accepter"
+                checked={submission.status === 'Acceptée'}
+                onCheckedChange={handleAcceptSubmission}
+                disabled={submission.status === 'Acceptée' || acceptSubmissionMutation.isPending}
+              />
+            </div>
+          ) : null}
         </div>
 
         {/* Archive Badge */}
