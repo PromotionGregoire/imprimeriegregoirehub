@@ -13,9 +13,10 @@ const Proofs = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [periodFilter, setPeriodFilter] = useState('all');
+  const [includeArchived, setIncludeArchived] = useState(false);
   const navigate = useNavigate();
   
-  const { proofs, isLoading, error } = useFilteredProofs(searchQuery, statusFilter, periodFilter);
+  const { proofs, isLoading, error } = useFilteredProofs(searchQuery, statusFilter, periodFilter, includeArchived);
 
   const proofStatusOptions = [
     { value: 'A preparer', label: 'À préparer' },
@@ -77,7 +78,7 @@ const Proofs = () => {
         </div>
 
         {/* Toolbar - BaseWeb Search and Filter Pattern */}
-        <div className="mb-6">
+        <div className="mb-4">
           <FlexibleDashboardToolbar
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
@@ -107,6 +108,22 @@ const Proofs = () => {
           />
         </div>
 
+        {/* Additional Filter: Include Archived */}
+        <div className="mb-6">
+          <div className="flex items-center space-x-2 px-2">
+            <input
+              type="checkbox"
+              id="include-archived"
+              checked={includeArchived}
+              onChange={(e) => setIncludeArchived(e.target.checked)}
+              className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary focus:ring-2"
+            />
+            <label htmlFor="include-archived" className="text-sm text-foreground font-medium">
+              Inclure les épreuves archivées
+            </label>
+          </div>
+        </div>
+
         {/* Statistics Cards - BaseWeb Card Pattern with 8px Grid */}
         <div className={cn(
           "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6",
@@ -121,7 +138,7 @@ const Proofs = () => {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-[14px] leading-tight text-muted-foreground font-medium mb-1">
-                    Total
+                    Total{includeArchived ? '' : ' (actives)'}
                   </p>
                   <p className="text-[24px] font-semibold leading-tight text-foreground">
                     {statistics.total}
@@ -263,7 +280,10 @@ const Proofs = () => {
                     Aucune épreuve trouvée
                   </h3>
                   <p className="text-[16px] leading-relaxed text-muted-foreground text-center">
-                    Aucune épreuve ne correspond aux critères de recherche actuels. Les épreuves apparaîtront ici dès qu'une commande sera acceptée.
+                    {includeArchived 
+                      ? "Aucune épreuve ne correspond aux critères de recherche actuels."
+                      : "Aucune épreuve active trouvée. Cochez 'Inclure archivées' pour voir toutes les épreuves."
+                    }
                   </p>
                 </div>
               </div>

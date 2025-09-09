@@ -16,6 +16,9 @@ interface ProofCardProps {
     human_id: string;
     human_year: number;
     human_seq: number;
+    archived_at?: string | null;
+    is_archived?: boolean;
+    archive_reason?: string | null;
     orders: any; // JSONB type from database function
   };
 }
@@ -57,9 +60,13 @@ export const ProofCard = ({ proof }: ProofCardProps) => {
     }
   };
 
+  const isArchived = proof.archived_at || proof.is_archived;
+
   return (
     <Card 
-      className="group hover:shadow-lg transition-all duration-300 cursor-pointer active:scale-[0.98] bg-card border-border/50 relative"
+      className={`group hover:shadow-lg transition-all duration-300 cursor-pointer active:scale-[0.98] bg-card border-border/50 relative ${
+        isArchived ? 'opacity-75 bg-muted/20' : ''
+      }`}
       onClick={handleCardClick}
     >
       <CardContent className="p-base-500 md:p-base-600 space-y-base-400">
@@ -126,6 +133,11 @@ export const ProofCard = ({ proof }: ProofCardProps) => {
             <p className="text-sm text-muted-foreground font-mono">
               {proof.human_id || 'Code épreuve manquant'}
             </p>
+            {isArchived && (
+              <Badge className="bg-gray-100 text-gray-600 text-xs px-2 py-1">
+                Archivée
+              </Badge>
+            )}
           </div>
         </div>
 

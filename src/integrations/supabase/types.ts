@@ -2429,6 +2429,23 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_all_proofs: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          archive_reason: string
+          archived_at: string
+          created_at: string
+          human_id: string
+          human_seq: number
+          human_year: number
+          id: string
+          is_archived: boolean
+          order_id: string
+          orders: Json
+          status: string
+          version: number
+        }[]
+      }
       get_latest_proofs_by_order: {
         Args: Record<PropertyKey, never>
         Returns: {

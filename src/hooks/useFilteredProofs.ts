@@ -1,28 +1,36 @@
 import { useMemo } from 'react';
-import { useProofs } from './useProofs';
+import { useAllProofs } from './useAllProofs';
 
 export const useFilteredProofs = (
   searchQuery: string,
   statusFilter: string,
-  periodFilter: string
+  periodFilter: string,
+  includeArchived: boolean = false
 ) => {
-  const { data: proofs, isLoading, error } = useProofs();
+  const { data: proofs, isLoading, error } = useAllProofs();
 
   const filteredProofs = useMemo(() => {
     if (!proofs || !Array.isArray(proofs)) return [];
 
     let filtered = [...proofs];
 
-      // Filter by search query
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase();
-        filtered = filtered.filter(proof => {
-          const orders = proof.orders as any;
-          return proof.human_id?.toLowerCase().includes(query) ||
-                 orders?.order_number?.toLowerCase().includes(query) ||
-                 orders?.clients?.business_name?.toLowerCase().includes(query);
-        });
-      }
+    // Filter by archived status FIRST
+    if (!includeArchived) {
+      filtered = filtered.filter(proof => 
+        !proof.archived_at && !proof.is_archived
+      );
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(proof => {
+        const orders = proof.orders as any;
+        return proof.human_id?.toLowerCase().includes(query) ||
+               orders?.order_number?.toLowerCase().includes(query) ||
+               orders?.clients?.business_name?.toLowerCase().includes(query);
+      });
+    }
 
     // Filter by status
     if (statusFilter !== 'all') {
@@ -41,7 +49,7 @@ export const useFilteredProofs = (
     }
 
     return filtered;
-  }, [proofs, searchQuery, statusFilter, periodFilter]);
+  }, [proofs, searchQuery, statusFilter, periodFilter, includeArchived]);
 
   return {
     proofs: filteredProofs,
