@@ -518,6 +518,7 @@ export type Database = {
           client_id: string
           created_at: string
           id: string
+          is_archived: boolean | null
           order_number: string
           status: string
           submission_id: string
@@ -531,6 +532,7 @@ export type Database = {
           client_id: string
           created_at?: string
           id?: string
+          is_archived?: boolean | null
           order_number?: string
           status?: string
           submission_id: string
@@ -544,6 +546,7 @@ export type Database = {
           client_id?: string
           created_at?: string
           id?: string
+          is_archived?: boolean | null
           order_number?: string
           status?: string
           submission_id?: string
@@ -1132,6 +1135,7 @@ export type Database = {
           file_url: string | null
           id: string
           is_active: boolean | null
+          is_archived: boolean | null
           order_id: string
           proof_code: string | null
           status: string
@@ -1153,6 +1157,7 @@ export type Database = {
           file_url?: string | null
           id?: string
           is_active?: boolean | null
+          is_archived?: boolean | null
           order_id: string
           proof_code?: string | null
           status?: string
@@ -1174,6 +1179,7 @@ export type Database = {
           file_url?: string | null
           id?: string
           is_active?: boolean | null
+          is_archived?: boolean | null
           order_id?: string
           proof_code?: string | null
           status?: string
@@ -1325,6 +1331,7 @@ export type Database = {
           created_at: string
           deadline: string | null
           id: string
+          is_archived: boolean | null
           modification_request_notes: string | null
           sent_at: string | null
           status: string
@@ -1344,6 +1351,7 @@ export type Database = {
           created_at?: string
           deadline?: string | null
           id?: string
+          is_archived?: boolean | null
           modification_request_notes?: string | null
           sent_at?: string | null
           status?: string
@@ -1363,6 +1371,7 @@ export type Database = {
           created_at?: string
           deadline?: string | null
           id?: string
+          is_archived?: boolean | null
           modification_request_notes?: string | null
           sent_at?: string | null
           status?: string
