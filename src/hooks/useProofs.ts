@@ -9,7 +9,10 @@ export const useProofs = () => {
         .rpc('get_latest_proofs_by_order');
 
       if (error) throw error;
-      return data;
+      return data as any[];
     },
+    retry: false,
+    refetchOnWindowFocus: false,
+    staleTime: 60_000,
   });
 };
