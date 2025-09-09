@@ -119,8 +119,15 @@ export default function SubmissionApprovalPage() {
 
     setAccepting(true);
     try {
-      const { data, error } = await supabase.functions.invoke('accept-submission', {
-        body: { submissionId: submission.id }
+      // Utiliser handle-quote-decision qui crée automatiquement la commande et l'épreuve
+      const { data, error } = await supabase.functions.invoke('handle-quote-decision', {
+        body: { 
+          token: submission.acceptance_token,
+          decision: 'approved',
+          comments: 'Soumission acceptée via le lien d\'approbation',
+          clientName: submission.clients.contact_name,
+          clientEmail: submission.clients.email
+        }
       });
 
       if (error) throw error;
@@ -148,13 +155,16 @@ export default function SubmissionApprovalPage() {
 
     setRejecting(true);
     try {
-      const { error } = await supabase
-        .from('submissions')
-        .update({ 
-          status: 'Refusée',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', submission.id);
+      // Utiliser handle-quote-decision pour le refus aussi
+      const { data, error } = await supabase.functions.invoke('handle-quote-decision', {
+        body: { 
+          token: submission.acceptance_token,
+          decision: 'declined',
+          comments: 'Soumission refusée via le lien d\'approbation',
+          clientName: submission.clients.contact_name,
+          clientEmail: submission.clients.email
+        }
+      });
 
       if (error) throw error;
 
@@ -164,10 +174,10 @@ export default function SubmissionApprovalPage() {
       });
 
       await fetchSubmission();
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "❌ Erreur",
-        description: "Impossible de refuser la soumission",
+        description: error.message || "Impossible de refuser la soumission",
         variant: "destructive"
       });
     } finally {
