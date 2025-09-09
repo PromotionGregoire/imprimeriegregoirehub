@@ -207,7 +207,7 @@ serve(async (req) => {
         .insert({
           proof_id: proofData.id,
           order_id: proofData.order_id,
-          commentaire: comments.trim(),
+          comment_text: comments.trim(),
           client_name: clientName.trim(),
           created_by_client: true,
           is_modification_request: true
