@@ -3,38 +3,54 @@ import { useClients } from './useClients';
 import { useAllSubmissions } from './useAllSubmissions';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { ArchiveFilter } from '@/utils/archiveUtils';
 
 export const useFilteredClientsByActivity = (
   searchQuery: string,
   statusFilter: string,
-  activityFilter: string
+  activityFilter: string,
+  archiveFilter: ArchiveFilter = 'actives'
 ) => {
   const { data: clients, isLoading: clientsLoading, error: clientsError } = useClients();
-  const { data: submissions, isLoading: submissionsLoading } = useAllSubmissions();
+  const { data: submissions, isLoading: submissionsLoading } = useAllSubmissions(archiveFilter);
   
   // Fetch orders data
   const { data: orders, isLoading: ordersLoading } = useQuery({
-    queryKey: ['orders'],
+    queryKey: ['orders', archiveFilter],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('orders')
         .select('*');
       
       if (error) throw error;
-      return data;
+      
+      // Filter based on archive status
+      if (archiveFilter === 'actives') {
+        return data?.filter(order => !order.archived_at) || [];
+      } else if (archiveFilter === 'archived') {
+        return data?.filter(order => order.archived_at) || [];
+      }
+      return data || [];
     },
   });
 
   // Fetch proofs data
   const { data: proofs, isLoading: proofsLoading } = useQuery({
-    queryKey: ['proofs'],
+    queryKey: ['proofs', archiveFilter],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('proofs')
         .select('*');
       
       if (error) throw error;
-      return data;
+      
+      // Filter based on archive status
+      if (archiveFilter === 'actives') {
+        return data?.filter(proof => !proof.archived_at) || [];
+      } else if (archiveFilter === 'archived') {
+        return data?.filter(proof => proof.archived_at) || [];
+      }
+      return data || [];
     },
   });
 
@@ -66,42 +82,42 @@ export const useFilteredClientsByActivity = (
       const threeMonthsAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
 
       filtered = filtered.filter(client => {
-        const clientSubmissions = submissions.filter(s => s.client_id === client.id);
-        const clientOrders = orders.filter(o => o.client_id === client.id);
+        const clientSubmissions = submissions?.filter(s => s && s.client_id === client.id) || [];
+        const clientOrders = orders?.filter(o => o && o.client_id === client.id) || [];
         
         // Get proofs from client orders
         const clientOrderIds = clientOrders.map(o => o.id);
-        const clientProofs = proofs.filter(p => clientOrderIds.includes(p.order_id));
+        const clientProofs = proofs?.filter(p => p && clientOrderIds.includes(p.order_id)) || [];
 
         switch (activityFilter) {
           case 'active_orders':
             // Has orders created in the last 3 months
             return clientOrders.some(order => 
-              new Date(order.created_at) > threeMonthsAgo
+              order.created_at && new Date(order.created_at) > threeMonthsAgo
             );
 
           case 'active_submissions':
             // Has submissions created in the last 3 months
             return clientSubmissions.some(submission => 
-              new Date(submission.created_at) > threeMonthsAgo
+              submission.created_at && new Date(submission.created_at) > threeMonthsAgo
             );
 
           case 'active_proofs':
             // Has proofs created in the last 3 months
             return clientProofs.some(proof => 
-              new Date(proof.created_at) > threeMonthsAgo
+              proof.created_at && new Date(proof.created_at) > threeMonthsAgo
             );
 
           case 'inactive_orders':
             // Has orders but none created in the last 3 months
             return clientOrders.length > 0 && !clientOrders.some(order => 
-              new Date(order.created_at) > threeMonthsAgo
+              order.created_at && new Date(order.created_at) > threeMonthsAgo
             );
 
           case 'inactive_submissions':
             // Has submissions but none created in the last 3 months
             return clientSubmissions.length > 0 && !clientSubmissions.some(submission => 
-              new Date(submission.created_at) > threeMonthsAgo
+              submission.created_at && new Date(submission.created_at) > threeMonthsAgo
             );
 
           default:

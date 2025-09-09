@@ -17,14 +17,14 @@ export const useFilteredSubmissions = (
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(submission =>
-        submission.submission_number.toLowerCase().includes(query) ||
-        submission.clients?.business_name.toLowerCase().includes(query)
+        submission?.submission_number?.toLowerCase().includes(query) ||
+        submission?.clients?.business_name?.toLowerCase().includes(query)
       );
     }
 
     // Filter by status
     if (statusFilter !== 'all') {
-      filtered = filtered.filter(submission => submission.status === statusFilter);
+      filtered = filtered.filter(submission => submission?.status === statusFilter);
     }
 
     // Filter by period
@@ -82,6 +82,7 @@ export const useFilteredSubmissions = (
       }
 
       filtered = filtered.filter(submission => {
+        if (!submission?.created_at) return false;
         const submissionDate = new Date(submission.created_at);
         return submissionDate >= startDate && submissionDate <= endDate;
       });

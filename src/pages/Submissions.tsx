@@ -29,13 +29,13 @@ const Submissions = () => {
     // Search filter
     if (searchQuery) {
       const searchLower = searchQuery.toLowerCase();
-      const matchesNumber = submission.submission_number?.toLowerCase().includes(searchLower);
-      const matchesClient = submission.clients?.business_name?.toLowerCase().includes(searchLower);
+      const matchesNumber = submission?.submission_number?.toLowerCase().includes(searchLower);
+      const matchesClient = submission?.clients?.business_name?.toLowerCase().includes(searchLower);
       if (!matchesNumber && !matchesClient) return false;
     }
 
     // Status filter
-    if (statusFilter !== 'all' && submission.status !== statusFilter) {
+    if (statusFilter !== 'all' && submission?.status !== statusFilter) {
       return false;
     }
 
