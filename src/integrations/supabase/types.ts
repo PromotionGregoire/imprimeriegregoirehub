@@ -178,6 +178,20 @@ export type Database = {
             referencedRelation: "proofs"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "email_notifications_proof_id_fkey"
+            columns: ["proof_id"]
+            isOneToOne: false
+            referencedRelation: "v_active_proofs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_notifications_proof_id_fkey"
+            columns: ["proof_id"]
+            isOneToOne: false
+            referencedRelation: "v_archived_proofs"
+            referencedColumns: ["id"]
+          },
         ]
       }
       epreuve_commentaires: {
@@ -226,10 +240,38 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "epreuve_commentaires_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_active_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "epreuve_commentaires_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_archived_orders"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "epreuve_commentaires_proof_id_fkey"
             columns: ["proof_id"]
             isOneToOne: false
             referencedRelation: "proofs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "epreuve_commentaires_proof_id_fkey"
+            columns: ["proof_id"]
+            isOneToOne: false
+            referencedRelation: "v_active_proofs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "epreuve_commentaires_proof_id_fkey"
+            columns: ["proof_id"]
+            isOneToOne: false
+            referencedRelation: "v_archived_proofs"
             referencedColumns: ["id"]
           },
         ]
@@ -373,10 +415,38 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "invoices_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_active_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_archived_orders"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "invoices_submission_id_fkey"
             columns: ["submission_id"]
             isOneToOne: false
             referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "v_active_submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "v_archived_submissions"
             referencedColumns: ["id"]
           },
         ]
@@ -407,6 +477,9 @@ export type Database = {
       }
       orders: {
         Row: {
+          archive_reason: string | null
+          archived_at: string | null
+          archived_by: string | null
           client_id: string
           created_at: string
           id: string
@@ -417,6 +490,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          archive_reason?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
           client_id: string
           created_at?: string
           id?: string
@@ -427,6 +503,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          archive_reason?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
           client_id?: string
           created_at?: string
           id?: string
@@ -437,6 +516,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "orders_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "orders_client_id_fkey"
             columns: ["client_id"]
@@ -456,6 +542,20 @@ export type Database = {
             columns: ["submission_id"]
             isOneToOne: false
             referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "v_active_submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "v_archived_submissions"
             referencedColumns: ["id"]
           },
         ]
@@ -503,10 +603,38 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ordre_historique_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_active_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordre_historique_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_archived_orders"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ordre_historique_proof_id_fkey"
             columns: ["proof_id"]
             isOneToOne: false
             referencedRelation: "proofs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordre_historique_proof_id_fkey"
+            columns: ["proof_id"]
+            isOneToOne: false
+            referencedRelation: "v_active_proofs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordre_historique_proof_id_fkey"
+            columns: ["proof_id"]
+            isOneToOne: false
+            referencedRelation: "v_archived_proofs"
             referencedColumns: ["id"]
           },
         ]
@@ -940,6 +1068,9 @@ export type Database = {
           approval_token: string | null
           approved_at: string | null
           approved_by_name: string | null
+          archive_reason: string | null
+          archived_at: string | null
+          archived_by: string | null
           client_comments: string | null
           created_at: string
           file_url: string | null
@@ -957,6 +1088,9 @@ export type Database = {
           approval_token?: string | null
           approved_at?: string | null
           approved_by_name?: string | null
+          archive_reason?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
           client_comments?: string | null
           created_at?: string
           file_url?: string | null
@@ -974,6 +1108,9 @@ export type Database = {
           approval_token?: string | null
           approved_at?: string | null
           approved_by_name?: string | null
+          archive_reason?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
           client_comments?: string | null
           created_at?: string
           file_url?: string | null
@@ -993,6 +1130,27 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_proofs_order_id"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_active_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_proofs_order_id"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_archived_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proofs_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1066,6 +1224,20 @@ export type Database = {
             referencedRelation: "submissions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "submission_items_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "v_active_submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submission_items_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "v_archived_submissions"
+            referencedColumns: ["id"]
+          },
         ]
       }
       submissions: {
@@ -1073,6 +1245,9 @@ export type Database = {
           acceptance_token: string
           approval_token: string | null
           approved_by: string | null
+          archive_reason: string | null
+          archived_at: string | null
+          archived_by: string | null
           client_id: string
           created_at: string
           deadline: string | null
@@ -1089,6 +1264,9 @@ export type Database = {
           acceptance_token?: string
           approval_token?: string | null
           approved_by?: string | null
+          archive_reason?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
           client_id: string
           created_at?: string
           deadline?: string | null
@@ -1105,6 +1283,9 @@ export type Database = {
           acceptance_token?: string
           approval_token?: string | null
           approved_by?: string | null
+          archive_reason?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
           client_id?: string
           created_at?: string
           deadline?: string | null
@@ -1118,6 +1299,13 @@ export type Database = {
           valid_until?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "submissions_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "submissions_client_id_fkey"
             columns: ["client_id"]
@@ -1354,6 +1542,524 @@ export type Database = {
         }
         Relationships: []
       }
+      v_active_orders: {
+        Row: {
+          archive_reason: string | null
+          archived_at: string | null
+          archived_by: string | null
+          client_id: string | null
+          created_at: string | null
+          id: string | null
+          order_number: string | null
+          status: string | null
+          submission_id: string | null
+          total_price: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          archive_reason?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          order_number?: string | null
+          status?: string | null
+          submission_id?: string | null
+          total_price?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          archive_reason?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          order_number?: string | null
+          status?: string | null
+          submission_id?: string | null
+          total_price?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_ordre_historique"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "orders_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "v_active_submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "v_archived_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_active_proofs: {
+        Row: {
+          approval_token: string | null
+          approved_at: string | null
+          approved_by_name: string | null
+          archive_reason: string | null
+          archived_at: string | null
+          archived_by: string | null
+          client_comments: string | null
+          created_at: string | null
+          file_url: string | null
+          id: string | null
+          is_active: boolean | null
+          order_id: string | null
+          status: string | null
+          updated_at: string | null
+          uploaded_at: string | null
+          uploaded_by: string | null
+          validation_token: string | null
+          version: number | null
+        }
+        Insert: {
+          approval_token?: string | null
+          approved_at?: string | null
+          approved_by_name?: string | null
+          archive_reason?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
+          client_comments?: string | null
+          created_at?: string | null
+          file_url?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          order_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+          validation_token?: string | null
+          version?: number | null
+        }
+        Update: {
+          approval_token?: string | null
+          approved_at?: string | null
+          approved_by_name?: string | null
+          archive_reason?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
+          client_comments?: string | null
+          created_at?: string | null
+          file_url?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          order_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+          validation_token?: string | null
+          version?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_proofs_order_id"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_proofs_order_id"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_active_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_proofs_order_id"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_archived_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proofs_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_active_submissions: {
+        Row: {
+          acceptance_token: string | null
+          approval_token: string | null
+          approved_by: string | null
+          archive_reason: string | null
+          archived_at: string | null
+          archived_by: string | null
+          client_id: string | null
+          created_at: string | null
+          deadline: string | null
+          id: string | null
+          modification_request_notes: string | null
+          sent_at: string | null
+          status: string | null
+          submission_number: string | null
+          total_price: number | null
+          updated_at: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          acceptance_token?: string | null
+          approval_token?: string | null
+          approved_by?: string | null
+          archive_reason?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          deadline?: string | null
+          id?: string | null
+          modification_request_notes?: string | null
+          sent_at?: string | null
+          status?: string | null
+          submission_number?: string | null
+          total_price?: number | null
+          updated_at?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          acceptance_token?: string | null
+          approval_token?: string | null
+          approved_by?: string | null
+          archive_reason?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          deadline?: string | null
+          id?: string | null
+          modification_request_notes?: string | null
+          sent_at?: string | null
+          status?: string | null
+          submission_number?: string | null
+          total_price?: number | null
+          updated_at?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submissions_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_ordre_historique"
+            referencedColumns: ["client_id"]
+          },
+        ]
+      }
+      v_archived_orders: {
+        Row: {
+          archive_reason: string | null
+          archived_at: string | null
+          archived_by: string | null
+          client_id: string | null
+          created_at: string | null
+          id: string | null
+          order_number: string | null
+          status: string | null
+          submission_id: string | null
+          total_price: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          archive_reason?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          order_number?: string | null
+          status?: string | null
+          submission_id?: string | null
+          total_price?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          archive_reason?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          order_number?: string | null
+          status?: string | null
+          submission_id?: string | null
+          total_price?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_ordre_historique"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "orders_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "v_active_submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "v_archived_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_archived_proofs: {
+        Row: {
+          approval_token: string | null
+          approved_at: string | null
+          approved_by_name: string | null
+          archive_reason: string | null
+          archived_at: string | null
+          archived_by: string | null
+          client_comments: string | null
+          created_at: string | null
+          file_url: string | null
+          id: string | null
+          is_active: boolean | null
+          order_id: string | null
+          status: string | null
+          updated_at: string | null
+          uploaded_at: string | null
+          uploaded_by: string | null
+          validation_token: string | null
+          version: number | null
+        }
+        Insert: {
+          approval_token?: string | null
+          approved_at?: string | null
+          approved_by_name?: string | null
+          archive_reason?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
+          client_comments?: string | null
+          created_at?: string | null
+          file_url?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          order_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+          validation_token?: string | null
+          version?: number | null
+        }
+        Update: {
+          approval_token?: string | null
+          approved_at?: string | null
+          approved_by_name?: string | null
+          archive_reason?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
+          client_comments?: string | null
+          created_at?: string | null
+          file_url?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          order_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+          validation_token?: string | null
+          version?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_proofs_order_id"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_proofs_order_id"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_active_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_proofs_order_id"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_archived_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proofs_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_archived_submissions: {
+        Row: {
+          acceptance_token: string | null
+          approval_token: string | null
+          approved_by: string | null
+          archive_reason: string | null
+          archived_at: string | null
+          archived_by: string | null
+          client_id: string | null
+          created_at: string | null
+          deadline: string | null
+          id: string | null
+          modification_request_notes: string | null
+          sent_at: string | null
+          status: string | null
+          submission_number: string | null
+          total_price: number | null
+          updated_at: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          acceptance_token?: string | null
+          approval_token?: string | null
+          approved_by?: string | null
+          archive_reason?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          deadline?: string | null
+          id?: string | null
+          modification_request_notes?: string | null
+          sent_at?: string | null
+          status?: string | null
+          submission_number?: string | null
+          total_price?: number | null
+          updated_at?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          acceptance_token?: string | null
+          approval_token?: string | null
+          approved_by?: string | null
+          archive_reason?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          deadline?: string | null
+          id?: string | null
+          modification_request_notes?: string | null
+          sent_at?: string | null
+          status?: string | null
+          submission_number?: string | null
+          total_price?: number | null
+          updated_at?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submissions_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_ordre_historique"
+            referencedColumns: ["client_id"]
+          },
+        ]
+      }
       v_order_history_details: {
         Row: {
           action_description: string | null
@@ -1377,10 +2083,38 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ordre_historique_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_active_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordre_historique_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_archived_orders"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ordre_historique_proof_id_fkey"
             columns: ["proof_id"]
             isOneToOne: false
             referencedRelation: "proofs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordre_historique_proof_id_fkey"
+            columns: ["proof_id"]
+            isOneToOne: false
+            referencedRelation: "v_active_proofs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordre_historique_proof_id_fkey"
+            columns: ["proof_id"]
+            isOneToOne: false
+            referencedRelation: "v_archived_proofs"
             referencedColumns: ["id"]
           },
         ]
@@ -1414,10 +2148,38 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ordre_historique_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_active_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordre_historique_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "v_archived_orders"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ordre_historique_proof_id_fkey"
             columns: ["proof_id"]
             isOneToOne: false
             referencedRelation: "proofs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordre_historique_proof_id_fkey"
+            columns: ["proof_id"]
+            isOneToOne: false
+            referencedRelation: "v_active_proofs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordre_historique_proof_id_fkey"
+            columns: ["proof_id"]
+            isOneToOne: false
+            referencedRelation: "v_archived_proofs"
             referencedColumns: ["id"]
           },
         ]
@@ -1435,6 +2197,18 @@ export type Database = {
           p_proof_id?: string
         }
         Returns: string
+      }
+      archive_order: {
+        Args: { p_by: string; p_order_id: string; p_reason: string }
+        Returns: undefined
+      }
+      archive_proof: {
+        Args: { p_by: string; p_proof_id: string; p_reason: string }
+        Returns: undefined
+      }
+      archive_submission: {
+        Args: { p_by: string; p_reason: string; p_submission_id: string }
+        Returns: undefined
       }
       gen_invoice_number: {
         Args: Record<PropertyKey, never>
@@ -1575,6 +2349,18 @@ export type Database = {
           test_name: string
           test_result: boolean
         }[]
+      }
+      unarchive_order: {
+        Args: { p_order_id: string }
+        Returns: undefined
+      }
+      unarchive_proof: {
+        Args: { p_proof_id: string }
+        Returns: undefined
+      }
+      unarchive_submission: {
+        Args: { p_submission_id: string }
+        Returns: undefined
       }
       update_proof_status_enum: {
         Args: Record<PropertyKey, never>

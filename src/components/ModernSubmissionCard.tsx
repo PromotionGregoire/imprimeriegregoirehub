@@ -16,6 +16,7 @@ import ModernToggle from './ModernToggle';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { ArchiveBadge } from './ArchiveBadge';
 
 interface ModernSubmissionCardProps {
   submission: any;
@@ -172,6 +173,13 @@ const ModernSubmissionCard = ({ submission, onClick }: ModernSubmissionCardProps
             </Button>
           )}
         </div>
+
+        {/* Archive Badge */}
+        {submission.archived_at && (
+          <div className="mt-4">
+            <ArchiveBadge entity={submission} />
+          </div>
+        )}
       </CardContent>
     </Card>
   );

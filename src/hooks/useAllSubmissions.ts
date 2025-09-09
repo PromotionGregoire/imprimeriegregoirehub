@@ -1,17 +1,21 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { ArchiveFilter, getTableNameByFilter } from '@/utils/archiveUtils';
 
-export const useAllSubmissions = () => {
+export const useAllSubmissions = (archiveFilter: ArchiveFilter = 'actives') => {
   return useQuery({
-    queryKey: ['all-submissions'],
+    queryKey: ['all-submissions', archiveFilter],
     queryFn: async () => {
+      const tableName = getTableNameByFilter('submissions', archiveFilter);
+      
       const { data, error } = await supabase
-        .from('submissions')
+        .from(tableName as any)
         .select(`
           *,
           clients (
             business_name,
             contact_name,
+            email,
             assigned_user_id,
             profiles (
               full_name

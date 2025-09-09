@@ -5,11 +5,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, FileText, AlertCircle, Search } from 'lucide-react';
-import { useFilteredSubmissions } from '@/hooks/useFilteredSubmissions';
+import { useAllSubmissions } from '@/hooks/useAllSubmissions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import ModernSubmissionCard from '@/components/ModernSubmissionCard';
+import { ArchiveFilter } from '@/components/ArchiveFilter';
+import { ArchiveActions } from '@/components/ArchiveActions';
+import { ArchiveFilter as ArchiveFilterType } from '@/utils/archiveUtils';
 import { cn } from '@/lib/utils';
 
 const Submissions = () => {
@@ -17,8 +20,30 @@ const Submissions = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [periodFilter, setPeriodFilter] = useState('all');
+  const [archiveFilter, setArchiveFilter] = useState<ArchiveFilterType>('actives');
   
-  const { submissions, isLoading, error } = useFilteredSubmissions(searchQuery, statusFilter, periodFilter);
+  const { data: submissions, isLoading, error } = useAllSubmissions(archiveFilter);
+
+  // Filter submissions based on search and status
+  const filteredSubmissions = submissions?.filter(submission => {
+    // Search filter
+    if (searchQuery) {
+      const searchLower = searchQuery.toLowerCase();
+      const matchesNumber = submission.submission_number?.toLowerCase().includes(searchLower);
+      const matchesClient = submission.clients?.business_name?.toLowerCase().includes(searchLower);
+      if (!matchesNumber && !matchesClient) return false;
+    }
+
+    // Status filter
+    if (statusFilter !== 'all' && submission.status !== statusFilter) {
+      return false;
+    }
+
+    // Period filter (simplified for now)
+    // TODO: Implement proper period filtering
+
+    return true;
+  }) || [];
 
   const submissionStatusOptions = [
     { value: 'Brouillon', label: 'Brouillon' },
@@ -46,11 +71,11 @@ const Submissions = () => {
 
   // Calculate dashboard stats
   const stats = {
-    total: submissions?.length || 0,
-    completed: submissions?.filter(s => s.status === 'Acceptée')?.length || 0,
-    accepted: submissions?.filter(s => s.status === 'Acceptée')?.length || 0,
-    sent: submissions?.filter(s => s.status === 'Envoyée')?.length || 0,
-    totalValue: submissions?.reduce((sum, s) => sum + (Number(s.total_price) || 0), 0) || 0
+    total: filteredSubmissions?.length || 0,
+    completed: filteredSubmissions?.filter(s => s.status === 'Acceptée')?.length || 0,
+    accepted: filteredSubmissions?.filter(s => s.status === 'Acceptée')?.length || 0,
+    sent: filteredSubmissions?.filter(s => s.status === 'Envoyée')?.length || 0,
+    totalValue: filteredSubmissions?.reduce((sum, s) => sum + (Number(s.total_price) || 0), 0) || 0
   };
 
   const formatPrice = (price: number) => {
@@ -309,6 +334,12 @@ const Submissions = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                
+                <ArchiveFilter 
+                  value={archiveFilter} 
+                  onChange={setArchiveFilter}
+                  className="w-full sm:w-[200px]"
+                />
               </div>
             </CardContent>
           </Card>
@@ -319,7 +350,7 @@ const Submissions = () => {
           "grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4",
           "gap-2" // 8px grid spacing
         )}>
-          {submissions.length === 0 ? (
+          {filteredSubmissions.length === 0 ? (
             <div className="col-span-full">
               <Card className="bg-background border-border">
                 <CardContent className="p-8 text-center">
@@ -329,7 +360,7 @@ const Submissions = () => {
                       Aucune soumission trouvée
                     </h3>
                     <p className="text-[16px] leading-relaxed text-muted-foreground text-center">
-                      {searchQuery || statusFilter !== 'all' 
+                      {searchQuery || statusFilter !== 'all' || archiveFilter !== 'actives'
                         ? 'Aucune soumission trouvée avec ces critères'
                         : 'Aucune soumission pour le moment'
                       }
@@ -339,12 +370,24 @@ const Submissions = () => {
               </Card>
             </div>
           ) : (
-            submissions.map((submission) => (
-              <ModernSubmissionCard
-                key={submission.id}
-                submission={submission}
-                onClick={() => navigate(`/dashboard/submissions/${submission.id}`)}
-              />
+            filteredSubmissions.map((submission) => (
+              <div key={submission.id} className="relative group">
+                <ModernSubmissionCard
+                  submission={submission}
+                  onClick={() => navigate(`/dashboard/submissions/${submission.id}`)}
+                />
+                
+                {/* Archive Actions - Only show for admin/managers */}
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ArchiveActions
+                    entity={submission}
+                    entityId={submission.id}
+                    kind="submission"
+                    variant="ghost"
+                    size="icon"
+                  />
+                </div>
+              </div>
             ))
           )}
         </div>
