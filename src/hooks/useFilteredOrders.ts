@@ -38,9 +38,9 @@ export const useFilteredOrders = (
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(order =>
-        order.order_number.toLowerCase().includes(query) ||
-        order.clients?.business_name.toLowerCase().includes(query) ||
-        order.submissions?.submission_number.toLowerCase().includes(query)
+        order.order_number?.toLowerCase().includes(query) ||
+        order.clients?.business_name?.toLowerCase().includes(query) ||
+        order.submissions?.submission_number?.toLowerCase().includes(query)
       );
     }
 
