@@ -13,6 +13,7 @@ const Proofs = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [periodFilter, setPeriodFilter] = useState('all');
+  const navigate = useNavigate(); // Moved before any conditional returns
   
   const { proofs, isLoading, error } = useFilteredProofs(searchQuery, statusFilter, periodFilter);
 
@@ -46,8 +47,6 @@ const Proofs = () => {
     sent: proofs?.filter(proof => proof.status === 'Envoyée').length || 0,
     inRevision: proofs?.filter(proof => proof.status === 'En révision').length || 0,
   };
-
-  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
