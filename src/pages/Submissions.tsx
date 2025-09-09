@@ -21,7 +21,7 @@ import { useAllSubmissions } from '@/hooks/useAllSubmissions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import ModernSubmissionCard from '@/components/ModernSubmissionCard';
+import GravitySubmissionCard from '@/components/GravitySubmissionCard';
 import { ArchiveFilter } from '@/components/ArchiveFilter';
 import { ArchiveActions } from '@/components/ArchiveActions';
 import { ArchiveFilter as ArchiveFilterType } from '@/utils/archiveUtils';
@@ -383,7 +383,7 @@ const Submissions = () => {
           ) : (
             filteredSubmissions.map((submission) => (
               <div key={submission.id} className="relative">
-                <ModernSubmissionCard
+                <GravitySubmissionCard
                   submission={submission}
                   onClick={() => navigate(`/dashboard/submissions/${submission.id}`)}
                   isSelected={isSelected(submission.id)}

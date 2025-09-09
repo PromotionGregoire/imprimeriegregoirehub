@@ -46,6 +46,37 @@ All colors MUST be HSL.
     /* Border Radius - Uber Base uses consistent rounding */
     --radius: 0.5rem;
 
+    /* Gravity UI Themed Card System */
+    /* Normal Theme (Gris) */
+    --theme-normal-border: 220 13% 42%;
+    --theme-normal-bg: 220 13% 42% / 0.05;
+    --theme-normal-badge-bg: 220 13% 42% / 0.1;
+    --theme-normal-text: 220 13% 42%;
+    
+    /* Info Theme (Bleu) */
+    --theme-info-border: 217 91% 60%;
+    --theme-info-bg: 217 91% 60% / 0.05;
+    --theme-info-badge-bg: 217 91% 60% / 0.1;
+    --theme-info-text: 217 91% 60%;
+    
+    /* Success Theme (Vert) */
+    --theme-success-border: 160 84% 39%;
+    --theme-success-bg: 160 84% 39% / 0.05;
+    --theme-success-badge-bg: 160 84% 39% / 0.1;
+    --theme-success-text: 160 84% 39%;
+    
+    /* Warning Theme (Orange) */
+    --theme-warning-border: 25 95% 53%;
+    --theme-warning-bg: 25 95% 53% / 0.05;
+    --theme-warning-badge-bg: 25 95% 53% / 0.1;
+    --theme-warning-text: 25 95% 53%;
+    
+    /* Danger Theme (Rouge) */
+    --theme-danger-border: 0 84% 60%;
+    --theme-danger-bg: 0 84% 60% / 0.05;
+    --theme-danger-badge-bg: 0 84% 60% / 0.1;
+    --theme-danger-text: 0 84% 60%;
+
     /* Semantic Status Colors - Couleurs Hub Grégoire */
     --status-positive: 111 56% 53%; /* Vert principal pour succès */
     --status-positive-light: 111 56% 96%;
@@ -167,5 +198,113 @@ All colors MUST be HSL.
   /* Improved focus states for accessibility */
   input:focus, select:focus, textarea:focus, button:focus {
     @apply ring-2 ring-primary ring-offset-2;
+  }
+}
+
+@layer components {
+  /* Gravity UI Card System */
+  .gravity-card {
+    @apply bg-background rounded-xl p-5 transition-all duration-300 cursor-pointer relative overflow-hidden;
+  }
+
+  .gravity-card:hover {
+    @apply -translate-y-0.5 shadow-lg;
+  }
+
+  /* Gravity UI Themed Cards */
+  .gravity-card.filled.theme-normal {
+    background: hsl(var(--theme-normal-bg));
+    border: 2px solid hsl(var(--theme-normal-border));
+    box-shadow: 0 0 0 4px hsl(var(--theme-normal-bg));
+  }
+
+  .gravity-card.filled.theme-info {
+    background: hsl(var(--theme-info-bg));
+    border: 2px solid hsl(var(--theme-info-border));
+    box-shadow: 0 0 0 4px hsl(var(--theme-info-bg));
+  }
+
+  .gravity-card.filled.theme-success {
+    background: hsl(var(--theme-success-bg));
+    border: 2px solid hsl(var(--theme-success-border));
+    box-shadow: 0 0 0 4px hsl(var(--theme-success-bg));
+  }
+
+  .gravity-card.filled.theme-warning {
+    background: hsl(var(--theme-warning-bg));
+    border: 2px solid hsl(var(--theme-warning-border));
+    box-shadow: 0 0 0 4px hsl(var(--theme-warning-bg));
+  }
+
+  .gravity-card.filled.theme-danger {
+    background: hsl(var(--theme-danger-bg));
+    border: 2px solid hsl(var(--theme-danger-border));
+    box-shadow: 0 0 0 4px hsl(var(--theme-danger-bg));
+  }
+
+  /* Card Header */
+  .gravity-card-header {
+    @apply flex justify-between items-start mb-4;
+  }
+
+  .gravity-card-title {
+    @apply text-lg font-semibold mb-1 text-foreground;
+  }
+
+  .gravity-card-code {
+    @apply text-sm text-muted-foreground font-mono;
+  }
+
+  /* Version Badge */
+  .gravity-card-version {
+    @apply inline-flex items-center px-2.5 py-1 bg-muted rounded-md text-xs font-semibold text-muted-foreground mb-3;
+  }
+
+  /* Menu Button */
+  .gravity-card-menu {
+    @apply w-8 h-8 rounded-md border-none bg-transparent cursor-pointer flex items-center justify-center text-muted-foreground transition-colors;
+  }
+
+  .gravity-card-menu:hover {
+    @apply bg-muted/50;
+  }
+
+  /* Status Badge */
+  .gravity-status-badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium mb-4;
+  }
+
+  .badge-normal {
+    background: hsl(var(--theme-normal-badge-bg));
+    color: hsl(var(--theme-normal-text));
+  }
+
+  .badge-info {
+    background: hsl(var(--theme-info-badge-bg));
+    color: hsl(var(--theme-info-text));
+  }
+
+  .badge-success {
+    background: hsl(var(--theme-success-badge-bg));
+    color: hsl(var(--theme-success-text));
+  }
+
+  .badge-warning {
+    background: hsl(var(--theme-warning-badge-bg));
+    color: hsl(var(--theme-warning-text));
+  }
+
+  .badge-danger {
+    background: hsl(var(--theme-danger-badge-bg));
+    color: hsl(var(--theme-danger-text));
+  }
+
+  /* Metadata */
+  .gravity-card-meta {
+    @apply flex gap-5 text-sm text-muted-foreground pt-4 border-t border-border;
+  }
+
+  .gravity-meta-item {
+    @apply flex items-center gap-1.5;
   }
 }

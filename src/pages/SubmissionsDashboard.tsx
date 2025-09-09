@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
-import { SubmissionCard } from '@/components/SubmissionCard';
+import GravitySubmissionCard from '@/components/GravitySubmissionCard';
 import { BulkActionsBar } from '@/components/BulkActionsBar';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { useSubmissionsData, useDashboardStats, useBulkActions } from '@/hooks/useSubmissionsData';
@@ -170,12 +170,12 @@ export const SubmissionsDashboard: React.FC = () => {
               {/* Submissions Grid - RESPONSIVE STRICTE */}
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5 lg:gap-6">
                 {submissions.map((submission) => (
-                  <SubmissionCard
+                  <GravitySubmissionCard
                     key={submission.id}
                     submission={submission}
                     isSelected={isSelected(submission.id)}
-                    onSelect={toggleSelection}
-                    onMenuAction={handleMenuAction}
+                    onSelect={() => toggleSelection(submission.id)}
+                    onClick={() => navigate(`/dashboard/submissions/${submission.id}`)}
                   />
                 ))}
               </div>
