@@ -48,28 +48,38 @@ serve(async (req) => {
     if (error) return json({ error: "Erreur DB (proof fetch)", detail: error.message }, 500);
     if (!proof) return json({ error: "Épreuve introuvable" }, 404);
 
-    const client = proof.orders?.submissions?.clients;
-    const clientEmail = client?.email;
-    const clientName = client?.contact_name || client?.business_name || "Client";
+    // --- après avoir récupéré `proof` (qui inclut orders -> submissions -> clients) ---
+    const client = proof.orders?.submissions?.clients as
+      | { contact_name?: string | null; business_name?: string | null; email?: string | null }
+      | undefined;
 
-    if (!isEmail(clientEmail)) return json({ error: "Client sans email valide" }, 400);
+    // Email: trim + lowercase pour éviter les rejets et incohérences
+    const clientEmail = (client?.email ?? "").trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientEmail)) {
+      return json({ error: "Client sans email valide" }, 400);
+    }
 
-    // 2. Préparer envoi
-    const resend = new Resend(Deno.env.get("RESEND_API_KEY") ?? "");
-    const fromEmail = (Deno.env.get("RESEND_FROM_PROOFS") ?? "").trim();
-    const replyTo = (Deno.env.get("RESEND_REPLY_TO") ?? "").trim();
-    const portalBase = Deno.env.get("PUBLIC_PORTAL_BASE_URL") ?? "https://client.promotiongregoire.com";
+    // Nom à afficher: contact_name > business_name > "Client"
+    const clientName =
+      (client?.contact_name && client?.contact_name.trim()) ||
+      (client?.business_name && client?.business_name.trim()) ||
+      "Client";
 
+    // Base URL du portail (sélecteur ENV > défaut .com)
+    const portalBase =
+      (Deno.env.get("PUBLIC_PORTAL_BASE_URL") || "https://client.promotiongregoire.com").replace(/\/+$/, "");
+
+    // Liens publics
     const proofVersion = `v${proof.version}`;
     const orderNumber = proof.orders.order_number;
     const approveUrl = `${portalBase}/epreuve/${encodeURIComponent(proof.approval_token)}`;
     const downloadUrl = proof.file_url;
 
+    // Sujet + HTML stylé (comme votre maquette)
     const subject = `Épreuve ${orderNumber} – ${proofVersion}`;
 
-    // 3. HTML stylé
     const html = `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
 <body style="font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; line-height:1.6; color:#333; max-width:600px; margin:0 auto; padding:20px;">
   <div style="background:#f8f9fa; padding:30px; border-radius:8px; border-left:4px solid #5a7a51;">
     <h2 style="color:#5a7a51; margin:0 0 20px 0;">Votre épreuve est prête – ${proofVersion}</h2>
@@ -77,8 +87,7 @@ serve(async (req) => {
     <p>Votre épreuve (BAT) pour la commande <strong>${orderNumber}</strong> est maintenant disponible pour validation.</p>
     <div style="margin:30px 0; text-align:center;">
       <a href="${approveUrl}"
-         style="display:inline-block; padding:15px 30px; background-color:#5a7a51; color:white;
-                text-decoration:none; border-radius:6px; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+         style="display:inline-block; padding:15px 30px; background-color:#5a7a51; color:#fff; text-decoration:none; border-radius:6px; font-weight:700; box-shadow:0 2px 4px rgba(0,0,0,.1);">
         📋 Consulter et approuver l'épreuve
       </a>
     </div>
@@ -89,8 +98,8 @@ serve(async (req) => {
     </p>
     <div style="margin-top:30px; padding-top:20px; border-top:1px solid #e9ecef; font-size:14px; color:#6c757d;">
       <p><strong>Imprimerie Grégoire</strong><br>
-         Pour toute question, répondez simplement à ce message.<br>
-         Nous sommes là pour vous accompagner ! 🎨</p>
+      Pour toute question, répondez simplement à ce message.<br>
+      Nous sommes là pour vous accompagner ! 🎨</p>
     </div>
   </div>
 </body></html>`;
@@ -107,11 +116,16 @@ ${downloadUrl}
 
 — Imprimerie Grégoire`;
 
+    // 2. Préparer envoi
+    const resend = new Resend(Deno.env.get("RESEND_API_KEY") ?? "");
+    const fromEmail = (Deno.env.get("RESEND_FROM_PROOFS") ?? "").trim();
+    const replyTo = (Deno.env.get("RESEND_REPLY_TO") ?? "").trim();
+
     // 4. Envoi via Resend
     const sent = await resend.emails.send({
       from: `Imprimerie Grégoire <${fromEmail}>`,
       to: [clientEmail],
-      reply_to: isEmail(replyTo) ? replyTo : undefined,
+      reply_to: replyTo && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(replyTo) ? replyTo : undefined,
       subject,
       html,
       text,
