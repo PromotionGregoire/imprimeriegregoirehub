@@ -26,7 +26,8 @@ import { ArchiveFilter } from '@/components/ArchiveFilter';
 import { ArchiveActions } from '@/components/ArchiveActions';
 import { ArchiveFilter as ArchiveFilterType } from '@/utils/archiveUtils';
 import { cn } from '@/lib/utils';
-import { useArchiveMutations } from '@/hooks/useArchiveMutations';
+import { useMultiSelect } from '@/hooks/useMultiSelect';
+import { BulkActionsBar } from '@/components/BulkActionsBar';
 
 const Submissions = () => {
   const navigate = useNavigate();
@@ -34,8 +35,6 @@ const Submissions = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [periodFilter, setPeriodFilter] = useState('all');
   const [archiveFilter, setArchiveFilter] = useState<ArchiveFilterType>('actives');
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const { archiveMutation } = useArchiveMutations('submission');
   
   const { data: submissions, isLoading, error } = useAllSubmissions(archiveFilter);
 
@@ -59,6 +58,19 @@ const Submissions = () => {
 
     return true;
   }) || [];
+
+  // Use multi-select hook for bulk actions
+  const {
+    selected,
+    selectedItems,
+    toggleSelection,
+    selectAll,
+    clearSelection,
+    isSelected,
+    hasSelection,
+    selectedCount,
+    isAllSelected
+  } = useMultiSelect(filteredSubmissions || []);
 
   const submissionStatusOptions = [
     { value: 'Brouillon', label: 'Brouillon' },
@@ -138,10 +150,6 @@ const Submissions = () => {
     return formatDate(submission.deadline);
   };
   
-  const toggleSelect = (id: string) => {
-    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
-  };
-  const clearSelection = () => setSelectedIds([]);
   if (isLoading) {
     return (
       <div className="px-4 md:px-6 lg:px-8 py-6 space-y-6">
@@ -349,6 +357,11 @@ const Submissions = () => {
                 <ModernSubmissionCard
                   submission={submission}
                   onClick={() => navigate(`/dashboard/submissions/${submission.id}`)}
+                  isSelected={isSelected(submission.id)}
+                  onSelect={(e) => {
+                    e?.stopPropagation();
+                    toggleSelection(submission.id);
+                  }}
                 />
                 
                 {/* Archive Actions - Only show for admin/managers */}
@@ -366,6 +379,13 @@ const Submissions = () => {
           )}
         </div>
       </div>
+
+      {/* Bulk Actions Bar */}
+      <BulkActionsBar
+        selectedCount={selectedCount}
+        selectedIds={selected}
+        onClearSelection={clearSelection}
+      />
     </div>
   );
 };
