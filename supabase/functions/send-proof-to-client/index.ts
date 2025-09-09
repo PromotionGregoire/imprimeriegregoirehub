@@ -51,12 +51,21 @@ serve(async (req) => {
     // Vérifier les secrets Resend
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
     const fromEmailRaw = (Deno.env.get('RESEND_FROM_PROOFS') || '').trim();
-    const replyToEmail = (Deno.env.get('RESEND_REPLY_TO') || fromEmailRaw || '').trim();
+    const replyToEmailRaw = (Deno.env.get('RESEND_REPLY_TO') || fromEmailRaw || '').trim();
+    
+    // Fonction pour extraire l'email pur (sans le nom)
+    const extractEmailOnly = (emailString: string): string => {
+      const match = emailString.match(/<([^>]+)>/);
+      return match ? match[1] : emailString;
+    };
+    
+    const replyToEmail = extractEmailOnly(replyToEmailRaw);
     
     console.log('Environment check:', {
       hasResendKey: !!resendApiKey,
       hasFromEmail: !!fromEmailRaw,
-      hasReplyTo: !!replyToEmail
+      hasReplyTo: !!replyToEmail,
+      replyToFormat: replyToEmail
     });
     
     if (!resendApiKey) {
