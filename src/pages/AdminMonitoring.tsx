@@ -264,7 +264,7 @@ export default function AdminMonitoring() {
               </div>
               <p className="text-sm text-blue-700 mb-2">Reçoit toutes les alertes (erreurs + avertissements)</p>
               <p className="font-mono text-sm bg-white px-2 py-1 rounded">
-                {config.find(c => c.key === 'admin_email')?.value || 'info@promotiongregoire.ca'}
+                {config.find(c => c.key === 'admin_email')?.value || 'info@promotiongregoire.com'}
               </p>
             </div>
             

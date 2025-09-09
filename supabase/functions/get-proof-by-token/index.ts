@@ -13,8 +13,23 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const url = new URL(req.url);
-    const token = url.searchParams.get('token');
+    let token: string | null = null;
+
+    // Supporter à la fois POST avec body JSON et GET avec query param
+    if (req.method === 'POST') {
+      try {
+        const body = await req.json();
+        token = body.token;
+      } catch (e) {
+        console.error('Invalid JSON body:', e);
+      }
+    }
+    
+    // Fallback vers query param si pas de token via POST
+    if (!token) {
+      const url = new URL(req.url);
+      token = url.searchParams.get('token');
+    }
 
     if (!token) {
       return new Response(

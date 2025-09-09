@@ -28,20 +28,11 @@ export default function ProofApprovalPage() {
   const proofHistory = response?.proofHistory || [];
   const orderHistory = response?.orderHistory || [];
 
-  // Debug pour voir la structure des données
+  // Debug pour voir la structure des données - données plates maintenant
   console.log('Proof data structure:', proofData);
-  console.log('Client data:', proofData?.orders?.submissions?.clients);
 
   const handleApprove = async () => {
-    if (!comments.trim()) {
-      toast({
-        title: "Commentaire requis",
-        description: "Veuillez ajouter un commentaire avant d'approuver.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
+    // Commentaire optionnel pour l'approbation
     setIsApproving(true);
     
     try {
@@ -50,8 +41,9 @@ export default function ProofApprovalPage() {
           body: {
             token,
             decision: 'approved',
-            comments,
-            clientName: proofData.orders?.submissions?.clients?.contact_name
+            // clientName facultatif - la fonction le déduit si absent
+            clientName: proofData.contact_name || undefined,
+            comments: comments.trim() || undefined,
           }
         });
 
@@ -104,8 +96,8 @@ export default function ProofApprovalPage() {
           body: {
             token,
             decision: 'rejected',
-            comments,
-            clientName: proofData.orders?.submissions?.clients?.contact_name
+            comments: comments.trim(),
+            clientName: proofData.contact_name || undefined
           }
         });
 
@@ -290,7 +282,7 @@ export default function ProofApprovalPage() {
                   "text-xs sm:text-sm text-muted-foreground mt-1",
                   "leading-relaxed"
                 )}>
-                  Commande #{proofData.orders?.order_number} - Version {proofData.version}
+                  Commande #{proofData.order_number} - Version {proofData.version}
                 </p>
               </div>
             </div>
@@ -365,7 +357,7 @@ export default function ProofApprovalPage() {
                     "text-sm font-medium text-right leading-tight",
                     "break-words max-w-[200px] sm:max-w-none"
                   )}>
-                     {proofData.orders?.submissions?.clients?.business_name}
+                     {proofData.business_name}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-3">
@@ -380,7 +372,7 @@ export default function ProofApprovalPage() {
                     "text-sm font-medium text-right",
                     "break-words"
                   )}>
-                     {proofData.orders?.submissions?.clients?.contact_name}
+                     {proofData.contact_name}
                   </span>
                 </div>
                 <div className="flex items-start justify-between gap-3">
@@ -395,7 +387,7 @@ export default function ProofApprovalPage() {
                     "text-sm font-medium text-right leading-tight",
                     "break-all max-w-[180px] sm:max-w-none"
                   )}>
-                    {proofData.orders?.submissions?.clients?.email}
+                    {proofData.email}
                   </span>
                 </div>
               </div>
@@ -632,18 +624,18 @@ export default function ProofApprovalPage() {
               {/* Comments Textarea */}
               <div className="space-y-2">
                 <label htmlFor="comments" className="text-sm font-medium">
-                  Commentaires *
+                  Commentaires (optionnel pour approbation, requis pour refus)
                 </label>
                 <Textarea
                   id="comments"
                   value={comments}
                   onChange={(e) => setComments(e.target.value)}
-                  placeholder="Veuillez partager vos commentaires sur l'épreuve..."
+                  placeholder="Vos commentaires sur l'épreuve (optionnel pour l'approbation)..."
                   className="min-h-[100px] resize-none"
                   maxLength={500}
                 />
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>* Champ obligatoire</span>
+                  <span>Commentaires obligatoires uniquement pour un refus</span>
                   <span>{comments.length}/500</span>
                 </div>
               </div>

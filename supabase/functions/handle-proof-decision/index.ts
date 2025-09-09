@@ -91,7 +91,7 @@ serve(async (req) => {
       // Historique (best-effort)
       const { error: histApproveErr } = await supabase.rpc("add_ordre_history", {
         p_order_id: proof.order_id,
-        p_action_type: "approbation_epreuve",
+        p_action_type: "proof_approved", // Action type valide
         p_action_description: `Épreuve v${proof.version} approuvée par ${derivedClientName}`,
         p_metadata: {
           proof_id: proof.id,
@@ -152,7 +152,7 @@ serve(async (req) => {
     // Historique (best-effort)
     const { error: histRejectErr } = await supabase.rpc("add_ordre_history", {
       p_order_id: proof.order_id,
-      p_action_type: "demande_modification_epreuve",
+      p_action_type: "proof_modification_requested", // Action type valide
       p_action_description: `Modifications demandées par ${derivedClientName} (v${proof.version})`,
       p_metadata: {
         proof_id: proof.id,

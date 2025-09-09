@@ -25,12 +25,18 @@ import SupplierDetails from "./pages/SupplierDetails";
 import AdminEmployees from "./pages/AdminEmployees";
 import AdminHistory from "./pages/AdminHistory";
 import AdminMonitoring from "./pages/AdminMonitoring";
-import ProofApproval from "./pages/ProofApproval";
 import ProofApprovalPage from "./pages/ProofApprovalPage";
 import SubmissionApprovalPage from "./pages/SubmissionApprovalPage";
 import QuoteApprovalPage from "./pages/QuoteApprovalPage";
 import ForcePasswordChange from "./pages/ForcePasswordChange";
 import DashboardLayout from "./components/DashboardLayout";
+import { Navigate, useParams } from "react-router-dom";
+
+// Composant pour les redirections avec token
+const RedirectToProofApproval = ({ prefix }: { prefix: string }) => {
+  const { token } = useParams<{ token: string }>();
+  return <Navigate to={`/epreuve/${token}`} replace />;
+};
 
 const queryClient = new QueryClient();
 
@@ -49,8 +55,10 @@ const App = () => {
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/epreuve/:token" element={<ProofApprovalPage />} />
-            <Route path="/proof/:token" element={<ProofApprovalPage />} />
-            <Route path="/approve/proof/:token" element={<ProofApprovalPage />} />
+            {/* Rétro-compatibilité - redirections vers la route canonique */}
+            <Route path="/proof/:token" element={<RedirectToProofApproval prefix="proof" />} />
+            <Route path="/approve/proof/:token" element={<RedirectToProofApproval prefix="approve/proof" />} />
+            <Route path="/approval" element={<Navigate to="/" replace />} />
             <Route path="/approve/submission/:token" element={<SubmissionApprovalPage />} />
             <Route path="/approve/quote/:token" element={<QuoteApprovalPage />} />
             <Route path="/quote-demo" element={<QuoteApprovalPage />} />
